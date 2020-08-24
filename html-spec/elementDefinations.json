@@ -1,0 +1,840 @@
+{
+  "id": "elements",
+  "label": "elements",
+  "children": [
+    {
+      "text": "Categories:\nNone.\nContexts in which this element can be used:\nAs document's document element.\nWherever a subdocument fragment is allowed in a compound document.\nContent model:\nA head element followed by a body element.\nTag omission in text/html:\nAn html element's start tag can be omitted if the first thing inside the html element is not a comment.\nAn html element's end tag can be omitted if the html element is not immediately followed by a comment.\nContent attributes:\nGlobal attributes\nmanifest — Application cache manifest\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLHtmlElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  // also has obsolete members\n};",
+      "name": "html",
+      "categories": []
+    },
+    {
+      "text": "Categories:\nNone.\nContexts in which this element can be used:\nAs the first element in an html element.\nContent model:\nIf the document is an iframe srcdoc document or if title information is available from a higher-level protocol: Zero or more elements of metadata content, of which no more than one is a title element and no more than one is a base element.\nOtherwise: One or more elements of metadata content, of which exactly one is a title element and no more than one is a base element.\nTag omission in text/html:\nA head element's start tag can be omitted if the element is empty, or if the first thing inside the head element is an element.\nA head element's end tag can be omitted if the head element is not immediately followed by ASCII whitespace or a comment.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLHeadElement : HTMLElement {\n  [HTMLConstructor] constructor();\n};",
+      "name": "head",
+      "categories": []
+    },
+    {
+      "text": "Categories:\nMetadata content.\nContexts in which this element can be used:\nIn a head element containing no other title elements.\nContent model:\nText that is not inter-element whitespace.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLTitleElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  [CEReactions] attribute DOMString text;\n};",
+      "name": "title",
+      "categories": [
+        "Metadata"
+      ]
+    },
+    {
+      "text": "Categories:\nMetadata content.\nContexts in which this element can be used:\nIn a head element containing no other base elements.\nContent model:\nNothing.\nTag omission in text/html:\nNo end tag.\nContent attributes:\nGlobal attributes\nhref — Document base URL\ntarget — Default browsing context for hyperlink navigation and form submission\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLBaseElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  [CEReactions] attribute USVString href;\n  [CEReactions] attribute DOMString target;\n};",
+      "name": "base",
+      "categories": [
+        "Metadata"
+      ]
+    },
+    {
+      "text": "Categories:\nMetadata content.\nIf the element is allowed in the body: flow content.\nIf the element is allowed in the body: phrasing content.\nContexts in which this element can be used:\nWhere metadata content is expected.\nIn a noscript element that is a child of a head element.\nIf the element is allowed in the body: where phrasing content is expected.\nContent model:\nNothing.\nTag omission in text/html:\nNo end tag.\nContent attributes:\nGlobal attributes\nhref — Address of the hyperlink\ncrossorigin — How the element handles crossorigin requests\nrel — Relationship between the document containing the hyperlink and the destination resource\nmedia — Applicable media\nintegrity — Integrity metadata used in Subresource Integrity checks [SRI]\nhreflang — Language of the linked resource\ntype — Hint for the type of the referenced resource\nreferrerpolicy — Referrer policy for fetches initiated by the element\nsizes — Sizes of the icons (for rel=\"icon\")\nimagesrcset — Images to use in different situations, e.g., high-resolution displays, small monitors, etc. (for rel=\"preload\")\nimagesizes — Image sizes for different page layouts (for rel=\"preload\")\nas — Potential destination for a preload request (for rel=\"preload\" and rel=\"modulepreload\")\ncolor — Color to use when customizing a site's icon (for rel=\"mask-icon\")\ndisabled — Whether the link is disabled\nAlso, the title attribute has special semantics on this element: Title of the link; CSS style sheet set name.\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLLinkElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  [CEReactions] attribute USVString href;\n  [CEReactions] attribute DOMString? crossOrigin;\n  [CEReactions] attribute DOMString rel;\n  [CEReactions] attribute DOMString as; // (default \"\")\n  [SameObject, PutForwards=value] readonly attribute DOMTokenList relList;\n  [CEReactions] attribute DOMString media;\n  [CEReactions] attribute DOMString integrity;\n  [CEReactions] attribute DOMString hreflang;\n  [CEReactions] attribute DOMString type;\n  [SameObject, PutForwards=value] readonly attribute DOMTokenList sizes;\n  [CEReactions] attribute USVString imageSrcset;\n  [CEReactions] attribute DOMString imageSizes;\n  [CEReactions] attribute DOMString referrerPolicy;\n  [CEReactions] attribute boolean disabled;\n\n  // also has obsolete members\n};\nHTMLLinkElement includes LinkStyle;",
+      "name": "link",
+      "categories": [
+        "Metadata"
+      ]
+    },
+    {
+      "text": "Categories:\nMetadata content.\nIf the itemprop attribute is present: flow content.\nIf the itemprop attribute is present: phrasing content.\nContexts in which this element can be used:\nIf the charset attribute is present, or if the element's http-equiv attribute is in the Encoding declaration state: in a head element.\nIf the http-equiv attribute is present but not in the Encoding declaration state: in a head element.\nIf the http-equiv attribute is present but not in the Encoding declaration state: in a noscript element that is a child of a head element.\nIf the name attribute is present: where metadata content is expected.\nIf the itemprop attribute is present: where metadata content is expected.\nIf the itemprop attribute is present: where phrasing content is expected.\nContent model:\nNothing.\nTag omission in text/html:\nNo end tag.\nContent attributes:\nGlobal attributes\nname — Metadata name\nhttp-equiv — Pragma directive\ncontent — Value of the element\ncharset — Character encoding declaration\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLMetaElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  [CEReactions] attribute DOMString name;\n  [CEReactions] attribute DOMString httpEquiv;\n  [CEReactions] attribute DOMString content;\n\n  // also has obsolete members\n};",
+      "name": "meta",
+      "categories": [
+        "Metadata"
+      ]
+    },
+    {
+      "text": "Categories:\nMetadata content.\nContexts in which this element can be used:\nWhere metadata content is expected.\nIn a noscript element that is a child of a head element.\nContent model:\nText that gives a conformant style sheet.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nmedia — Applicable media\nAlso, the title attribute has special semantics on this element: CSS style sheet set name.\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLStyleElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  [CEReactions] attribute DOMString media;\n\n  // also has obsolete members\n};\nHTMLStyleElement includes LinkStyle;",
+      "name": "style",
+      "categories": [
+        "Metadata"
+      ]
+    },
+    {
+      "text": "Categories:\nSectioning root.\nContexts in which this element can be used:\nAs the second element in an html element.\nContent model:\nFlow content.\nTag omission in text/html:\nA body element's start tag can be omitted if the element is empty, or if the first thing inside the body element is not ASCII whitespace or a comment, except if the first thing inside the body element is a meta, link, script, style, or template element.\nA body element's end tag can be omitted if the body element is not immediately followed by a comment.\nContent attributes:\nGlobal attributes\nonafterprint\nonbeforeprint\nonbeforeunload\nonhashchange\nonlanguagechange\nonmessage\nonmessageerror\nonoffline\nononline\nonpagehide\nonpageshow\nonpopstate\nonrejectionhandled\nonstorage\nonunhandledrejection\nonunload\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLBodyElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  // also has obsolete members\n};\n\nHTMLBodyElement includes WindowEventHandlers;",
+      "name": "body",
+      "categories": []
+    },
+    {
+      "text": "Categories:\nFlow content.\nSectioning content.\nPalpable content.\nContexts in which this element can be used:\nWhere sectioning content is expected.\nContent model:\nFlow content.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\nUses HTMLElement.",
+      "name": "article",
+      "categories": [
+        "Flow",
+        "Sectioning",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nSectioning content.\nPalpable content.\nContexts in which this element can be used:\nWhere sectioning content is expected.\nContent model:\nFlow content.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\nUses HTMLElement.",
+      "name": "section",
+      "categories": [
+        "Flow",
+        "Sectioning",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nSectioning content.\nPalpable content.\nContexts in which this element can be used:\nWhere sectioning content is expected.\nContent model:\nFlow content.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\nUses HTMLElement.",
+      "name": "nav",
+      "categories": [
+        "Flow",
+        "Sectioning",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nSectioning content.\nPalpable content.\nContexts in which this element can be used:\nWhere sectioning content is expected.\nContent model:\nFlow content.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\nUses HTMLElement.",
+      "name": "aside",
+      "categories": [
+        "Flow",
+        "Sectioning",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nHeading content.\nPalpable content.\nContexts in which this element can be used:\nAs a child of an hgroup element.\nWhere heading content is expected.\nContent model:\nPhrasing content.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLHeadingElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  // also has obsolete members\n};",
+      "name": null,
+      "categories": [
+        "Flow",
+        "Heading",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nHeading content.\nPalpable content.\nContexts in which this element can be used:\nWhere heading content is expected.\nContent model:\nOne or more h1, h2, h3, h4, h5, h6 elements, optionally intermixed with script-supporting elements.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\nUses HTMLElement.",
+      "name": "hgroup",
+      "categories": [
+        "Flow",
+        "Heading",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPalpable content.\nContexts in which this element can be used:\nWhere flow content is expected.\nContent model:\nFlow content, but with no header or footer element descendants.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nIf the nearest ancestor sectioning content or sectioning root element is the body element: for authors; for implementers.\nOtherwise: for authors; for implementers.\nDOM interface:\nUses HTMLElement.",
+      "name": "header",
+      "categories": [
+        "Flow",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPalpable content.\nContexts in which this element can be used:\nWhere flow content is expected.\nContent model:\nFlow content, but with no header or footer element descendants.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nIf the nearest ancestor sectioning content or sectioning root element is the body element: for authors; for implementers.\nOtherwise: for authors; for implementers.\nDOM interface:\nUses HTMLElement.",
+      "name": "footer",
+      "categories": [
+        "Flow",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPalpable content.\nContexts in which this element can be used:\nWhere flow content is expected.\nContent model:\nFlow content, but with no heading content descendants, no sectioning content descendants, and no header, footer, or address element descendants.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\nUses HTMLElement.",
+      "name": "address",
+      "categories": [
+        "Flow",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPalpable content.\nContexts in which this element can be used:\nWhere flow content is expected.\nContent model:\nPhrasing content.\nTag omission in text/html:\nA p element's end tag can be omitted if the p element is immediately followed by an address, article, aside, blockquote, details, div, dl, fieldset, figcaption, figure, footer, form, h1, h2, h3, h4, h5, h6, header, hgroup, hr, main, menu, nav, ol, p, pre, section, table, or ul element, or if there is no more content in the parent element and the parent element is an HTML element that is not an a, audio, del, ins, map, noscript, or video element, or an autonomous custom element.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLParagraphElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  // also has obsolete members\n};",
+      "name": "p",
+      "categories": [
+        "Flow",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nContexts in which this element can be used:\nWhere flow content is expected.\nContent model:\nNothing.\nTag omission in text/html:\nNo end tag.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLHRElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  // also has obsolete members\n};",
+      "name": "hr",
+      "categories": [
+        "Flow"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPalpable content.\nContexts in which this element can be used:\nWhere flow content is expected.\nContent model:\nPhrasing content.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLPreElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  // also has obsolete members\n};",
+      "name": "pre",
+      "categories": [
+        "Flow",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nSectioning root.\nPalpable content.\nContexts in which this element can be used:\nWhere flow content is expected.\nContent model:\nFlow content.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\ncite — Link to the source of the quotation or more information about the edit\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLQuoteElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  [CEReactions] attribute USVString cite;\n};\n\nThe HTMLQuoteElement interface is also used by the q element.",
+      "name": "blockquote",
+      "categories": [
+        "Flow",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nIf the element's children include at least one li element: Palpable content.\nContexts in which this element can be used:\nWhere flow content is expected.\nContent model:\nZero or more li and script-supporting elements.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nreversed — Number the list backwards\nstart — Starting value of the list\ntype — Kind of list marker\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLOListElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  [CEReactions] attribute boolean reversed;\n  [CEReactions] attribute long start;\n  [CEReactions] attribute DOMString type;\n\n  // also has obsolete members\n};",
+      "name": "ol",
+      "categories": [
+        "Flow"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nIf the element's children include at least one li element: Palpable content.\nContexts in which this element can be used:\nWhere flow content is expected.\nContent model:\nZero or more li and script-supporting elements.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLUListElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  // also has obsolete members\n};",
+      "name": "ul",
+      "categories": [
+        "Flow"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nIf the element's children include at least one li element: Palpable content.\nContexts in which this element can be used:\nWhere flow content is expected.\nContent model:\nZero or more li and script-supporting elements.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLMenuElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  // also has obsolete members\n};",
+      "name": "menu",
+      "categories": [
+        "Flow"
+      ]
+    },
+    {
+      "text": "Categories:\nNone.\nContexts in which this element can be used:\nInside ol elements.\nInside ul elements.\nInside menu elements.\nContent model:\nFlow content.\nTag omission in text/html:\nAn li element's end tag can be omitted if the li element is immediately followed by another li element or if there is no more content in the parent element.\nContent attributes:\nGlobal attributes\nIf the element is not a child of an ul or menu element: value — Ordinal value of the list item\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLLIElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  [CEReactions] attribute long value;\n\n  // also has obsolete members\n};",
+      "name": "li",
+      "categories": []
+    },
+    {
+      "text": "Categories:\nFlow content.\nIf the element's children include at least one name-value group: Palpable content.\nContexts in which this element can be used:\nWhere flow content is expected.\nContent model:\nEither: Zero or more groups each consisting of one or more dt elements followed by one or more dd elements, optionally intermixed with script-supporting elements.\nOr: One or more div elements, optionally intermixed with script-supporting elements.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLDListElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  // also has obsolete members\n};",
+      "name": "dl",
+      "categories": [
+        "Flow"
+      ]
+    },
+    {
+      "text": "Categories:\nNone.\nContexts in which this element can be used:\nBefore dd or dt elements inside dl elements.\nBefore dd or dt elements inside div elements that are children of a dl element.\nContent model:\nFlow content, but with no header, footer, sectioning content, or heading content descendants.\nTag omission in text/html:\nA dt element's end tag can be omitted if the dt element is immediately followed by another dt element or a dd element.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\nUses HTMLElement.",
+      "name": "dt",
+      "categories": []
+    },
+    {
+      "text": "Categories:\nNone.\nContexts in which this element can be used:\nAfter dt or dd elements inside dl elements.\nAfter dt or dd elements inside div elements that are children of a dl element.\nContent model:\nFlow content.\nTag omission in text/html:\nA dd element's end tag can be omitted if the dd element is immediately followed by another dd element or a dt element, or if there is no more content in the parent element.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\nUses HTMLElement.",
+      "name": "dd",
+      "categories": []
+    },
+    {
+      "text": "Categories:\nFlow content.\nSectioning root.\nPalpable content.\nContexts in which this element can be used:\nWhere flow content is expected.\nContent model:\nEither: one figcaption element followed by flow content.\nOr: flow content followed by one figcaption element.\nOr: flow content.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\nUses HTMLElement.",
+      "name": "figure",
+      "categories": [
+        "Flow",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nNone.\nContexts in which this element can be used:\nAs the first or last child of a figure element.\nContent model:\nFlow content.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\nUses HTMLElement.",
+      "name": "figcaption",
+      "categories": []
+    },
+    {
+      "text": "Categories:\nFlow content.\nPalpable content.\nContexts in which this element can be used:\nWhere flow content is expected, but only if it is a hierarchically correct main element.\nContent model:\nFlow content.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\nUses HTMLElement.",
+      "name": "main",
+      "categories": [
+        "Flow",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPalpable content.\nContexts in which this element can be used:\nWhere flow content is expected.\nAs a child of a dl element.\nContent model:\nIf the element is a child of a dl element: one or more dt elements followed by one or more dd elements, optionally intermixed with script-supporting elements.\nIf the element is not a child of a dl element: flow content.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLDivElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  // also has obsolete members\n};",
+      "name": "div",
+      "categories": [
+        "Flow",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nIf the element has an href attribute: Interactive content.\nPalpable content.\nContexts in which this element can be used:\nWhere phrasing content is expected.\nContent model:\nTransparent, but there must be no interactive content descendant, a element descendant, or descendant with the tabindex attribute specified.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nhref — Address of the hyperlink\ntarget — Browsing context for hyperlink navigation\ndownload — Whether to download the resource instead of navigating to it, and its file name if so\nping — URLs to ping\nrel — Relationship between the location in the document containing the hyperlink and the destination resource\nhreflang — Language of the linked resource\ntype — Hint for the type of the referenced resource\nreferrerpolicy — Referrer policy for fetches initiated by the element\nAccessibility considerations:\nIf the element has an href attribute: for authors; for implementers.\nOtherwise: for authors; for implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLAnchorElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  [CEReactions] attribute DOMString target;\n  [CEReactions] attribute DOMString download;\n  [CEReactions] attribute USVString ping;\n  [CEReactions] attribute DOMString rel;\n  [SameObject, PutForwards=value] readonly attribute DOMTokenList relList;\n  [CEReactions] attribute DOMString hreflang;\n  [CEReactions] attribute DOMString type;\n\n  [CEReactions] attribute DOMString text;\n\n  [CEReactions] attribute DOMString referrerPolicy;\n\n  // also has obsolete members\n};\nHTMLAnchorElement includes HTMLHyperlinkElementUtils;",
+      "name": "a",
+      "categories": [
+        "Flow",
+        "Phrasing",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nPalpable content.\nContexts in which this element can be used:\nWhere phrasing content is expected.\nContent model:\nPhrasing content.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\nUses HTMLElement.",
+      "name": "em",
+      "categories": [
+        "Flow",
+        "Phrasing",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nPalpable content.\nContexts in which this element can be used:\nWhere phrasing content is expected.\nContent model:\nPhrasing content.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\nUses HTMLElement.",
+      "name": "strong",
+      "categories": [
+        "Flow",
+        "Phrasing",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nPalpable content.\nContexts in which this element can be used:\nWhere phrasing content is expected.\nContent model:\nPhrasing content.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\nUses HTMLElement.",
+      "name": "small",
+      "categories": [
+        "Flow",
+        "Phrasing",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nPalpable content.\nContexts in which this element can be used:\nWhere phrasing content is expected.\nContent model:\nPhrasing content.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\nUses HTMLElement.",
+      "name": "s",
+      "categories": [
+        "Flow",
+        "Phrasing",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nPalpable content.\nContexts in which this element can be used:\nWhere phrasing content is expected.\nContent model:\nPhrasing content.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\nUses HTMLElement.",
+      "name": "cite",
+      "categories": [
+        "Flow",
+        "Phrasing",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nPalpable content.\nContexts in which this element can be used:\nWhere phrasing content is expected.\nContent model:\nPhrasing content.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\ncite — Link to the source of the quotation or more information about the edit\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\nUses HTMLQuoteElement.",
+      "name": "q",
+      "categories": [
+        "Flow",
+        "Phrasing",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nPalpable content.\nContexts in which this element can be used:\nWhere phrasing content is expected.\nContent model:\nPhrasing content, but there must be no dfn element descendants.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAlso, the title attribute has special semantics on this element: Full term or expansion of abbreviation.\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\nUses HTMLElement.",
+      "name": "dfn",
+      "categories": [
+        "Flow",
+        "Phrasing",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nPalpable content.\nContexts in which this element can be used:\nWhere phrasing content is expected.\nContent model:\nPhrasing content.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAlso, the title attribute has special semantics on this element: Full term or expansion of abbreviation.\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\nUses HTMLElement.",
+      "name": "abbr",
+      "categories": [
+        "Flow",
+        "Phrasing",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nPalpable content.\nContexts in which this element can be used:\nWhere phrasing content is expected.\nContent model:\nSee prose.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\nUses HTMLElement.",
+      "name": "ruby",
+      "categories": [
+        "Flow",
+        "Phrasing",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nNone.\nContexts in which this element can be used:\nAs a child of a ruby element.\nContent model:\nPhrasing content.\nTag omission in text/html:\nAn rt element's end tag can be omitted if the rt element is immediately followed by an rt or rp element, or if there is no more content in the parent element.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\nUses HTMLElement.",
+      "name": "rt",
+      "categories": []
+    },
+    {
+      "text": "Categories:\nNone.\nContexts in which this element can be used:\nAs a child of a ruby element, either immediately before or immediately after an rt element.\nContent model:\nText.\nTag omission in text/html:\nAn rp element's end tag can be omitted if the rp element is immediately followed by an rt or rp element, or if there is no more content in the parent element.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\nUses HTMLElement.",
+      "name": "rp",
+      "categories": []
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nPalpable content.\nContexts in which this element can be used:\nWhere phrasing content is expected.\nContent model:\nPhrasing content.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nvalue — Machine-readable value\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLDataElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  [CEReactions] attribute DOMString value;\n};",
+      "name": "data",
+      "categories": [
+        "Flow",
+        "Phrasing",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nPalpable content.\nContexts in which this element can be used:\nWhere phrasing content is expected.\nContent model:\nIf the element has a datetime attribute: Phrasing content.\nOtherwise: Text, but must match requirements described in prose below.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\ndatetime — Machine-readable value\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLTimeElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  [CEReactions] attribute DOMString dateTime;\n};",
+      "name": "time",
+      "categories": [
+        "Flow",
+        "Phrasing",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nPalpable content.\nContexts in which this element can be used:\nWhere phrasing content is expected.\nContent model:\nPhrasing content.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\nUses HTMLElement.",
+      "name": "code",
+      "categories": [
+        "Flow",
+        "Phrasing",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nPalpable content.\nContexts in which this element can be used:\nWhere phrasing content is expected.\nContent model:\nPhrasing content.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\nUses HTMLElement.",
+      "name": "var",
+      "categories": [
+        "Flow",
+        "Phrasing",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nPalpable content.\nContexts in which this element can be used:\nWhere phrasing content is expected.\nContent model:\nPhrasing content.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\nUses HTMLElement.",
+      "name": "samp",
+      "categories": [
+        "Flow",
+        "Phrasing",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nPalpable content.\nContexts in which this element can be used:\nWhere phrasing content is expected.\nContent model:\nPhrasing content.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\nUses HTMLElement.",
+      "name": "kbd",
+      "categories": [
+        "Flow",
+        "Phrasing",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nPalpable content.\nContexts in which this element can be used:\nWhere phrasing content is expected.\nContent model:\nPhrasing content.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nThe sub element: for authors; for implementers.\nThe sup element: for authors; for implementers.\nDOM interface:\nUse HTMLElement.",
+      "name": null,
+      "categories": [
+        "Flow",
+        "Phrasing",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nPalpable content.\nContexts in which this element can be used:\nWhere phrasing content is expected.\nContent model:\nPhrasing content.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\nUses HTMLElement.",
+      "name": "i",
+      "categories": [
+        "Flow",
+        "Phrasing",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nPalpable content.\nContexts in which this element can be used:\nWhere phrasing content is expected.\nContent model:\nPhrasing content.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\nUses HTMLElement.",
+      "name": "b",
+      "categories": [
+        "Flow",
+        "Phrasing",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nPalpable content.\nContexts in which this element can be used:\nWhere phrasing content is expected.\nContent model:\nPhrasing content.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\nUses HTMLElement.",
+      "name": "u",
+      "categories": [
+        "Flow",
+        "Phrasing",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nPalpable content.\nContexts in which this element can be used:\nWhere phrasing content is expected.\nContent model:\nPhrasing content.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\nUses HTMLElement.",
+      "name": "mark",
+      "categories": [
+        "Flow",
+        "Phrasing",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nPalpable content.\nContexts in which this element can be used:\nWhere phrasing content is expected.\nContent model:\nPhrasing content.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAlso, the dir global attribute has special semantics on this element.\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\nUses HTMLElement.",
+      "name": "bdi",
+      "categories": [
+        "Flow",
+        "Phrasing",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nPalpable content.\nContexts in which this element can be used:\nWhere phrasing content is expected.\nContent model:\nPhrasing content.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAlso, the dir global attribute has special semantics on this element.\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\nUses HTMLElement.",
+      "name": "bdo",
+      "categories": [
+        "Flow",
+        "Phrasing",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nPalpable content.\nContexts in which this element can be used:\nWhere phrasing content is expected.\nContent model:\nPhrasing content.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLSpanElement : HTMLElement {\n  [HTMLConstructor] constructor();\n};",
+      "name": "span",
+      "categories": [
+        "Flow",
+        "Phrasing",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nContexts in which this element can be used:\nWhere phrasing content is expected.\nContent model:\nNothing.\nTag omission in text/html:\nNo end tag.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLBRElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  // also has obsolete members\n};",
+      "name": "br",
+      "categories": [
+        "Flow",
+        "Phrasing"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nContexts in which this element can be used:\nWhere phrasing content is expected.\nContent model:\nNothing.\nTag omission in text/html:\nNo end tag.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\nUses HTMLElement.",
+      "name": "wbr",
+      "categories": [
+        "Flow",
+        "Phrasing"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nPalpable content.\nContexts in which this element can be used:\nWhere phrasing content is expected.\nContent model:\nTransparent.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\ncite — Link to the source of the quotation or more information about the edit\ndatetime — Date and (optionally) time of the change\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\nUses HTMLModElement.",
+      "name": "ins",
+      "categories": [
+        "Flow",
+        "Phrasing",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nContexts in which this element can be used:\nWhere phrasing content is expected.\nContent model:\nTransparent.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\ncite — Link to the source of the quotation or more information about the edit\ndatetime — Date and (optionally) time of the change\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\nUses HTMLModElement.",
+      "name": "del",
+      "categories": [
+        "Flow",
+        "Phrasing"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nEmbedded content.\nContexts in which this element can be used:\nWhere embedded content is expected.\nContent model:\nZero or more source elements, followed by one img element, optionally intermixed with script-supporting elements.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLPictureElement : HTMLElement {\n  [HTMLConstructor] constructor();\n};",
+      "name": "picture",
+      "categories": [
+        "Flow",
+        "Phrasing",
+        "Embedded"
+      ]
+    },
+    {
+      "text": "Categories:\nNone.\nContexts in which this element can be used:\nAs a child of a picture element, before the img element.\nAs a child of a media element, before any flow content or track elements.\nContent model:\nNothing.\nTag omission in text/html:\nNo end tag.\nContent attributes:\nGlobal attributes\nsrc — Address of the resource\ntype — Type of embedded resource\nsrcset — Images to use in different situations, e.g., high-resolution displays, small monitors, etc.\nsizes — Image sizes for different page layouts\nmedia — Applicable media\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLSourceElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  [CEReactions] attribute USVString src;\n  [CEReactions] attribute DOMString type;\n  [CEReactions] attribute USVString srcset;\n  [CEReactions] attribute DOMString sizes;\n  [CEReactions] attribute DOMString media;\n};",
+      "name": "source",
+      "categories": []
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nEmbedded content.\nForm-associated element.\nIf the element has a usemap attribute: Interactive content.\nPalpable content.\nContexts in which this element can be used:\nWhere embedded content is expected.\nContent model:\nNothing.\nTag omission in text/html:\nNo end tag.\nContent attributes:\nGlobal attributes\nalt — Replacement text for use when images are not available\nsrc — Address of the resource\nsrcset — Images to use in different situations, e.g., high-resolution displays, small monitors, etc.\nsizes — Image sizes for different page layouts\ncrossorigin — How the element handles crossorigin requests\nusemap — Name of image map to use\nismap — Whether the image is a server-side image map\nwidth — Horizontal dimension\nheight — Vertical dimension\nreferrerpolicy — Referrer policy for fetches initiated by the element\ndecoding — Decoding hint to use when processing this image for presentation\nloading — Used when determining loading deferral\nAccessibility considerations:\nIf the element has a non-empty alt attribute: for authors; for implementers.\nOtherwise: for authors; for implementers.\nDOM interface:\n[Exposed=Window,\n LegacyFactoryFunction=Image(optional unsigned long width, optional unsigned long height)]\ninterface HTMLImageElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  [CEReactions] attribute DOMString alt;\n  [CEReactions] attribute USVString src;\n  [CEReactions] attribute USVString srcset;\n  [CEReactions] attribute DOMString sizes;\n  [CEReactions] attribute DOMString? crossOrigin;\n  [CEReactions] attribute DOMString useMap;\n  [CEReactions] attribute boolean isMap;\n  [CEReactions] attribute unsigned long width;\n  [CEReactions] attribute unsigned long height;\n  readonly attribute unsigned long naturalWidth;\n  readonly attribute unsigned long naturalHeight;\n  readonly attribute boolean complete;\n  readonly attribute USVString currentSrc;\n  [CEReactions] attribute DOMString referrerPolicy;\n  [CEReactions] attribute DOMString decoding;\n  [CEReactions] attribute DOMString loading;\n\n  Promise<undefined> decode();\n\n  // also has obsolete members\n};",
+      "name": "img",
+      "categories": [
+        "Flow",
+        "Phrasing",
+        "Embedded",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nEmbedded content.\nInteractive content.\nPalpable content.\nContexts in which this element can be used:\nWhere embedded content is expected.\nContent model:\nNothing.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nsrc — Address of the resource\nsrcdoc — A document to render in the iframe\nname — Name of nested browsing context\nsandbox — Security rules for nested content\nallow — Permissions policy to be applied to the iframe's contents\nallowfullscreen — Whether to allow the iframe's contents to use requestFullscreen()\nallowpaymentrequest — Whether the iframe's contents are allowed to use the PaymentRequest interface to make payment requests\nwidth — Horizontal dimension\nheight — Vertical dimension\nreferrerpolicy — Referrer policy for fetches initiated by the element\nloading — Used when determining loading deferral\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLIFrameElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  [CEReactions] attribute USVString src;\n  [CEReactions] attribute DOMString srcdoc;\n  [CEReactions] attribute DOMString name;\n  [SameObject, PutForwards=value] readonly attribute DOMTokenList sandbox;\n  [CEReactions] attribute DOMString allow;\n  [CEReactions] attribute boolean allowFullscreen;\n  [CEReactions] attribute boolean allowPaymentRequest;\n  [CEReactions] attribute DOMString width;\n  [CEReactions] attribute DOMString height;\n  [CEReactions] attribute DOMString referrerPolicy;\n  [CEReactions] attribute DOMString loading;\n  readonly attribute Document? contentDocument;\n  readonly attribute WindowProxy? contentWindow;\n  Document? getSVGDocument();\n\n  // also has obsolete members\n};",
+      "name": "iframe",
+      "categories": [
+        "Flow",
+        "Phrasing",
+        "Embedded",
+        "Interactive",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nEmbedded content.\nInteractive content.\nPalpable content.\nContexts in which this element can be used:\nWhere embedded content is expected.\nContent model:\nNothing.\nTag omission in text/html:\nNo end tag.\nContent attributes:\nGlobal attributes\nsrc — Address of the resource\ntype — Type of embedded resource\nwidth — Horizontal dimension\nheight — Vertical dimension\nAny other attribute that has no namespace (see prose).\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLEmbedElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  [CEReactions] attribute USVString src;\n  [CEReactions] attribute DOMString type;\n  [CEReactions] attribute DOMString width;\n  [CEReactions] attribute DOMString height;\n  Document? getSVGDocument();\n\n  // also has obsolete members\n};\n\nDepending on the type of content instantiated by the embed element, the node may also support other interfaces.",
+      "name": "embed",
+      "categories": [
+        "Flow",
+        "Phrasing",
+        "Embedded",
+        "Interactive",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nEmbedded content.\nIf the element has a usemap attribute: Interactive content.\nListed and submittable form-associated element.\nPalpable content.\nContexts in which this element can be used:\nWhere embedded content is expected.\nContent model:\nZero or more param elements, then, transparent.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\ndata — Address of the resource\ntype — Type of embedded resource\nname — Name of nested browsing context\nusemap — Name of image map to use\nform — Associates the element with a form element\nwidth — Horizontal dimension\nheight — Vertical dimension\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLObjectElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  [CEReactions] attribute USVString data;\n  [CEReactions] attribute DOMString type;\n  [CEReactions] attribute DOMString name;\n  [CEReactions] attribute DOMString useMap;\n  readonly attribute HTMLFormElement? form;\n  [CEReactions] attribute DOMString width;\n  [CEReactions] attribute DOMString height;\n  readonly attribute Document? contentDocument;\n  readonly attribute WindowProxy? contentWindow;\n  Document? getSVGDocument();\n\n  readonly attribute boolean willValidate;\n  readonly attribute ValidityState validity;\n  readonly attribute DOMString validationMessage;\n  boolean checkValidity();\n  boolean reportValidity();\n  undefined setCustomValidity(DOMString error);\n\n  // also has obsolete members\n};\n\nDepending on the type of content instantiated by the object element, the node also supports other interfaces.",
+      "name": "object",
+      "categories": [
+        "Flow",
+        "Phrasing",
+        "Embedded",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nNone.\nContexts in which this element can be used:\nAs a child of an object element, before any flow content.\nContent model:\nNothing.\nTag omission in text/html:\nNo end tag.\nContent attributes:\nGlobal attributes\nname — Name of parameter\nvalue — Value of parameter\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLParamElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  [CEReactions] attribute DOMString name;\n  [CEReactions] attribute DOMString value;\n\n  // also has obsolete members\n};",
+      "name": "param",
+      "categories": []
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nEmbedded content.\nIf the element has a controls attribute: Interactive content.\nPalpable content.\nContexts in which this element can be used:\nWhere embedded content is expected.\nContent model:\nIf the element has a src attribute: zero or more track elements, then transparent, but with no media element descendants.\nIf the element does not have a src attribute: zero or more source elements, then zero or more track elements, then transparent, but with no media element descendants.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nsrc — Address of the resource\ncrossorigin — How the element handles crossorigin requests\nposter — Poster frame to show prior to video playback\npreload — Hints how much buffering the media resource will likely need\nautoplay — Hint that the media resource can be started automatically when the page is loaded\nplaysinline — Encourage the user agent to display video content within the element's playback area\nloop — Whether to loop the media resource\nmuted — Whether to mute the media resource by default\ncontrols — Show user agent controls\nwidth — Horizontal dimension\nheight — Vertical dimension\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLVideoElement : HTMLMediaElement {\n  [HTMLConstructor] constructor();\n\n  [CEReactions] attribute unsigned long width;\n  [CEReactions] attribute unsigned long height;\n  readonly attribute unsigned long videoWidth;\n  readonly attribute unsigned long videoHeight;\n  [CEReactions] attribute USVString poster;\n  [CEReactions] attribute boolean playsInline;\n};",
+      "name": "video",
+      "categories": [
+        "Flow",
+        "Phrasing",
+        "Embedded",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nEmbedded content.\nIf the element has a controls attribute: Interactive content.\nIf the element has a controls attribute: Palpable content.\nContexts in which this element can be used:\nWhere embedded content is expected.\nContent model:\nIf the element has a src attribute: zero or more track elements, then transparent, but with no media element descendants.\nIf the element does not have a src attribute: zero or more source elements, then zero or more track elements, then transparent, but with no media element descendants.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nsrc — Address of the resource\ncrossorigin — How the element handles crossorigin requests\npreload — Hints how much buffering the media resource will likely need\nautoplay — Hint that the media resource can be started automatically when the page is loaded\nloop — Whether to loop the media resource\nmuted — Whether to mute the media resource by default\ncontrols — Show user agent controls\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window,\n LegacyFactoryFunction=Audio(optional DOMString src)]\ninterface HTMLAudioElement : HTMLMediaElement {\n  [HTMLConstructor] constructor();\n};",
+      "name": "audio",
+      "categories": [
+        "Flow",
+        "Phrasing",
+        "Embedded"
+      ]
+    },
+    {
+      "text": "Categories:\nNone.\nContexts in which this element can be used:\nAs a child of a media element, before any flow content.\nContent model:\nNothing.\nTag omission in text/html:\nNo end tag.\nContent attributes:\nGlobal attributes\nkind — The type of text track\nsrc — Address of the resource\nsrclang — Language of the text track\nlabel — User-visible label\ndefault — Enable the track if no other text track is more suitable\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLTrackElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  [CEReactions] attribute DOMString kind;\n  [CEReactions] attribute USVString src;\n  [CEReactions] attribute DOMString srclang;\n  [CEReactions] attribute DOMString label;\n  [CEReactions] attribute boolean default;\n\n  const unsigned short NONE = 0;\n  const unsigned short LOADING = 1;\n  const unsigned short LOADED = 2;\n  const unsigned short ERROR = 3;\n  readonly attribute unsigned short readyState;\n\n  readonly attribute TextTrack track;\n};",
+      "name": "track",
+      "categories": []
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nPalpable content.\nContexts in which this element can be used:\nWhere phrasing content is expected.\nContent model:\nTransparent.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nname — Name of image map to reference from the usemap attribute\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLMapElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  [CEReactions] attribute DOMString name;\n  [SameObject] readonly attribute HTMLCollection areas;\n};",
+      "name": "map",
+      "categories": [
+        "Flow",
+        "Phrasing",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nContexts in which this element can be used:\nWhere phrasing content is expected, but only if there is a map element ancestor.\nContent model:\nNothing.\nTag omission in text/html:\nNo end tag.\nContent attributes:\nGlobal attributes\nalt — Replacement text for use when images are not available\ncoords — Coordinates for the shape to be created in an image map\nshape — The kind of shape to be created in an image map\nhref — Address of the hyperlink\ntarget — Browsing context for hyperlink navigation\ndownload — Whether to download the resource instead of navigating to it, and its file name if so\nping — URLs to ping\nrel — Relationship between the location in the document containing the hyperlink and the destination resource\nreferrerpolicy — Referrer policy for fetches initiated by the element\nAccessibility considerations:\nIf the element has an href attribute: for authors; for implementers.\nOtherwise: for authors; for implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLAreaElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  [CEReactions] attribute DOMString alt;\n  [CEReactions] attribute DOMString coords;\n  [CEReactions] attribute DOMString shape;\n  [CEReactions] attribute DOMString target;\n  [CEReactions] attribute DOMString download;\n  [CEReactions] attribute USVString ping;\n  [CEReactions] attribute DOMString rel;\n  [SameObject, PutForwards=value] readonly attribute DOMTokenList relList;\n  [CEReactions] attribute DOMString referrerPolicy;\n\n  // also has obsolete members\n};\nHTMLAreaElement includes HTMLHyperlinkElementUtils;",
+      "name": "area",
+      "categories": [
+        "Flow",
+        "Phrasing"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPalpable content.\nContexts in which this element can be used:\nWhere flow content is expected.\nContent model:\nIn this order: optionally a caption element, followed by zero or more colgroup elements, followed optionally by a thead element, followed by either zero or more tbody elements or one or more tr elements, followed optionally by a tfoot element, optionally intermixed with one or more script-supporting elements.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLTableElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  [CEReactions] attribute HTMLTableCaptionElement? caption;\n  HTMLTableCaptionElement createCaption();\n  [CEReactions] undefined deleteCaption();\n\n  [CEReactions] attribute HTMLTableSectionElement? tHead;\n  HTMLTableSectionElement createTHead();\n  [CEReactions] undefined deleteTHead();\n\n  [CEReactions] attribute HTMLTableSectionElement? tFoot;\n  HTMLTableSectionElement createTFoot();\n  [CEReactions] undefined deleteTFoot();\n\n  [SameObject] readonly attribute HTMLCollection tBodies;\n  HTMLTableSectionElement createTBody();\n\n  [SameObject] readonly attribute HTMLCollection rows;\n  HTMLTableRowElement insertRow(optional long index = -1);\n  [CEReactions] undefined deleteRow(long index);\n\n  // also has obsolete members\n};",
+      "name": "table",
+      "categories": [
+        "Flow",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nNone.\nContexts in which this element can be used:\nAs the first element child of a table element.\nContent model:\nFlow content, but with no descendant table elements.\nTag omission in text/html:\nA caption element's end tag can be omitted if the caption element is not immediately followed by ASCII whitespace or a comment.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLTableCaptionElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  // also has obsolete members\n};",
+      "name": "caption",
+      "categories": []
+    },
+    {
+      "text": "Categories:\nNone.\nContexts in which this element can be used:\nAs a child of a table element, after any caption elements and before any thead, tbody, tfoot, and tr elements.\nContent model:\nIf the span attribute is present: Nothing.\nIf the span attribute is absent: Zero or more col and template elements.\nTag omission in text/html:\nA colgroup element's start tag can be omitted if the first thing inside the colgroup element is a col element, and if the element is not immediately preceded by another colgroup element whose end tag has been omitted. (It can't be omitted if the element is empty.)\nA colgroup element's end tag can be omitted if the colgroup element is not immediately followed by ASCII whitespace or a comment.\nContent attributes:\nGlobal attributes\nspan — Number of columns spanned by the element\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLTableColElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  [CEReactions] attribute unsigned long span;\n\n  // also has obsolete members\n};",
+      "name": "colgroup",
+      "categories": []
+    },
+    {
+      "text": "Categories:\nNone.\nContexts in which this element can be used:\nAs a child of a colgroup element that doesn't have a span attribute.\nContent model:\nNothing.\nTag omission in text/html:\nNo end tag.\nContent attributes:\nGlobal attributes\nspan — Number of columns spanned by the element\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\nUses HTMLTableColElement, as defined for colgroup elements.",
+      "name": "col",
+      "categories": []
+    },
+    {
+      "text": "Categories:\nNone.\nContexts in which this element can be used:\nAs a child of a table element, after any caption, colgroup, and thead elements, but only if there are no tr elements that are children of the table element.\nContent model:\nZero or more tr and script-supporting elements.\nTag omission in text/html:\nA tbody element's start tag can be omitted if the first thing inside the tbody element is a tr element, and if the element is not immediately preceded by a tbody, thead, or tfoot element whose end tag has been omitted. (It can't be omitted if the element is empty.)\nA tbody element's end tag can be omitted if the tbody element is immediately followed by a tbody or tfoot element, or if there is no more content in the parent element.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLTableSectionElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  [SameObject] readonly attribute HTMLCollection rows;\n  HTMLTableRowElement insertRow(optional long index = -1);\n  [CEReactions] undefined deleteRow(long index);\n\n  // also has obsolete members\n};\n\nThe HTMLTableSectionElement interface is also used for thead and tfoot elements.",
+      "name": "tbody",
+      "categories": []
+    },
+    {
+      "text": "Categories:\nNone.\nContexts in which this element can be used:\nAs a child of a table element, after any caption, and colgroup elements and before any tbody, tfoot, and tr elements, but only if there are no other thead elements that are children of the table element.\nContent model:\nZero or more tr and script-supporting elements.\nTag omission in text/html:\nA thead element's end tag can be omitted if the thead element is immediately followed by a tbody or tfoot element.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\nUses HTMLTableSectionElement, as defined for tbody elements.",
+      "name": "thead",
+      "categories": []
+    },
+    {
+      "text": "Categories:\nNone.\nContexts in which this element can be used:\nAs a child of a table element, after any caption, colgroup, thead, tbody, and tr elements, but only if there are no other tfoot elements that are children of the table element.\nContent model:\nZero or more tr and script-supporting elements.\nTag omission in text/html:\nA tfoot element's end tag can be omitted if there is no more content in the parent element.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\nUses HTMLTableSectionElement, as defined for tbody elements.",
+      "name": "tfoot",
+      "categories": []
+    },
+    {
+      "text": "Categories:\nNone.\nContexts in which this element can be used:\nAs a child of a thead element.\nAs a child of a tbody element.\nAs a child of a tfoot element.\nAs a child of a table element, after any caption, colgroup, and thead elements, but only if there are no tbody elements that are children of the table element.\nContent model:\nZero or more td, th, and script-supporting elements.\nTag omission in text/html:\nA tr element's end tag can be omitted if the tr element is immediately followed by another tr element, or if there is no more content in the parent element.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLTableRowElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  readonly attribute long rowIndex;\n  readonly attribute long sectionRowIndex;\n  [SameObject] readonly attribute HTMLCollection cells;\n  HTMLTableCellElement insertCell(optional long index = -1);\n  [CEReactions] undefined deleteCell(long index);\n\n  // also has obsolete members\n};",
+      "name": "tr",
+      "categories": []
+    },
+    {
+      "text": "Categories:\nSectioning root.\nContexts in which this element can be used:\nAs a child of a tr element.\nContent model:\nFlow content.\nTag omission in text/html:\nA td element's end tag can be omitted if the td element is immediately followed by a td or th element, or if there is no more content in the parent element.\nContent attributes:\nGlobal attributes\ncolspan — Number of columns that the cell is to span\nrowspan — Number of rows that the cell is to span\nheaders — The header cells for this cell\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLTableCellElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  [CEReactions] attribute unsigned long colSpan;\n  [CEReactions] attribute unsigned long rowSpan;\n  [CEReactions] attribute DOMString headers;\n  readonly attribute long cellIndex;\n\n  [CEReactions] attribute DOMString scope; // only conforming for th elements\n  [CEReactions] attribute DOMString abbr;  // only conforming for th elements\n\n  // also has obsolete members\n};\n\nThe HTMLTableCellElement interface is also used for th elements.",
+      "name": "td",
+      "categories": []
+    },
+    {
+      "text": "Categories:\nNone.\nContexts in which this element can be used:\nAs a child of a tr element.\nContent model:\nFlow content, but with no header, footer, sectioning content, or heading content descendants.\nTag omission in text/html:\nA th element's end tag can be omitted if the th element is immediately followed by a td or th element, or if there is no more content in the parent element.\nContent attributes:\nGlobal attributes\ncolspan — Number of columns that the cell is to span\nrowspan — Number of rows that the cell is to span\nheaders — The header cells for this cell\nscope — Specifies which cells the header cell applies to\nabbr — Alternative label to use for the header cell when referencing the cell in other contexts\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\nUses HTMLTableCellElement, as defined for td elements.",
+      "name": "th",
+      "categories": []
+    },
+    {
+      "text": "Categories:\nFlow content.\nPalpable content.\nContexts in which this element can be used:\nWhere flow content is expected.\nContent model:\nFlow content, but with no form element descendants.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\naccept-charset — Character encodings to use for form submission\naction — URL to use for form submission\nautocomplete — Default setting for autofill feature for controls in the form\nenctype — Entry list encoding type to use for form submission\nmethod — Variant to use for form submission\nname — Name of form to use in the document.forms API\nnovalidate — Bypass form control validation for form submission\ntarget — Browsing context for form submission\nrel\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window,\n LegacyOverrideBuiltIns,\n LegacyUnenumerableNamedProperties]\ninterface HTMLFormElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  [CEReactions] attribute DOMString acceptCharset;\n  [CEReactions] attribute USVString action;\n  [CEReactions] attribute DOMString autocomplete;\n  [CEReactions] attribute DOMString enctype;\n  [CEReactions] attribute DOMString encoding;\n  [CEReactions] attribute DOMString method;\n  [CEReactions] attribute DOMString name;\n  [CEReactions] attribute boolean noValidate;\n  [CEReactions] attribute DOMString target;\n  [CEReactions] attribute DOMString rel;\n  [SameObject, PutForwards=value] readonly attribute DOMTokenList relList;\n\n  [SameObject] readonly attribute HTMLFormControlsCollection elements;\n  readonly attribute unsigned long length;\n  getter Element (unsigned long index);\n  getter (RadioNodeList or Element) (DOMString name);\n\n  undefined submit();\n  undefined requestSubmit(optional HTMLElement? submitter = null);\n  [CEReactions] undefined reset();\n  boolean checkValidity();\n  boolean reportValidity();\n};",
+      "name": "form",
+      "categories": [
+        "Flow",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nInteractive content.\nPalpable content.\nContexts in which this element can be used:\nWhere phrasing content is expected.\nContent model:\nPhrasing content, but with no descendant labelable elements unless it is the element's labeled control, and no descendant label elements.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nfor — Associate the label with form control\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLLabelElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  readonly attribute HTMLFormElement? form;\n  [CEReactions] attribute DOMString htmlFor;\n  readonly attribute HTMLElement? control;\n};",
+      "name": "label",
+      "categories": [
+        "Flow",
+        "Phrasing",
+        "Interactive",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nIf the type attribute is not in the Hidden state: Interactive content.\nIf the type attribute is not in the Hidden state: Listed, labelable, submittable, resettable, and autocapitalize-inheriting form-associated element.\nIf the type attribute is in the Hidden state: Listed, submittable, resettable, and autocapitalize-inheriting form-associated element.\nIf the type attribute is not in the Hidden state: Palpable content.\nContexts in which this element can be used:\nWhere phrasing content is expected.\nContent model:\nNothing.\nTag omission in text/html:\nNo end tag.\nContent attributes:\nGlobal attributes\naccept — Hint for expected file type in file upload controls\nalt — Replacement text for use when images are not available\nautocomplete — Hint for form autofill feature\nchecked — Whether the control is checked\ndirname — Name of form control to use for sending the element's directionality in form submission\ndisabled — Whether the form control is disabled\nform — Associates the element with a form element\nformaction — URL to use for form submission\nformenctype — Entry list encoding type to use for form submission\nformmethod — Variant to use for form submission\nformnovalidate — Bypass form control validation for form submission\nformtarget — Browsing context for form submission\nheight — Vertical dimension\nlist — List of autocomplete options\nmax — Maximum value\nmaxlength — Maximum length of value\nmin — Minimum value\nminlength — Minimum length of value\nmultiple — Whether to allow multiple values\nname — Name of the element to use for form submission and in the form.elements API\npattern — Pattern to be matched by the form control's value\nplaceholder — User-visible label to be placed within the form control\nreadonly — Whether to allow the value to be edited by the user\nrequired — Whether the control is required for form submission\nsize — Size of the control\nsrc — Address of the resource\nstep — Granularity to be matched by the form control's value\ntype — Type of form control\nvalue — Value of the form control\nwidth — Horizontal dimension\nAlso, the title attribute has special semantics on this element: Description of pattern (when used with pattern attribute).\nAccessibility considerations:\ntype attribute in the Hidden state: for authors; for implementers.\ntype attribute in the Text state: for authors; for implementers.\ntype attribute in the Search state: for authors; for implementers.\ntype attribute in the Telephone state: for authors; for implementers.\ntype attribute in the URL state: for authors; for implementers.\ntype attribute in the E-mail state: for authors; for implementers.\ntype attribute in the Password state: for authors; for implementers.\ntype attribute in the Date state: for authors; for implementers.\ntype attribute in the Month state: for authors; for implementers.\ntype attribute in the Week state: for authors; for implementers.\ntype attribute in the Time state: for authors; for implementers.\ntype attribute in the Local Date and Time state: for authors; for implementers.\ntype attribute in the Number state: for authors; for implementers.\ntype attribute in the Range state: for authors; for implementers.\ntype attribute in the Color state: for authors; for implementers.\ntype attribute in the Checkbox state: for authors; for implementers.\ntype attribute in the Radio Button state: for authors; for implementers.\ntype attribute in the File Upload state: for authors; for implementers.\ntype attribute in the Submit Button state: for authors; for implementers.\ntype attribute in the Image Button state: for authors; for implementers.\ntype attribute in the Reset Button state: for authors; for implementers.\ntype attribute in the Button state: for authors; for implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLInputElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  [CEReactions] attribute DOMString accept;\n  [CEReactions] attribute DOMString alt;\n  [CEReactions] attribute DOMString autocomplete;\n  [CEReactions] attribute boolean defaultChecked;\n  attribute boolean checked;\n  [CEReactions] attribute DOMString dirName;\n  [CEReactions] attribute boolean disabled;\n  readonly attribute HTMLFormElement? form;\n  attribute FileList? files;\n  [CEReactions] attribute USVString formAction;\n  [CEReactions] attribute DOMString formEnctype;\n  [CEReactions] attribute DOMString formMethod;\n  [CEReactions] attribute boolean formNoValidate;\n  [CEReactions] attribute DOMString formTarget;\n  [CEReactions] attribute unsigned long height;\n  attribute boolean indeterminate;\n  readonly attribute HTMLElement? list;\n  [CEReactions] attribute DOMString max;\n  [CEReactions] attribute long maxLength;\n  [CEReactions] attribute DOMString min;\n  [CEReactions] attribute long minLength;\n  [CEReactions] attribute boolean multiple;\n  [CEReactions] attribute DOMString name;\n  [CEReactions] attribute DOMString pattern;\n  [CEReactions] attribute DOMString placeholder;\n  [CEReactions] attribute boolean readOnly;\n  [CEReactions] attribute boolean required;\n  [CEReactions] attribute unsigned long size;\n  [CEReactions] attribute USVString src;\n  [CEReactions] attribute DOMString step;\n  [CEReactions] attribute DOMString type;\n  [CEReactions] attribute DOMString defaultValue;\n  [CEReactions] attribute [LegacyNullToEmptyString] DOMString value;\n  attribute object? valueAsDate;\n  attribute unrestricted double valueAsNumber;\n  [CEReactions] attribute unsigned long width;\n\n  undefined stepUp(optional long n = 1);\n  undefined stepDown(optional long n = 1);\n\n  readonly attribute boolean willValidate;\n  readonly attribute ValidityState validity;\n  readonly attribute DOMString validationMessage;\n  boolean checkValidity();\n  boolean reportValidity();\n  undefined setCustomValidity(DOMString error);\n\n  readonly attribute NodeList? labels;\n\n  undefined select();\n  attribute unsigned long? selectionStart;\n  attribute unsigned long? selectionEnd;\n  attribute DOMString? selectionDirection;\n  undefined setRangeText(DOMString replacement);\n  undefined setRangeText(DOMString replacement, unsigned long start, unsigned long end, optional SelectionMode selectionMode = \"preserve\");\n  undefined setSelectionRange(unsigned long start, unsigned long end, optional DOMString direction);\n\n  // also has obsolete members\n};",
+      "name": "input",
+      "categories": [
+        "Flow",
+        "Phrasing"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nInteractive content.\nListed, labelable, submittable, and autocapitalize-inheriting form-associated element.\nPalpable content.\nContexts in which this element can be used:\nWhere phrasing content is expected.\nContent model:\nPhrasing content, but there must be no interactive content descendant and no descendant with the tabindex attribute specified.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\ndisabled — Whether the form control is disabled\nform — Associates the element with a form element\nformaction — URL to use for form submission\nformenctype — Entry list encoding type to use for form submission\nformmethod — Variant to use for form submission\nformnovalidate — Bypass form control validation for form submission\nformtarget — Browsing context for form submission\nname — Name of the element to use for form submission and in the form.elements API\ntype — Type of button\nvalue — Value to be used for form submission\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLButtonElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  [CEReactions] attribute boolean disabled;\n  readonly attribute HTMLFormElement? form;\n  [CEReactions] attribute USVString formAction;\n  [CEReactions] attribute DOMString formEnctype;\n  [CEReactions] attribute DOMString formMethod;\n  [CEReactions] attribute boolean formNoValidate;\n  [CEReactions] attribute DOMString formTarget;\n  [CEReactions] attribute DOMString name;\n  [CEReactions] attribute DOMString type;\n  [CEReactions] attribute DOMString value;\n\n  readonly attribute boolean willValidate;\n  readonly attribute ValidityState validity;\n  readonly attribute DOMString validationMessage;\n  boolean checkValidity();\n  boolean reportValidity();\n  undefined setCustomValidity(DOMString error);\n\n  readonly attribute NodeList labels;\n};",
+      "name": "button",
+      "categories": [
+        "Flow",
+        "Phrasing",
+        "Interactive",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nInteractive content.\nListed, labelable, submittable, resettable, and autocapitalize-inheriting form-associated element.\nPalpable content.\nContexts in which this element can be used:\nWhere phrasing content is expected.\nContent model:\nZero or more option, optgroup, and script-supporting elements.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nautocomplete — Hint for form autofill feature\ndisabled — Whether the form control is disabled\nform — Associates the element with a form element\nmultiple — Whether to allow multiple values\nname — Name of the element to use for form submission and in the form.elements API\nrequired — Whether the control is required for form submission\nsize — Size of the control\nAccessibility considerations:\nIf the element has a multiple attribute or a size attribute with a value > 1: for authors; for implementers.\nOtherwise: for authors; for implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLSelectElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  [CEReactions] attribute DOMString autocomplete;\n  [CEReactions] attribute boolean disabled;\n  readonly attribute HTMLFormElement? form;\n  [CEReactions] attribute boolean multiple;\n  [CEReactions] attribute DOMString name;\n  [CEReactions] attribute boolean required;\n  [CEReactions] attribute unsigned long size;\n\n  readonly attribute DOMString type;\n\n  [SameObject] readonly attribute HTMLOptionsCollection options;\n  [CEReactions] attribute unsigned long length;\n  getter Element? item(unsigned long index);\n  HTMLOptionElement? namedItem(DOMString name);\n  [CEReactions] undefined add((HTMLOptionElement or HTMLOptGroupElement) element, optional (HTMLElement or long)? before = null);\n  [CEReactions] undefined remove(); // ChildNode overload\n  [CEReactions] undefined remove(long index);\n  [CEReactions] setter undefined (unsigned long index, HTMLOptionElement? option);\n\n  [SameObject] readonly attribute HTMLCollection selectedOptions;\n  attribute long selectedIndex;\n  attribute DOMString value;\n\n  readonly attribute boolean willValidate;\n  readonly attribute ValidityState validity;\n  readonly attribute DOMString validationMessage;\n  boolean checkValidity();\n  boolean reportValidity();\n  undefined setCustomValidity(DOMString error);\n\n  readonly attribute NodeList labels;\n};",
+      "name": "select",
+      "categories": [
+        "Flow",
+        "Phrasing",
+        "Interactive",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nContexts in which this element can be used:\nWhere phrasing content is expected.\nContent model:\nEither: phrasing content.\nOr: Zero or more option and script-supporting elements.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLDataListElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  [SameObject] readonly attribute HTMLCollection options;\n};",
+      "name": "datalist",
+      "categories": [
+        "Flow",
+        "Phrasing"
+      ]
+    },
+    {
+      "text": "Categories:\nNone.\nContexts in which this element can be used:\nAs a child of a select element.\nContent model:\nZero or more option and script-supporting elements.\nTag omission in text/html:\nAn optgroup element's end tag can be omitted if the optgroup element is immediately followed by another optgroup element, or if there is no more content in the parent element.\nContent attributes:\nGlobal attributes\ndisabled — Whether the form control is disabled\nlabel — User-visible label\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLOptGroupElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  [CEReactions] attribute boolean disabled;\n  [CEReactions] attribute DOMString label;\n};",
+      "name": "optgroup",
+      "categories": []
+    },
+    {
+      "text": "Categories:\nNone.\nContexts in which this element can be used:\nAs a child of a select element.\nAs a child of a datalist element.\nAs a child of an optgroup element.\nContent model:\nIf the element has a label attribute and a value attribute: Nothing.\nIf the element has a label attribute but no value attribute: Text.\nIf the element has no label attribute and is not a child of a datalist element: Text that is not inter-element whitespace.\nIf the element has no label attribute and is a child of a datalist element: Text.\nTag omission in text/html:\nAn option element's end tag can be omitted if the option element is immediately followed by another option element, or if it is immediately followed by an optgroup element, or if there is no more content in the parent element.\nContent attributes:\nGlobal attributes\ndisabled — Whether the form control is disabled\nlabel — User-visible label\nselected — Whether the option is selected by default\nvalue — Value to be used for form submission\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window,\n LegacyFactoryFunction=Option(optional DOMString text = \"\", optional DOMString value, optional boolean defaultSelected = false, optional boolean selected = false)]\ninterface HTMLOptionElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  [CEReactions] attribute boolean disabled;\n  readonly attribute HTMLFormElement? form;\n  [CEReactions] attribute DOMString label;\n  [CEReactions] attribute boolean defaultSelected;\n  attribute boolean selected;\n  [CEReactions] attribute DOMString value;\n\n  [CEReactions] attribute DOMString text;\n  readonly attribute long index;\n};",
+      "name": "option",
+      "categories": []
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nInteractive content.\nListed, labelable, submittable, resettable, and autocapitalize-inheriting form-associated element.\nPalpable content.\nContexts in which this element can be used:\nWhere phrasing content is expected.\nContent model:\nText.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nautocomplete — Hint for form autofill feature\ncols — Maximum number of characters per line\ndirname — Name of form control to use for sending the element's directionality in form submission\ndisabled — Whether the form control is disabled\nform — Associates the element with a form element\nmaxlength — Maximum length of value\nminlength — Minimum length of value\nname — Name of the element to use for form submission and in the form.elements API\nplaceholder — User-visible label to be placed within the form control\nreadonly — Whether to allow the value to be edited by the user\nrequired — Whether the control is required for form submission\nrows — Number of lines to show\nwrap — How the value of the form control is to be wrapped for form submission\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLTextAreaElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  [CEReactions] attribute DOMString autocomplete;\n  [CEReactions] attribute unsigned long cols;\n  [CEReactions] attribute DOMString dirName;\n  [CEReactions] attribute boolean disabled;\n  readonly attribute HTMLFormElement? form;\n  [CEReactions] attribute long maxLength;\n  [CEReactions] attribute long minLength;\n  [CEReactions] attribute DOMString name;\n  [CEReactions] attribute DOMString placeholder;\n  [CEReactions] attribute boolean readOnly;\n  [CEReactions] attribute boolean required;\n  [CEReactions] attribute unsigned long rows;\n  [CEReactions] attribute DOMString wrap;\n\n  readonly attribute DOMString type;\n  [CEReactions] attribute DOMString defaultValue;\n  attribute [LegacyNullToEmptyString] DOMString value;\n  readonly attribute unsigned long textLength;\n\n  readonly attribute boolean willValidate;\n  readonly attribute ValidityState validity;\n  readonly attribute DOMString validationMessage;\n  boolean checkValidity();\n  boolean reportValidity();\n  undefined setCustomValidity(DOMString error);\n\n  readonly attribute NodeList labels;\n\n  undefined select();\n  attribute unsigned long selectionStart;\n  attribute unsigned long selectionEnd;\n  attribute DOMString selectionDirection;\n  undefined setRangeText(DOMString replacement);\n  undefined setRangeText(DOMString replacement, unsigned long start, unsigned long end, optional SelectionMode selectionMode = \"preserve\");\n  undefined setSelectionRange(unsigned long start, unsigned long end, optional DOMString direction);\n};",
+      "name": "textarea",
+      "categories": [
+        "Flow",
+        "Phrasing",
+        "Interactive",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nListed, labelable, resettable, and autocapitalize-inheriting form-associated element.\nPalpable content.\nContexts in which this element can be used:\nWhere phrasing content is expected.\nContent model:\nPhrasing content.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nfor — Specifies controls from which the output was calculated\nform — Associates the element with a form element\nname — Name of the element to use in the form.elements API.\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLOutputElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  [SameObject, PutForwards=value] readonly attribute DOMTokenList htmlFor;\n  readonly attribute HTMLFormElement? form;\n  [CEReactions] attribute DOMString name;\n\n  readonly attribute DOMString type;\n  [CEReactions] attribute DOMString defaultValue;\n  [CEReactions] attribute DOMString value;\n\n  readonly attribute boolean willValidate;\n  readonly attribute ValidityState validity;\n  readonly attribute DOMString validationMessage;\n  boolean checkValidity();\n  boolean reportValidity();\n  undefined setCustomValidity(DOMString error);\n\n  readonly attribute NodeList labels;\n};",
+      "name": "output",
+      "categories": [
+        "Flow",
+        "Phrasing",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nLabelable element.\nPalpable content.\nContexts in which this element can be used:\nWhere phrasing content is expected.\nContent model:\nPhrasing content, but there must be no progress element descendants.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nvalue — Current value of the element\nmax — Upper bound of range\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLProgressElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  [CEReactions] attribute double value;\n  [CEReactions] attribute double max;\n  readonly attribute double position;\n  readonly attribute NodeList labels;\n};",
+      "name": "progress",
+      "categories": [
+        "Flow",
+        "Phrasing",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nLabelable element.\nPalpable content.\nContexts in which this element can be used:\nWhere phrasing content is expected.\nContent model:\nPhrasing content, but there must be no meter element descendants.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nvalue — Current value of the element\nmin — Lower bound of range\nmax — Upper bound of range\nlow — High limit of low range\nhigh — Low limit of high range\noptimum — Optimum value in gauge\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLMeterElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  [CEReactions] attribute double value;\n  [CEReactions] attribute double min;\n  [CEReactions] attribute double max;\n  [CEReactions] attribute double low;\n  [CEReactions] attribute double high;\n  [CEReactions] attribute double optimum;\n  readonly attribute NodeList labels;\n};",
+      "name": "meter",
+      "categories": [
+        "Flow",
+        "Phrasing",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nSectioning root.\nListed and autocapitalize-inheriting form-associated element.\nPalpable content.\nContexts in which this element can be used:\nWhere flow content is expected.\nContent model:\nOptionally a legend element, followed by flow content.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\ndisabled — Whether the descendant form controls, except any inside legend, are disabled\nform — Associates the element with a form element\nname — Name of the element to use in the form.elements API.\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLFieldSetElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  [CEReactions] attribute boolean disabled;\n  readonly attribute HTMLFormElement? form;\n  [CEReactions] attribute DOMString name;\n\n  readonly attribute DOMString type;\n\n  [SameObject] readonly attribute HTMLCollection elements;\n\n  readonly attribute boolean willValidate;\n  [SameObject] readonly attribute ValidityState validity;\n  readonly attribute DOMString validationMessage;\n  boolean checkValidity();\n  boolean reportValidity();\n  undefined setCustomValidity(DOMString error);\n};",
+      "name": "fieldset",
+      "categories": [
+        "Flow",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nNone.\nContexts in which this element can be used:\nAs the first child of a fieldset element.\nContent model:\nPhrasing content, optionally intermixed with heading content.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLLegendElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  readonly attribute HTMLFormElement? form;\n\n  // also has obsolete members\n};",
+      "name": "legend",
+      "categories": []
+    },
+    {
+      "text": "Categories:\nFlow content.\nSectioning root.\nInteractive content.\nPalpable content.\nContexts in which this element can be used:\nWhere flow content is expected.\nContent model:\nOne summary element followed by flow content.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nopen — Whether the details are visible\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLDetailsElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  [CEReactions] attribute boolean open;\n};",
+      "name": "details",
+      "categories": [
+        "Flow",
+        "Interactive",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nNone.\nContexts in which this element can be used:\nAs the first child of a details element.\nContent model:\nPhrasing content, optionally intermixed with heading content.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\nUses HTMLElement.",
+      "name": "summary",
+      "categories": []
+    },
+    {
+      "text": "Categories:\nFlow content.\nSectioning root.\nContexts in which this element can be used:\nWhere flow content is expected.\nContent model:\nFlow content.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nopen — Whether the dialog box is showing\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLDialogElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  [CEReactions] attribute boolean open;\n  attribute DOMString returnValue;\n  [CEReactions] undefined show();\n  [CEReactions] undefined showModal();\n  [CEReactions] undefined close(optional DOMString returnValue);\n};",
+      "name": "dialog",
+      "categories": [
+        "Flow"
+      ]
+    },
+    {
+      "text": "Categories:\nMetadata content.\nFlow content.\nPhrasing content.\nScript-supporting element.\nContexts in which this element can be used:\nWhere metadata content is expected.\nWhere phrasing content is expected.\nWhere script-supporting elements are expected.\nContent model:\nIf there is no src attribute, depends on the value of the type attribute, but must match script content restrictions.\nIf there is a src attribute, the element must be either empty or contain only script documentation that also matches script content restrictions.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nsrc — Address of the resource\ntype — Type of script\nnomodule — Prevents execution in user agents that support module scripts\nasync — Execute script when available, without blocking while fetching\ndefer — Defer script execution\ncrossorigin — How the element handles crossorigin requests\nintegrity — Integrity metadata used in Subresource Integrity checks [SRI]\nreferrerpolicy — Referrer policy for fetches initiated by the element\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLScriptElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  [CEReactions] attribute USVString src;\n  [CEReactions] attribute DOMString type;\n  [CEReactions] attribute boolean noModule;\n  [CEReactions] attribute boolean async;\n  [CEReactions] attribute boolean defer;\n  [CEReactions] attribute DOMString? crossOrigin;\n  [CEReactions] attribute DOMString text;\n  [CEReactions] attribute DOMString integrity;\n  [CEReactions] attribute DOMString referrerPolicy;\n\n  // also has obsolete members\n};",
+      "name": "script",
+      "categories": [
+        "Metadata",
+        "Flow",
+        "Phrasing"
+      ]
+    },
+    {
+      "text": "Categories:\nMetadata content.\nFlow content.\nPhrasing content.\nContexts in which this element can be used:\nIn a head element of an HTML document, if there are no ancestor noscript elements.\nWhere phrasing content is expected in HTML documents, if there are no ancestor noscript elements.\nContent model:\nWhen scripting is disabled, in a head element: in any order, zero or more link elements, zero or more style elements, and zero or more meta elements.\nWhen scripting is disabled, not in a head element: transparent, but there must be no noscript element descendants.\nOtherwise: text that conforms to the requirements given in the prose.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\nUses HTMLElement.",
+      "name": "noscript",
+      "categories": [
+        "Metadata",
+        "Flow",
+        "Phrasing"
+      ]
+    },
+    {
+      "text": "Categories:\nMetadata content.\nFlow content.\nPhrasing content.\nScript-supporting element.\nContexts in which this element can be used:\nWhere metadata content is expected.\nWhere phrasing content is expected.\nWhere script-supporting elements are expected.\nAs a child of a colgroup element that doesn't have a span attribute.\nContent model:\nNothing (for clarification, see example).\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLTemplateElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  readonly attribute DocumentFragment content;\n};",
+      "name": "template",
+      "categories": [
+        "Metadata",
+        "Flow",
+        "Phrasing"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nContexts in which this element can be used:\nWhere phrasing content is expected.\nContent model:\nTransparent\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nname — Name of shadow tree slot\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\n[Exposed=Window]\ninterface HTMLSlotElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  [CEReactions] attribute DOMString name;\n  sequence<Node> assignedNodes(optional AssignedNodesOptions options = {});\n  sequence<Element> assignedElements(optional AssignedNodesOptions options = {});\n};\n\ndictionary AssignedNodesOptions {\n  boolean flatten = false;\n};",
+      "name": "slot",
+      "categories": [
+        "Flow",
+        "Phrasing"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nEmbedded content.\nPalpable content.\nContexts in which this element can be used:\nWhere embedded content is expected.\nContent model:\nTransparent, but with no interactive content descendants except for a elements, img elements with usemap attributes, button elements, input elements whose type attribute are in the Checkbox or Radio Button states, input elements that are buttons, and select elements with a multiple attribute or a display size greater than 1.\nTag omission in text/html:\nNeither tag is omissible.\nContent attributes:\nGlobal attributes\nwidth — Horizontal dimension\nheight — Vertical dimension\nAccessibility considerations:\nFor authors.\nFor implementers.\nDOM interface:\ntypedef (CanvasRenderingContext2D or ImageBitmapRenderingContext or WebGLRenderingContext or WebGL2RenderingContext) RenderingContext;\n\n[Exposed=Window]\ninterface HTMLCanvasElement : HTMLElement {\n  [HTMLConstructor] constructor();\n\n  [CEReactions] attribute unsigned long width;\n  [CEReactions] attribute unsigned long height;\n\n  RenderingContext? getContext(DOMString contextId, optional any options = null);\n\n  USVString toDataURL(optional DOMString type = \"image/png\", optional any quality);\n  undefined toBlob(BlobCallback _callback, optional DOMString type = \"image/png\", optional any quality);\n  OffscreenCanvas transferControlToOffscreen();\n};\n\ncallback BlobCallback = undefined (Blob? blob);",
+      "name": "canvas",
+      "categories": [
+        "Flow",
+        "Phrasing",
+        "Embedded",
+        "Palpable"
+      ]
+    },
+    {
+      "text": "Categories:\nFlow content.\nPhrasing content.\nPalpable content.\nFor form-associated custom elements: Listed, labelable, submittable, and resettable form-associated element.\nContexts in which this element can be used:\nWhere phrasing content is expected.\nContent model:\nTransparent.\nContent attributes:\nGlobal attributes, except the is attribute\nform, for form-associated custom elements — Associates the element with a form element\ndisabled, for form-associated custom elements — Whether the form control is disabled\nreadonly, for form-associated custom elements — Affects willValidate, plus any behavior added by the custom element author\nname, for form-associated custom elements — Name of the element to use for form submission and in the form.elements API\nAny other attribute that has no namespace (see prose).\nAccessibility considerations:\nFor form-associated custom elements: for authors; for implementers.\nOtherwise: for authors; for implementers.\nDOM interface:\nSupplied by the element's author (inherits from HTMLElement)",
+      "name": null,
+      "categories": [
+        "Flow",
+        "Phrasing",
+        "Palpable"
+      ]
+    }
+  ]
+}
