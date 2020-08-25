@@ -39,7 +39,7 @@ function bindClick(elem) {
 		if (cell.textContent) return
 		const [i, j] = cell.dataset.position.split('-')
 		pattern[i][j] = (index % 2) + 1
-		if (judge()) {
+		if (judge(pattern[i][j], i, j)) {
 			result.textContent = `胜者为 ${statusMap[index % 2]}`
 			done = true
 		}
@@ -47,40 +47,46 @@ function bindClick(elem) {
 	})
 }
 
-function judge() {
-	console.table(pattern)
-	for (let i = 0; i < pattern.length; i++) {
-		const line = pattern[i]
-		for (let j = 0; j < line.length; j++) {
-			if (
-				line[j + 1] &&
-				line[j] === line[j + 1] &&
-				line[j + 1] === line[j + 2]
-			) {
-				return true
-			} else if (
-				i === 0 &&
-				pattern[i][j] &&
-				pattern[i][j] === pattern[i + 1][j] &&
-				pattern[i + 1][j] === pattern[i + 2][j]
-			) {
-				return true
-			} else if (
-				i === 0 &&
-				pattern[i][0] &&
-				pattern[i][0] === pattern[i + 1][1] &&
-				pattern[i + 1][1] === pattern[i + 2][2]
-			) {
-				return true
-			} else if (
-				i === 2 &&
-				pattern[i][0] &&
-				pattern[i][0] === pattern[i - 1][1] &&
-				pattern[i - 1][1] === pattern[i - 2][2]
-			) {
-				return true
+function judge(cellVal, x, y) {
+	{
+		let win = true
+		for (let j = 0; j < 3; j++) {
+			if (pattern[x][j] !== cellVal) {
+				win = false
+				break
 			}
 		}
+		if (win) return true
+	}
+	{
+		let win = true
+		for (let j = 0; j < 3; j++) {
+			if (pattern[j][y] !== cellVal) {
+				win = false
+				break
+			}
+		}
+		if (win) return true
+	}
+	{
+		let win = true
+		for (let j = 0; j < 3; j++) {
+			if (pattern[j][j] !== cellVal) {
+				win = false
+				break
+			}
+		}
+		if (win) return true
+	}
+	{
+		let win = true
+		for (let j = 0; j < 3; j++) {
+			if (pattern[j][2 - j] !== cellVal) {
+				win = false
+				break
+			}
+		}
+		if (win) return true
 	}
 }
 
