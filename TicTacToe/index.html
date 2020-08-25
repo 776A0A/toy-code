@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>井字棋</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    #board {
+      display: flex;
+      width: 312px;
+      flex-wrap: wrap;
+    }
+
+    .cell {
+      width: 100px;
+      height: 100px;
+      line-height: 100px;
+      text-align: center;
+      background-color: #316f1d;
+      color: bisque;
+      font-size: 50px;
+      margin: 2px;
+      display: inline-block;
+      vertical-align: middle;
+      cursor: pointer;
+    }
+
+    .cell>span {
+      position: relative;
+      top: -12px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="board"></div>
+  <script src="./index.js"></script>
+</body>
+
+</html>
