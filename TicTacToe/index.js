@@ -7,6 +7,8 @@ const pattern = [
 ]
 
 const board = _('board')
+const result = _('result')
+let done = false
 const statusMap = ['⭕', '❌']
 let index = 0
 
@@ -32,13 +34,54 @@ function render(elem, content) {
 
 function bindClick(elem) {
 	elem.addEventListener('click', e => {
+		if (done) return
 		const cell = e.target
 		if (cell.textContent) return
 		const [i, j] = cell.dataset.position.split('-')
 		pattern[i][j] = (index % 2) + 1
+		if (judge()) {
+			result.textContent = `胜者为 ${statusMap[index % 2]}`
+			done = true
+		}
 		cell.textContent = statusMap[index++ % 2]
-		console.table(pattern)
 	})
+}
+
+function judge() {
+	console.table(pattern)
+	for (let i = 0; i < pattern.length; i++) {
+		const line = pattern[i]
+		for (let j = 0; j < line.length; j++) {
+			if (
+				line[j + 1] &&
+				line[j] === line[j + 1] &&
+				line[j + 1] === line[j + 2]
+			) {
+				return true
+			} else if (
+				i === 0 &&
+				pattern[i][j] &&
+				pattern[i][j] === pattern[i + 1][j] &&
+				pattern[i + 1][j] === pattern[i + 2][j]
+			) {
+				return true
+			} else if (
+				i === 0 &&
+				pattern[i][0] &&
+				pattern[i][0] === pattern[i + 1][1] &&
+				pattern[i + 1][1] === pattern[i + 2][2]
+			) {
+				return true
+			} else if (
+				i === 2 &&
+				pattern[i][0] &&
+				pattern[i][0] === pattern[i - 1][1] &&
+				pattern[i - 1][1] === pattern[i - 2][2]
+			) {
+				return true
+			}
+		}
+	}
 }
 
 render(board, pattern)
