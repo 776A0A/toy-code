@@ -65,6 +65,8 @@ function computerMove() {
 		const res = willWin(pattern, 3 - shape)
 		if (res) {
 			pattern[res.y][res.x] = shape
+		} else if (!pattern[1][1]) {
+			pattern[1][1] = shape
 		} else {
 			randomMove(pattern, shape)
 		}
