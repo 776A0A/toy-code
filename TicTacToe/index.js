@@ -2,11 +2,13 @@ const _ = id => document.getElementById(id)
 
 const board = _('board')
 const result = _('result')
-const pattern = [
-	[0, 1, 0],
-	[2, 2, 0],
-	[2, 1, 0]
+const reset = _('reset')
+const plainPattern = [
+	[0, 0, 0],
+	[0, 0, 0],
+	[0, 0, 0]
 ]
+let pattern = clone(plainPattern)
 let done = false,
 	shape = 1,
 	cellMap = ['', '⭕', '❌']
@@ -19,14 +21,14 @@ function render() {
 			const cellElem = document.createElement('div')
 			cellElem.classList.add('cell')
 			cellElem.textContent = cellMap[cell]
-			cellElem.onclick = e => move(y, x)
+			cellElem.onclick = e => userMove(y, x)
 			frag.appendChild(cellElem)
 		})
 	})
 	board.appendChild(frag)
 }
 
-function move(y, x) {
+function userMove(y, x) {
 	if (pattern[y][x] || done) return
 	pattern[y][x] = shape
 	render()
@@ -43,7 +45,45 @@ function move(y, x) {
 			`If you(${cellMap[shape]}) move to ${JSON.stringify(res)}, you will win!`
 		)
 	} else {
+		/**
+		 * 我没有一步棋就能赢的局面，此时判断对方是否有大于两个的一步赢局面
+		 * 因为只有一个的话我还能阻止
+		 */
 		willLose()
+	}
+	computerMove()
+}
+
+function computerMove() {
+	if (done) return
+	const res = willWin(pattern, shape)
+	if (res) {
+		done = true
+		pattern[res.y][res.x] = shape
+		result.textContent = `Winner Is: ${cellMap[shape]}`
+	} else {
+		const res = willWin(pattern, 3 - shape)
+		if (res) {
+			pattern[res.y][res.x] = shape
+		} else {
+			randomMove(pattern, shape)
+		}
+	}
+	shape = 3 - shape
+	render()
+}
+
+function randomMove(pattern, shape) {
+	const isDraw = new Set()
+	while (true) {
+		if (isDraw.size === 9) return
+		const random = () => Math.floor(Math.random() * 3)
+		const [y, x] = [random(), random()]
+		isDraw.add([y, x].join())
+		if (!pattern[y][x]) {
+			pattern[y][x] = shape
+			break
+		}
 	}
 }
 
@@ -60,7 +100,7 @@ function willLose() {
 	}
 	if (times.size > 1) {
 		console.log(
-			`opponent will win in ${Array.from(times).reduce(
+			`Opponent will win in ${Array.from(times).reduce(
 				(p, position) => (p += '\n' + JSON.stringify(position)),
 				''
 			)}`
@@ -116,5 +156,12 @@ function crosswise2(pattern, shape, y, x) {
 function clone(pattern) {
 	return JSON.parse(JSON.stringify(pattern))
 }
+
+reset.addEventListener('click', e => {
+	pattern = clone(plainPattern)
+	shape = 1
+	done = false
+	render()
+})
 
 render()

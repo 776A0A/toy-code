@@ -42,12 +42,26 @@
       padding-bottom: 20px;
       border-bottom: 1px solid;
     }
+
+    .wrapper {
+      display: flex;
+    }
+
+    .button-wrapper {
+      padding: 2px;
+      margin-left: 16px;
+    }
   </style>
 </head>
 
 <body>
   <div id="result">Winner Is: </div>
-  <div id="board"></div>
+  <div class="wrapper">
+    <div id="board"></div>
+    <div class="button-wrapper">
+      <button id="reset">重置</button>
+    </div>
+  </div>
   <script src="./index.js"></script>
 </body>
 
