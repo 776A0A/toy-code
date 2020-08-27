@@ -1,94 +1,75 @@
 const _ = id => document.getElementById(id)
 
+const board = _('board')
+const result = _('result')
 const pattern = [
 	[0, 0, 0],
 	[0, 0, 0],
 	[0, 0, 0]
 ]
+let done = false,
+	shape = 1,
+	cellMap = ['', '⭕', '❌']
 
-const board = _('board')
-const result = _('result')
-let done = false
-const statusMap = ['⭕', '❌']
-let index = 0
+function render() {
+	const frag = document.createDocumentFragment()
+	board.innerHTML = ''
+	pattern.forEach((line, y) => {
+		line.forEach((cell, x) => {
+			const cellElem = document.createElement('div')
+			cellElem.classList.add('cell')
+			cellElem.textContent = cellMap[cell]
+			cellElem.onclick = e => move(y, x)
+			frag.appendChild(cellElem)
+		})
+	})
+	board.appendChild(frag)
+}
 
-function render(elem, content) {
-	const cell = `<div class="cell" data-position="__p__">__content__</div>`
-	elem.innerHTML = content.reduce(
-		(lineHtml, line, i) =>
-			lineHtml +
-			line.reduce(
-				(cellHtml, status, j) =>
-					cellHtml +
-					cell
-						.replace(
-							'__content__',
-							status === 2 ? '❌' : status === 1 ? '⭕' : ''
-						)
-						.replace('__p__', i + '-' + j),
-				''
-			),
-		''
+function move(y, x) {
+	if (pattern[y][x] || done) return
+	pattern[y][x] = shape
+	render()
+	if (checkWinner(shape, y, x)) {
+		done = true
+		result.textContent = `Winner Is: ${cellMap[shape]}`
+		return
+	}
+	shape = 3 - shape
+}
+
+function checkWinner(shape, y, x) {
+	return (
+		horizontal(shape, y, x) ||
+		portrait(shape, y, x) ||
+		crosswise1(shape, y, x) ||
+		crosswise2(shape, y, x)
 	)
 }
 
-function bindClick(elem) {
-	elem.addEventListener('click', e => {
-		if (done) return
-		const cell = e.target
-		if (cell.textContent) return
-		const [i, j] = cell.dataset.position.split('-')
-		pattern[i][j] = (index % 2) + 1
-		if (judge(pattern[i][j], i, j)) {
-			result.textContent = `胜者为 ${statusMap[index % 2]}`
-			done = true
-		}
-		cell.textContent = statusMap[index++ % 2]
-	})
+function horizontal(shape, y, x) {
+	for (let i = 0; i < 3; i++) {
+		if (pattern[y][i] !== shape) return false
+	}
+	return true
+}
+function portrait(shape, y, x) {
+	for (let i = 0; i < 3; i++) {
+		if (pattern[i][x] !== shape) return false
+	}
+	return true
+}
+function crosswise1(shape, y, x) {
+	for (let i = 0; i < 3; i++) {
+		if (pattern[i][i] !== shape) return false
+	}
+	return true
+}
+function crosswise2(shape, y, x) {
+	for (let i = 0; i < 3; i++) {
+		if (pattern[i][2 - i] !== shape) return false
+	}
+	return true
 }
 
-function judge(cellVal, x, y) {
-	{
-		let win = true
-		for (let j = 0; j < 3; j++) {
-			if (pattern[x][j] !== cellVal) {
-				win = false
-				break
-			}
-		}
-		if (win) return true
-	}
-	{
-		let win = true
-		for (let j = 0; j < 3; j++) {
-			if (pattern[j][y] !== cellVal) {
-				win = false
-				break
-			}
-		}
-		if (win) return true
-	}
-	{
-		let win = true
-		for (let j = 0; j < 3; j++) {
-			if (pattern[j][j] !== cellVal) {
-				win = false
-				break
-			}
-		}
-		if (win) return true
-	}
-	{
-		let win = true
-		for (let j = 0; j < 3; j++) {
-			if (pattern[j][2 - j] !== cellVal) {
-				win = false
-				break
-			}
-		}
-		if (win) return true
-	}
-}
-
-render(board, pattern)
-bindClick(board)
+render()
