@@ -1,13 +1,17 @@
-const board = document.getElementById('board')
+const map = document.getElementById('map')
 const save = document.getElementById('save')
 const reset = document.getElementById('reset')
 let down, clear
-const cells = localStorage.board
-	? JSON.parse(localStorage.board)
+let cells = localStorage.map
+	? JSON.parse(localStorage.map)
 	: Array(10000).fill(0)
 
+function path(map, start, end) {
+  
+}
+
 function render() {
-	board.innerHTML = ''
+	map.innerHTML = ''
 	const frag = document.createDocumentFragment()
 	cells.forEach((item, i) => {
 		const cell = document.createElement('div')
@@ -28,15 +32,16 @@ function render() {
 		})
 		frag.append(cell)
 	})
-	board.append(frag)
+	map.append(frag)
 }
-save.addEventListener('click', e => {
-	localStorage.board = JSON.stringify(cells)
-})
+save.addEventListener(
+	'click',
+	e => (localStorage.map = JSON.stringify(cells))
+)
 reset.addEventListener('click', e => {
 	const answer = confirm('确认清空？')
 	if (answer) {
-		cells.forEach((_, i) => (cells[i] = 0))
+		cells = Array(10000).fill(0)
 		save.click()
 		render()
 	}
