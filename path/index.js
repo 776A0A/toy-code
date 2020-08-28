@@ -6,18 +6,26 @@ let cells = localStorage.map
 	? JSON.parse(localStorage.map)
 	: Array(10000).fill(0)
 
+const START_POINT = 'darkviolet'
+const END_POINT = 'red'
+const POINT = 'lightseagreen'
+const PATH_COLOR = 'lightcoral'
+
 async function findPath(map, start, end) {
 	const queue = [start]
-	map.children[start[1] * 100 + start[0]].style.backgroundColor = 'darkviolet'
-	map.children[end[1] * 100 + end[0]].style.backgroundColor = 'lightcoral'
+
+	draw(start[1] * 100 + start[0], START_POINT)
+	draw(end[1] * 100 + end[0], END_POINT)
+
 	while (queue.length) {
 		let [x, y] = queue.shift()
+		await sleep(1)
+		draw(y * 100 + x, POINT)
 		if (x === end[0] && y === end[1]) {
-			map.children[start[1] * 100 + start[0]].style.backgroundColor =
-				'darkviolet'
+			draw(start[1] * 100 + start[0], START_POINT)
 			while (!(x === start[0] && y === start[1])) {
 				await sleep(1)
-				map.children[y * 100 + x].style.backgroundColor = 'red'
+				draw(y * 100 + x, PATH_COLOR)
 				;[x, y] = cells[y * 100 + x]
 			}
 			return true
@@ -39,17 +47,19 @@ async function findPath(map, start, end) {
 			insert([x + 1, y - 1], [x, y])
 		}
 	}
-
+	console.log('没有找到路线')
 	return false
 
 	async function insert([x, y], pre) {
 		if (cells[y * 100 + x]) return
 		if (x < 0 || x >= 100 || y < 0 || y >= 100) return
-		await sleep(1)
-		map.children[y * 100 + x].style.backgroundColor = 'lightseagreen'
 		cells[y * 100 + x] = pre
 		queue.push([x, y])
 	}
+}
+
+function draw(i, color) {
+	map.children[i].style.backgroundColor = color
 }
 
 function sleep(t) {
