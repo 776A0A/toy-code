@@ -37,13 +37,13 @@ async function findPath(map, start, end) {
 		await insert([x + 1, y], [x, y])
 
 		// 斜方向
-		if (!cells[(x, y + 1)] || !cells[(x - 1, y)]) {
+		if (!cells[(y + 1) * 100 + x] || !cells[y * 100 + x - 1]) {
 			insert([x - 1, y + 1], [x, y])
-		} else if (!cells[(x, y + 1)] || !cells[(x + 1, y)]) {
+		} else if (!cells[(y + 1) * 100 + x] || !cells[y * 100 + x + 1]) {
 			insert([x + 1, y + 1], [x, y])
-		} else if (!cells[(x - 1, y)] || !cells[(x, y - 1)]) {
+		} else if (!cells[y * 100 + x - 1] || !cells[(y - 1) * 100 + x]) {
 			insert([x - 1, y - 1], [x, y])
-		} else if (!cells[(x + 1, y)] || !cells[(x, y - 1)]) {
+		} else if (!cells[(y - 1) * 100 + x] || !cells[y * 100 + x + 1]) {
 			insert([x + 1, y - 1], [x, y])
 		}
 	}
@@ -71,9 +71,7 @@ function render() {
 	const frag = document.createDocumentFragment()
 	cells.forEach((item, i) => {
 		const cell = document.createElement('div')
-		if (item) {
-			cell.style.backgroundColor = 'black'
-		}
+		item && (cell.style.backgroundColor = 'black')
 		cell.classList.add('cell')
 		cell.addEventListener('mousemove', e => {
 			if (down) {
