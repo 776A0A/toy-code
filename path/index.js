@@ -17,34 +17,38 @@ async function findPath(map, start, end) {
 	draw(start[1] * 100 + start[0], START_POINT)
 	draw(end[1] * 100 + end[0], END_POINT)
 
+	let d = distance(start, end)
 	while (queue.length) {
 		let [x, y] = queue.shift()
-		await sleep(1)
-		draw(y * 100 + x, POINT)
-		if (x === end[0] && y === end[1]) {
-			draw(start[1] * 100 + start[0], START_POINT)
-			while (!(x === start[0] && y === start[1])) {
-				await sleep(1)
-				draw(y * 100 + x, PATH_COLOR)
-				;[x, y] = cells[y * 100 + x]
+		if (distance([x, y], end) - d <= 0) {
+			d = distance([x, y], end)
+			await sleep(1)
+			draw(y * 100 + x, POINT)
+			if (x === end[0] && y === end[1]) {
+				draw(start[1] * 100 + start[0], START_POINT)
+				while (!(x === start[0] && y === start[1])) {
+					await sleep(1)
+					draw(y * 100 + x, PATH_COLOR)
+					;[x, y] = cells[y * 100 + x]
+				}
+				return true
 			}
-			return true
-		}
-		// 上下左右
-		await insert([x, y + 1], [x, y])
-		await insert([x, y - 1], [x, y])
-		await insert([x - 1, y], [x, y])
-		await insert([x + 1, y], [x, y])
+			// 上下左右
+			await insert([x, y + 1], [x, y])
+			await insert([x, y - 1], [x, y])
+			await insert([x - 1, y], [x, y])
+			await insert([x + 1, y], [x, y])
 
-		// 斜方向
-		if (!cells[(y + 1) * 100 + x] || !cells[y * 100 + x - 1]) {
-			insert([x - 1, y + 1], [x, y])
-		} else if (!cells[(y + 1) * 100 + x] || !cells[y * 100 + x + 1]) {
-			insert([x + 1, y + 1], [x, y])
-		} else if (!cells[y * 100 + x - 1] || !cells[(y - 1) * 100 + x]) {
-			insert([x - 1, y - 1], [x, y])
-		} else if (!cells[(y - 1) * 100 + x] || !cells[y * 100 + x + 1]) {
-			insert([x + 1, y - 1], [x, y])
+			// 斜方向
+			if (!cells[(y + 1) * 100 + x] || !cells[y * 100 + x - 1]) {
+				insert([x - 1, y + 1], [x, y])
+			} else if (!cells[(y + 1) * 100 + x] || !cells[y * 100 + x + 1]) {
+				insert([x + 1, y + 1], [x, y])
+			} else if (!cells[y * 100 + x - 1] || !cells[(y - 1) * 100 + x]) {
+				insert([x - 1, y - 1], [x, y])
+			} else if (!cells[(y - 1) * 100 + x] || !cells[y * 100 + x + 1]) {
+				insert([x + 1, y - 1], [x, y])
+			}
 		}
 	}
 	console.log('没有找到路线')
@@ -56,6 +60,10 @@ async function findPath(map, start, end) {
 		cells[y * 100 + x] = pre
 		queue.push([x, y])
 	}
+}
+
+function distance(start, end) {
+	return Math.abs(start[0] - end[0]) ** 2 + Math.abs(start[1] - end[1]) ** 2
 }
 
 function draw(i, color) {
