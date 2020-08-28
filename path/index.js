@@ -15,10 +15,26 @@ async function findPath(map, start, end) {
 			map.children[end[1] * 100 + end[0]].style.backgroundColor = 'lightcoral'
 			return true
 		}
+		// 上下左右
+		await insert([x, y + 1])
+		await insert([x, y - 1])
 		await insert([x - 1, y])
 		await insert([x + 1, y])
-		await insert([x, y - 1])
-		await insert([x, y + 1])
+
+		// 斜方向
+		if (!cells[(x, y + 1)]) {
+			await insert([x - 1, y + 1])
+			await insert([x + 1, y + 1])
+		} else if (!cells[(x, y - 1)]) {
+			await insert([x - 1, y - 1])
+			await insert([x + 1, y - 1])
+		} else if (!cells[(x - 1, y)]) {
+			await insert([x - 1, y + 1])
+			await insert([x - 1, y - 1])
+		} else if (!cells[(x + 1, y)]) {
+			await insert([x + 1, y + 1])
+			await insert([x + 1, y - 1])
+		}
 	}
 
 	return false
