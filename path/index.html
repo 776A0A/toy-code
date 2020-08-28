@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>寻路迷宫</title>
+  <style>
+    #container {
+      display: flex;
+      min-width: 750px;
+    }
+
+    #board {
+      width: 701px;
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    .cell {
+      width: 6px;
+      height: 6px;
+      background-color: gray;
+      border-bottom: solid 1px white;
+      border-right: solid 1px white;
+      vertical-align: middle;
+    }
+
+    #save {
+      align-self: center;
+      margin-left: 16px;
+    }
+
+    dl {
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    dt,
+    dd {
+      width: 50%;
+      margin: 0;
+      text-align: center
+    }
+  </style>
+</head>
+
+<body>
+  <div id="container">
+    <div id="board"></div>
+    <aside>
+      <dl>
+        <dt>左键：</dt>
+        <dd>画迷宫</dd>
+        <dt>右键：</dt>
+        <dd>擦除迷宫</dd>
+      </dl>
+      <button id="save">保存</button>
+    </aside>
+  </div>
+  <script src="./index.js"></script>
+</body>
+
+</html>
