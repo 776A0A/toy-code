@@ -57,7 +57,8 @@ async function findPath(start, end) {
 
 		if (x === end[0] && y === end[1]) {
 			draw(start[1] * 100 + start[0], START_POINT)
-			drawPath(start, x, y)
+			await drawPath(start, x, y)
+			draw(end[1] * 100 + end[0], END_POINT)
 			return true
 		}
 		// 左
