@@ -43,13 +43,40 @@
       margin: 0;
       text-align: center
     }
+
+    #tip {
+      position: absolute;
+      background-color: aliceblue;
+      padding: 3px 16px;
+      border-radius: 2px;
+      opacity: .7;
+    }
+
+    .color {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+    }
+
+    aside {
+      background-color: cadetblue;
+    }
   </style>
 </head>
 
 <body>
+  <div id="tip">[0, 0] 无值</div>
   <div id="container">
     <div id="map"></div>
     <aside>
+      <div>图块颜色说明</div>
+      <ul>
+        <li><span class="color" style="background-color:#000;"></span> 迷宫点</li>
+        <li><span class="color" style="background-color:#fff;"></span> 终点</li>
+        <li><span class="color" style="background-color:red;"></span> 起始点</li>
+        <li><span class="color" style="background-color:lightseagreen;"></span> 已查找</li>
+        <li><span class="color" style="background-color:lightcoral;"></span> 结果路径</li>
+      </ul>
       <dl>
         <dt>左键：</dt>
         <dd>画迷宫</dd>

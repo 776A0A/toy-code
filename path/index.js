@@ -1,13 +1,14 @@
 const map = document.getElementById('map')
 const save = document.getElementById('save')
 const reset = document.getElementById('reset')
+const tip = document.getElementById('tip')
 let down, clear
 let cells = localStorage.map
 	? JSON.parse(localStorage.map)
 	: Array(10000).fill(0)
 
-const START_POINT = 'darkviolet'
-const END_POINT = 'red'
+const START_POINT = 'red'
+const END_POINT = 'white'
 const POINT = 'lightseagreen'
 const PATH = 'lightcoral'
 
@@ -37,7 +38,7 @@ class Sorted {
 	}
 }
 
-async function findPath(map, start, end) {
+async function findPath(start, end) {
 	const collection = new Sorted(
 		[start],
 		(a, b) => distance(a, end) - distance(b, end) < 0
@@ -126,23 +127,33 @@ function sleep(t) {
 function render() {
 	map.innerHTML = ''
 	const frag = document.createDocumentFragment()
-	cells.forEach((item, i) => {
-		const cell = document.createElement('div')
-		item && (cell.style.backgroundColor = 'black')
-		cell.classList.add('cell')
-		cell.addEventListener('mousemove', e => {
-			if (down) {
-				if (clear) {
-					cells[i] = 0
-					cell.style.backgroundColor = ''
+	for (let y = 0; y < 100; y++) {
+		for (let x = 0; x < 100; x++) {
+			const cell = document.createElement('div')
+			cells[y * 100 + x] && (cell.style.backgroundColor = 'black')
+			cell.classList.add('cell')
+			cell.addEventListener('mousemove', e => {
+				if (down) {
+					tip.style.display = 'none'
+					if (clear) {
+						cells[y * 100 + x] = 0
+						cell.style.backgroundColor = ''
+					} else {
+						cells[y * 100 + x] = 1
+						cell.style.backgroundColor = 'black'
+					}
 				} else {
-					cells[i] = 1
-					cell.style.backgroundColor = 'black'
+					tip.style.display = 'block'
+					tip.style.left = e.pageX + 'px'
+					tip.style.top = e.pageY + 'px'
+					tip.textContent = `[${x}, ${y}] ${
+						cells[y * 100 + x] === 1 ? '有值' : '无值'
+					}`
 				}
-			}
-		})
-		frag.append(cell)
-	})
+			})
+			frag.append(cell)
+		}
+	}
 	map.append(frag)
 }
 save.addEventListener('click', e => (localStorage.map = JSON.stringify(cells)))
