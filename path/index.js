@@ -43,19 +43,24 @@ async function findPath(map, start, end) {
 
 	draw(start[1] * 100 + start[0], START_POINT)
 	draw(end[1] * 100 + end[0], END_POINT)
-
+	let hasMove = 0
 	while (queue.length) {
 		const point = queue.take()
 		let [x, y] = point
+		hasMove++
+		console.log(`移动到 x: ${x}, y: ${y}，已经移动 ${hasMove} 步`)
 		await sleep(1)
 		draw(y * 100 + x, POINT)
 		if (x === end[0] && y === end[1]) {
 			draw(start[1] * 100 + start[0], START_POINT)
+			let moved = 0
 			while (!(x === start[0] && y === start[1])) {
 				await sleep(1)
 				draw(y * 100 + x, PATH)
 				;[x, y] = cells[y * 100 + x]
+				moved++
 			}
+			console.log(`移动 ${moved} 步即可到达终点`)
 			return true
 		}
 		// 左
@@ -144,9 +149,7 @@ reset.addEventListener('click', e => {
 
 document.addEventListener('mousedown', e => {
 	down = true
-	if (e.which === 3) {
-		clear = true
-	}
+	e.which === 3 && (clear = true)
 })
 document.addEventListener('mouseup', e => {
 	down = false
