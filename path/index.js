@@ -10,7 +10,7 @@ let cells = localStorage.map
 const START_POINT = 'red'
 const END_POINT = 'white'
 const POINT = 'lightseagreen'
-const PATH = 'lightcoral'
+const PATH = 'aqua'
 
 class Sorted {
 	constructor(data, compare) {
