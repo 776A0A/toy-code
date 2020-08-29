@@ -9,46 +9,78 @@ let cells = localStorage.map
 const START_POINT = 'darkviolet'
 const END_POINT = 'red'
 const POINT = 'lightseagreen'
-const PATH_COLOR = 'lightcoral'
+const PATH = 'lightcoral'
+
+class Sorted {
+	constructor(queue, start, end) {
+		this.queue = queue
+		this.start = start
+		this.end = end
+	}
+	take() {
+		let min = this.queue[0]
+		let minIndex = 0
+		for (let j = 1; j < this.queue.length; j++) {
+			if (distance(this.queue[j], this.end) - distance(min, this.end) < 0) {
+				min = this.queue[j]
+				minIndex = j
+			}
+		}
+		this.queue[minIndex] = this.queue[this.queue.length - 1]
+		this.queue.pop()
+		return min
+	}
+	insert(point) {
+		this.queue.push(point)
+	}
+	get length() {
+		return this.queue.length
+	}
+}
 
 async function findPath(map, start, end) {
-	const queue = [start]
+	const queue = new Sorted([start], start, end)
 
 	draw(start[1] * 100 + start[0], START_POINT)
 	draw(end[1] * 100 + end[0], END_POINT)
 
-	let d = distance(start, end)
 	while (queue.length) {
-		let [x, y] = queue.shift()
-		if (distance([x, y], end) - d <= 0) {
-			d = distance([x, y], end)
-			await sleep(1)
-			draw(y * 100 + x, POINT)
-			if (x === end[0] && y === end[1]) {
-				draw(start[1] * 100 + start[0], START_POINT)
-				while (!(x === start[0] && y === start[1])) {
-					await sleep(1)
-					draw(y * 100 + x, PATH_COLOR)
-					;[x, y] = cells[y * 100 + x]
-				}
-				return true
+		const point = queue.take()
+		let [x, y] = point
+		await sleep(1)
+		draw(y * 100 + x, POINT)
+		if (x === end[0] && y === end[1]) {
+			draw(start[1] * 100 + start[0], START_POINT)
+			while (!(x === start[0] && y === start[1])) {
+				await sleep(1)
+				draw(y * 100 + x, PATH)
+				;[x, y] = cells[y * 100 + x]
 			}
-			// 上下左右
-			await insert([x, y + 1], [x, y])
-			await insert([x, y - 1], [x, y])
-			await insert([x - 1, y], [x, y])
-			await insert([x + 1, y], [x, y])
-
-			// 斜方向
-			if (!cells[(y + 1) * 100 + x] || !cells[y * 100 + x - 1]) {
-				insert([x - 1, y + 1], [x, y])
-			} else if (!cells[(y + 1) * 100 + x] || !cells[y * 100 + x + 1]) {
-				insert([x + 1, y + 1], [x, y])
-			} else if (!cells[y * 100 + x - 1] || !cells[(y - 1) * 100 + x]) {
-				insert([x - 1, y - 1], [x, y])
-			} else if (!cells[(y - 1) * 100 + x] || !cells[y * 100 + x + 1]) {
-				insert([x + 1, y - 1], [x, y])
-			}
+			return true
+		}
+		// 左
+		await insert([x - 1, y], point)
+		// 右
+		await insert([x + 1, y], point)
+		// 下
+		await insert([x, y + 1], point)
+		// 上
+		await insert([x, y - 1], point)
+		// 左下
+		if (canThrough((y + 1) * 100 + x) || canThrough(y * 100 + x - 1)) {
+			insert([x - 1, y + 1], point)
+		}
+		// 右下
+		if (canThrough((y + 1) * 100 + x) || canThrough(y * 100 + x + 1)) {
+			insert([x + 1, y + 1], point)
+		}
+		// 左上
+		if (canThrough(y * 100 + x - 1) || canThrough((y - 1) * 100 + x)) {
+			insert([x - 1, y - 1], point)
+		}
+		// 右上
+		if (canThrough((y - 1) * 100 + x) || canThrough(y * 100 + x + 1)) {
+			insert([x + 1, y - 1], point)
 		}
 	}
 	console.log('没有找到路线')
@@ -58,8 +90,12 @@ async function findPath(map, start, end) {
 		if (cells[y * 100 + x]) return
 		if (x < 0 || x >= 100 || y < 0 || y >= 100) return
 		cells[y * 100 + x] = pre
-		queue.push([x, y])
+		queue.insert([x, y])
 	}
+}
+
+function canThrough(point) {
+	return cells[point] && cells[point] !== 1
 }
 
 function distance(start, end) {
