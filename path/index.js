@@ -12,55 +12,51 @@ const POINT = 'lightseagreen'
 const PATH = 'lightcoral'
 
 class Sorted {
-	constructor(queue, start, end) {
-		this.queue = queue
-		this.start = start
-		this.end = end
+	constructor(data, compare) {
+		this.data = data
+		this.compare = compare
 	}
 	take() {
-		let min = this.queue[0]
+		let min = this.data[0]
 		let minIndex = 0
-		for (let j = 1; j < this.queue.length; j++) {
-			if (distance(this.queue[j], this.end) - distance(min, this.end) < 0) {
-				min = this.queue[j]
-				minIndex = j
+		for (let i = 1; i < this.data.length; i++) {
+			if (this.compare(this.data[i], min)) {
+				min = this.data[i]
+				minIndex = i
 			}
 		}
-		this.queue[minIndex] = this.queue[this.queue.length - 1]
-		this.queue.pop()
+		this.data[minIndex] = this.data[this.data.length - 1]
+		this.data.pop()
 		return min
 	}
 	insert(point) {
-		this.queue.push(point)
+		this.data.push(point)
 	}
 	get length() {
-		return this.queue.length
+		return this.data.length
 	}
 }
 
 async function findPath(map, start, end) {
-	const queue = new Sorted([start], start, end)
+	const collection = new Sorted(
+		[start],
+		(a, b) => distance(a, end) - distance(b, end) < 0
+	)
+	let hasMove = 0
 
 	draw(start[1] * 100 + start[0], START_POINT)
 	draw(end[1] * 100 + end[0], END_POINT)
-	let hasMove = 0
-	while (queue.length) {
-		const point = queue.take()
+
+	while (collection.length) {
+		const point = collection.take()
 		let [x, y] = point
-		hasMove++
-		console.log(`移动到 x: ${x}, y: ${y}，已经移动 ${hasMove} 步`)
-		await sleep(1)
-		draw(y * 100 + x, POINT)
+
+		console.log(`移动到 x: ${x}, y: ${y}，已经移动 ${hasMove++} 步`)
+		await sleep(1).then(() => draw(y * 100 + x, POINT))
+
 		if (x === end[0] && y === end[1]) {
 			draw(start[1] * 100 + start[0], START_POINT)
-			let moved = 0
-			while (!(x === start[0] && y === start[1])) {
-				await sleep(1)
-				draw(y * 100 + x, PATH)
-				;[x, y] = cells[y * 100 + x]
-				moved++
-			}
-			console.log(`移动 ${moved} 步即可到达终点`)
+			drawPath(start, x, y)
 			return true
 		}
 		// 左
@@ -88,6 +84,7 @@ async function findPath(map, start, end) {
 			insert([x + 1, y - 1], point)
 		}
 	}
+
 	console.log('没有找到路线')
 	return false
 
@@ -95,8 +92,19 @@ async function findPath(map, start, end) {
 		if (cells[y * 100 + x]) return
 		if (x < 0 || x >= 100 || y < 0 || y >= 100) return
 		cells[y * 100 + x] = pre
-		queue.insert([x, y])
+		collection.insert([x, y])
 	}
+}
+
+async function drawPath(start, x, y) {
+	let moved = 0
+	while (!(x === start[0] && y === start[1])) {
+		await sleep(1).then(() => draw(y * 100 + x, PATH))
+		;[x, y] = cells[y * 100 + x]
+		moved++
+	}
+
+	console.log(`移动 ${moved} 步即可到达终点`)
 }
 
 function canThrough(point) {
