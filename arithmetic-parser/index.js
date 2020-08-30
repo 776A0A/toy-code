@@ -1,4 +1,4 @@
-const regexp = /([0-9\.]+)|([ \t]+)|([\r\n]+)|(\+)|(\-)|(\*)|(\/)|(\=)/g
+const regexp = /([\d\.]+)|([ \t]+)|([\r\n]+)|(\+)|(\-)|(\*)|(\/)|(\=)/g
 const dictionary = [
 	'Number',
 	'Whitespace',
@@ -12,9 +12,16 @@ const dictionary = [
 
 function* tokenize(source) {
 	let result = null
+	let lastIndex = 0
 	do {
+		lastIndex = regexp.lastIndex
 		result = regexp.exec(source)
 		if (!result) break
+		// 当有非法字符的时候，lastIndex跳过的长度会超过实际找到的合法字符长度
+		if (regexp.lastIndex - lastIndex > result[0].length)
+			throw new Error(
+				`Unexpected token: "${source.slice(lastIndex, lastIndex + 1)}"`
+			)
 		const token = {
 			type: null,
 			value: null
@@ -25,10 +32,37 @@ function* tokenize(source) {
 		token.value = result[0]
 		yield token
 	} while (result)
+
+	yield { type: 'EOF' }
 }
 
-function run() {
-	for (const token of tokenize('1 + 1 * 2 - 19 / 12')) {
-		console.log(token)
+const source = []
+
+for (const token of tokenize('1 * 2 / 12')) {
+	if (token.type !== 'Whitespace' && token.type !== 'LineTerminator')
+		source.push(token)
+}
+
+function MultiplicativeExpression(source) {
+	if (source[0].type === 'Number') {
+		const node = {
+			type: 'MultiplicativeExpression',
+			children: [source.shift()]
+		}
+		source.unshift(node)
+		return MultiplicativeExpression(source)
 	}
+	if (
+		source[0].type === 'MultiplicativeExpression' &&
+		source.length > 1 &&
+		(source[1].type === '*' || source[1].type === '/')
+	) {
+		const node = {
+			type: 'MultiplicativeExpression',
+			children: [source.shift(), source.shift(), source.shift()]
+		}
+		source.unshift(node)
+		return MultiplicativeExpression(source)
+	}
+	return source
 }
