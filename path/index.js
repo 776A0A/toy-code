@@ -18,25 +18,33 @@ class BinaryHeap {
 		this.compare = compare
 	}
 	take() {
+		if (!this.data.length) return
+
 		const min = this.data[0]
 		let i = 0
-		// 修补空位
-		while (true) {
-			if (i * 2 + 1 >= this.data.length) break
-			if (i * 2 + 2 >= this.data.length) {
-				i = i * 2 + 1
-				break
-			}
-			if (this.compare(this.data[i * 2 + 1], this.data[i * 2 + 2]) < 0) {
-				this.data[i] = this.data[i * 2 + 1]
-				i = i * 2 + 1
-			} else {
-				this.data[i] = this.data[i * 2 + 2]
-				i = i * 2 + 2
+		if (this.data.length > 1) {
+			// 修补空位
+			while (true) {
+				// 没有子节点了
+				if (i * 2 + 1 >= this.data.length) break
+				// 只有左子节点
+				if (i * 2 + 2 >= this.data.length) {
+					this.data[i] = this.data[i * 2 + 1]
+					i = i * 2 + 1
+					break
+				}
+				// 左右子节点比较
+				if (this.compare(this.data[i * 2 + 1], this.data[i * 2 + 2]) < 0) {
+					this.data[i] = this.data[i * 2 + 1]
+					i = i * 2 + 1
+				} else {
+					this.data[i] = this.data[i * 2 + 2]
+					i = i * 2 + 2
+				}
 			}
 		}
 		if (i !== this.data.length - 1)
-			// 将缺口始终保持在最后一位
+			// 将缺口始终保持在最后一位，因为插入永远都是在最后一位，而不是某一个特定的空位
 			this.insertAt(i, this.data.pop())
 		else this.data.pop()
 
@@ -92,17 +100,17 @@ const s = new Sorted([], (a, b) => a - b)
 
 function test(log, collection) {
 	console.time(log)
-	for (let i = 0; i < 10000; i++) {
-		collection.insert(Math.floor(Math.random() * 10000))
+	for (let i = 0; i < 100; i++) {
+		collection.insert(Math.floor(Math.random() * 100))
 	}
-	for (let i = 0; i < 10000; i++) {
-		collection.take()
+	for (let i = 0; i < 100; i++) {
+		console.log(collection.take())
 	}
 	console.timeEnd(log)
 }
 
 test('binary-heap', b)
-test('sorted', s)
+// test('sorted', s)
 
 async function findPath(start, end) {
 	const collection = new BinaryHeap(
