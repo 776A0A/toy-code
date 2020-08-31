@@ -38,9 +38,37 @@ function* tokenize(source) {
 
 const source = []
 
-for (const token of tokenize('1 * 2 / 12')) {
+for (const token of tokenize('1 * 2 / 12 + 1 - 2 + 3')) {
 	if (token.type !== 'Whitespace' && token.type !== 'LineTerminator')
 		source.push(token)
+}
+
+function AdditiveExpression(source) {
+	if (source[0].type === 'Number') {
+		MultiplicativeExpression(source)
+	}
+	if (source[0].type === 'MultiplicativeExpression') {
+		const node = {
+			type: 'AdditiveExpression',
+			children: [source.shift()]
+		}
+		source.unshift(node)
+	}
+	if (
+		source[0].type === 'AdditiveExpression' &&
+		source.length > 1 &&
+		(source[1].type === '+' || source[1].type === '-')
+	) {
+		const node = {
+			type: 'AdditiveExpression',
+			children: [source.shift(), source.shift()]
+		}
+		MultiplicativeExpression(source)
+		node.children.push(source.shift())
+		source.unshift(node)
+		return AdditiveExpression(source)
+	}
+	if (source[0].type === 'AdditiveExpression') return source
 }
 
 function MultiplicativeExpression(source) {
@@ -50,7 +78,6 @@ function MultiplicativeExpression(source) {
 			children: [source.shift()]
 		}
 		source.unshift(node)
-		return MultiplicativeExpression(source)
 	}
 	if (
 		source[0].type === 'MultiplicativeExpression' &&
@@ -64,5 +91,5 @@ function MultiplicativeExpression(source) {
 		source.unshift(node)
 		return MultiplicativeExpression(source)
 	}
-	return source
+	if (source[0].type === 'MultiplicativeExpression') return source
 }
