@@ -38,19 +38,33 @@ function* tokenize(source) {
 
 const source = []
 
-for (const token of tokenize('1 * 2 / 12 + 1 - 2 + 3')) {
+for (const token of tokenize('5 + 1 * 2 / 12 + 1 - 2 + 3')) {
 	if (token.type !== 'Whitespace' && token.type !== 'LineTerminator')
 		source.push(token)
 }
 
-function AdditiveExpression(source) {
-	if (source[0].type === 'Number') {
-		MultiplicativeExpression(source)
+function Expression(source) {
+	AdditiveExpression(source)
+	if (
+		source[0].type === 'AdditiveExpression' &&
+		source[1] &&
+		source[1].type === 'EOF'
+	) {
+		const node = {
+			type: 'Expression',
+			children: [source.shift(), source.shift()]
+		}
+		source.unshift(node)
+		return node
 	}
+}
+
+function AdditiveExpression(source) {
+	MultiplicativeExpression(source)
 	if (source[0].type === 'MultiplicativeExpression') {
 		const node = {
 			type: 'AdditiveExpression',
-			children: [source.shift()]
+			children: source.shift()
 		}
 		source.unshift(node)
 	}
@@ -63,7 +77,7 @@ function AdditiveExpression(source) {
 			type: 'AdditiveExpression',
 			children: [source.shift(), source.shift()]
 		}
-		MultiplicativeExpression(source)
+		MultiplicativeExpression(source) // 这一步的逻辑是根据产生式得来的
 		node.children.push(source.shift())
 		source.unshift(node)
 		return AdditiveExpression(source)
@@ -75,7 +89,7 @@ function MultiplicativeExpression(source) {
 	if (source[0].type === 'Number') {
 		const node = {
 			type: 'MultiplicativeExpression',
-			children: [source.shift()]
+			children: source.shift()
 		}
 		source.unshift(node)
 	}
