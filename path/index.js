@@ -35,8 +35,11 @@ class BinaryHeap {
 				i = i * 2 + 2
 			}
 		}
-		// 将缺口始终保持在最后一位
-		this.insertAt(i, this.data.pop())
+		if (i !== this.data.length - 1)
+			// 将缺口始终保持在最后一位
+			this.insertAt(i, this.data.pop())
+		else this.data.pop()
+
 		return min
 	}
 	insertAt(i, v) {
@@ -83,6 +86,23 @@ class Sorted {
 		return this.data.length
 	}
 }
+
+const b = new BinaryHeap([], (a, b) => a - b)
+const s = new Sorted([], (a, b) => a - b)
+
+function test(log, collection) {
+	console.time(log)
+	for (let i = 0; i < 10000; i++) {
+		collection.insert(Math.floor(Math.random() * 10000))
+	}
+	for (let i = 0; i < 10000; i++) {
+		collection.take()
+	}
+	console.timeEnd(log)
+}
+
+test('binary-heap', b)
+test('sorted', s)
 
 async function findPath(start, end) {
 	const collection = new BinaryHeap(
