@@ -12,6 +12,52 @@ const END_POINT = 'white'
 const POINT = 'lightseagreen'
 const PATH = 'aqua'
 
+class BinaryHeap {
+	constructor(data, compare) {
+		this.data = data
+		this.compare = compare
+	}
+	take() {
+		const min = this.data[0]
+		let i = 0
+		// 修补空位
+		while (true) {
+			if (i * 2 + 1 >= this.data.length) break
+			if (i * 2 + 2 >= this.data.length) {
+				i = i * 2 + 1
+				break
+			}
+			if (this.compare(this.data[i * 2 + 1], this.data[i * 2 + 2]) < 0) {
+				this.data[i] = this.data[i * 2 + 1]
+				i = i * 2 + 1
+			} else {
+				this.data[i] = this.data[i * 2 + 2]
+				i = i * 2 + 2
+			}
+		}
+		// 将缺口始终保持在最后一位
+		this.insertAt(i, this.data.pop())
+		return min
+	}
+	insertAt(i, v) {
+		this.data[i] = v
+		let parentIndex = Math.floor((i - 1) / 2)
+		// 最小堆
+		while (parentIndex >= 0 && this.compare(v, this.data[parentIndex]) < 0) {
+			this.data[i] = this.data[parentIndex]
+			this.data[parentIndex] = v
+			i = parentIndex
+			parentIndex = Math.floor((parentIndex - 1) / 2)
+		}
+	}
+	insert(v) {
+		this.insertAt(this.data.length, v)
+	}
+	get length() {
+		return this.data.length
+	}
+}
+
 class Sorted {
 	constructor(data, compare) {
 		this.data = data
@@ -21,7 +67,7 @@ class Sorted {
 		let min = this.data[0]
 		let minIndex = 0
 		for (let i = 1; i < this.data.length; i++) {
-			if (this.compare(this.data[i], min)) {
+			if (this.compare(this.data[i], min) < 0) {
 				min = this.data[i]
 				minIndex = i
 			}
@@ -39,9 +85,9 @@ class Sorted {
 }
 
 async function findPath(start, end) {
-	const collection = new Sorted(
+	const collection = new BinaryHeap(
 		[start],
-		(a, b) => distance(a, end) - distance(b, end) < 0
+		(a, b) => distance(a, end) - distance(b, end)
 	)
 	let hasMove = 0
 
@@ -56,8 +102,8 @@ async function findPath(start, end) {
 		await sleep(1).then(() => draw(y * 100 + x, POINT))
 
 		if (x === end[0] && y === end[1]) {
-			draw(start[1] * 100 + start[0], START_POINT)
 			await drawPath(start, x, y)
+			draw(start[1] * 100 + start[0], START_POINT)
 			draw(end[1] * 100 + end[0], END_POINT)
 			return true
 		}
