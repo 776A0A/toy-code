@@ -44,7 +44,7 @@ class BinaryHeap {
 			}
 		}
 		if (i !== this.data.length - 1)
-			// 将缺口始终保持在最后一位，因为插入永远都是在最后一位，而不是某一个特定的空位
+			// 复原为完全二叉树，将缺口始终保持在最后一位，因为插入永远都是在最后一位，而不是某一个特定的空位
 			this.insertAt(i, this.data.pop())
 		else this.data.pop()
 
@@ -100,16 +100,16 @@ const s = new Sorted([], (a, b) => a - b)
 
 function test(log, collection) {
 	console.time(log)
-	for (let i = 0; i < 100; i++) {
-		collection.insert(Math.floor(Math.random() * 100))
+	for (let i = 0; i < 100000; i++) {
+		collection.insert(Math.floor(Math.random() * 100000))
 	}
-	for (let i = 0; i < 100; i++) {
-		console.log(collection.take())
+	for (let i = 0; i < 100000; i++) {
+		collection.take()
 	}
 	console.timeEnd(log)
 }
 
-test('binary-heap', b)
+// test('binary-heap', b)
 // test('sorted', s)
 
 async function findPath(start, end) {

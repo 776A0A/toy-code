@@ -1,0 +1,51 @@
+<script>
+	class Trie {
+		constructor() {
+			this.root = new Map()
+			this.max = null
+		}
+		insert(word) {
+			let node = this.root
+			for (const w of word) {
+				if (!node.has(w)) node.set(w, new Map())
+				node = node.get(w)
+			}
+			if (!node.has('$')) node.set('$', 0) // 设置一个单词的终结符
+			node.set('$', node.get('$') + 1)
+			this.saveMost(node, word)
+		}
+		most() {
+			let max = 0
+			let maxWord = ''
+			const visit = (node, word) => {
+				if (!(node instanceof Map)) return
+				if (node.get('$') && node.get('$') > max) {
+					max = node.get('$')
+					maxWord = word
+				}
+				for (const [w, _node] of node) visit(_node, word + w)
+			}
+			visit(this.root, maxWord)
+			return { max, maxWord }
+		}
+		saveMost(node, word) {
+			if (!this.max) this.max = { word: '', $: 0 }
+			if (this.max.$ < node.get('$')) this.max = { word, $: node.get('$') }
+		}
+	}
+
+	function randomWord(len) {
+		let w = ''
+		for (let i = 0; i < len; i++) {
+			w += String.fromCharCode(Math.random() * 26 + 'a'.codePointAt())
+		}
+		return w
+	}
+
+	const trie = new Trie
+
+	for (let i = 0; i < 10000; i++) {
+		trie.insert(randomWord(4))
+	}
+
+</script>
