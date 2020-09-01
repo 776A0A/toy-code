@@ -22,16 +22,16 @@
       if (source[i] === pattern[j]) {
         j++
       } else {
-        rollback(i, j)
+        let k = j
+        while (j !== 0) {
+          j = next[--k] || 0
+          if (source[i] === pattern[j]) {
+            j++
+            break
+          }
+        }
       }
       if (j === pattern.length) return true
-    }
-
-    function rollback(i, k) {
-      if (j === 0) return
-      j = next[k - 1] || 0
-      if (source[i] === pattern[j]) j++
-      else rollback(i, k - 1)
     }
 
     return false
