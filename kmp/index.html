@@ -22,10 +22,16 @@
       if (source[i] === pattern[j]) {
         j++
       } else {
-        j = next[j - 1] || 0
-        if (source[i] === pattern[j]) j++
+        rollback(i, j)
       }
       if (j === pattern.length) return true
+    }
+
+    function rollback(i, k) {
+      if (j === 0) return
+      j = next[k - 1] || 0
+      if (source[i] === pattern[j]) j++
+      else rollback(i, k - 1)
     }
 
     return false
@@ -44,4 +50,10 @@
     }
     return next
   }
+
+  console.log(find1('abcababcabx', 'abcabx'));
+  console.log(find1('abcdabcdabcxabcd', 'abcdabcxabcd'));
+  console.log(find1('abcdabcdabcx', 'abcdabcx'));
+  console.log(find1('abcxxyz', 'xy'));
+  console.log(find1('abcxyz', 'xy'));
 </script>
