@@ -2,15 +2,15 @@
   function find(source, pattern) {
     const next = generateNext(pattern)
     console.log(next);
-    let j = 0
+    let j = -1
     for (let i = 0; i < source.length; i++) {
-      if (source[i] === pattern[j]) {
+      if (source[i] === pattern[j < 0 ? 0 : j]) {
         j++
       } else {
-        j = next[j - 1] || 0
+        j = next[j] || 0
         if (source[i] === pattern[j]) j++
       }
-      if (j === pattern.length) return true
+      if (j === pattern.length - 1) return true
     }
 
     return false
