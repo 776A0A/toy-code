@@ -1,5 +1,5 @@
 <script>
-  let usedReactivities = []
+  let usedReactivities = new Map()
   const handlers = new Map()
   const reactivities = new Map()
 
@@ -8,7 +8,7 @@
 
     const proxy = new Proxy(obj, {
       get(obj, prop) {
-        usedReactivities.push([obj, prop])
+        !usedReactivities.get(obj) && usedReactivities.set(obj, prop)
         if (typeof prop === 'object' && prop) return reactive(obj[prop]) // 递归
         return obj[prop]
       },
@@ -25,7 +25,7 @@
   }
 
   function effect(handler) {
-    usedReactivities = []
+    usedReactivities.clear()
     handler()
     for (const reactivity of usedReactivities) {
       const [obj, prop] = reactivity
