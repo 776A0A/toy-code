@@ -9,6 +9,13 @@
     "Marketplace-Town Hall", "Shop-Town Hall"
   ];
 
+  const mailRoute = [
+    "Alice's House", "Cabin", "Alice's House", "Bob's House",
+    "Town Hall", "Daria's House", "Ernie's House",
+    "Grete's House", "Shop", "Grete's House", "Farm",
+    "Marketplace", "Post Office"
+  ];
+
   function buildGraph() {
     const graph = Object.create(null)
     roads.forEach(road => {
@@ -30,19 +37,89 @@
 
   class VillageState {
     constructor(place, parcels) {
-      this.place = place
-      this.parcels = parcels
+      this.place = place // 当前村庄
+      this.parcels = parcels // 当前村庄拥有的包裹
     }
     move(destination) {
       if (!roadGraph[this.place].includes(destination)) return this
 
       const parcels = this.parcels.map(parcel => {
+        // 包裹不在这
         if (parcel.place !== this.place) return parcel
+        // 更新包裹状态
         return { place: destination, address: parcel.address }
-      }).filter(parcel => parcel.place !== parcel.address)
+      })
+        // 剔除已送达的包裹
+        .filter(parcel => parcel.place !== parcel.address)
 
       return new VillageState(destination, parcels)
     }
+    static randomParcels(count = 5) {
+      const parcels = []
+      for (let i = 0; i < count; i++) {
+        const parcel = { place: randomPick(Object.keys(roadGraph)) }
+        do {
+          parcel.address = randomPick(roadGraph[parcel.place])
+        } while (parcel.address === parcel.place);
+        parcels.push(parcel)
+      }
+      return parcels
+    }
   }
+
+  function runRobot(state, robot, memory) {
+    let turn = 0
+    while (true) {
+      if (state.parcels.length === 0) {
+        console.log(`Done in ${turn} turns`);
+        return
+      }
+      const action = robot(state, memory)
+      state = state.move(action.direction)
+      memory = action.memory
+      console.log(`Moved to ${action.direction}`);
+      turn++
+    }
+  }
+
+  function randomRobot({ place }) {
+    return { direction: randomPick(roadGraph[place]) }
+  }
+
+  function randomPick(arr) {
+    return arr[Math.floor(Math.random() * arr.length)]
+  }
+
+  function mailRobot({ place }, memory) {
+    if (memory.length === 0) memory = mailRoute
+    return { direction: memory[0], memory: memory.slice(1) }
+  }
+
+  function findRoute(from, to) {
+    const stack = [{ at: from, routes: [] }]
+    while (stack.length) {
+      const { at, routes } = stack.shift()
+      for (const place of roadGraph[at]) {
+        if (place === to) return routes.concat(place)
+        if (!stack.find(item => item.at === place)) {
+          stack.push({ at: place, routes: routes.concat(place) })
+        }
+      }
+    }
+  }
+
+  function orientedRobot({ place, parcels }, memory) {
+    // memory是一条规划的路线
+    if (memory.length === 0) {
+      const parcel = parcels[0]
+      // 包裹不在本地，去拿包裹
+      if (parcel.place !== place) memory = findRoute(place, parcel.place)
+      // 包裹在本地，朝目的地送去
+      else memory = findRoute(place, parcel.address)
+    }
+    return { direction: memory[0], memory: memory.slice(1) }
+  }
+
+  runRobot(new VillageState('Alice\'s House', VillageState.randomParcels()), orientedRobot, [])
 
 </script>
