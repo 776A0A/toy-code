@@ -3,22 +3,39 @@
     width: 100px;
     height: 100px;
     background-color: pink;
+    display: inline-block;
+  }
+
+  #dragable:hover {
+    cursor: grab;
   }
 </style>
+<div id="container">
+  文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字
+</div>
 <div id="dragable"></div>
 
 <script>
+  const container = document.getElementById('container')
   const dragable = document.getElementById('dragable')
+
+  document.addEventListener('selectstart', e => e.preventDefault())
+
   dragable.addEventListener('mousedown', e => {
+    dragable.style.cursor = 'grabbing'
     const sX = e.clientX, sY = e.clientY
     const { top, left } = e.target.getBoundingClientRect()
     const diffX = sX - left
     const diffY = sY - top
     const move = e => {
-      const x = e.clientX - diffX, y = e.clientY - diffY
-      dragable.style.transform = `translate(${x}px, ${y}px)`
+      // const x = e.clientX - diffX, y = e.clientY - diffY
+      // dragable.style.transform = `translate(${x}px, ${y}px)`
+
+      const range = nearest(e.clientX, e.clientY)
+      range.insertNode(dragable)
     }
     const up = e => {
+      dragable.style.cursor = 'grab'
       document.removeEventListener('mousemove', move)
       document.removeEventListener('mouseup', up)
     }
@@ -26,4 +43,29 @@
     document.addEventListener('mousemove', move)
     document.addEventListener('mouseup', up)
   })
+
+  const ranges = []
+
+  for (let i = 0; i < container.childNodes[0].textContent.length; i++) {
+    const range = document.createRange()
+    range.setStart(container.childNodes[0], i)
+    range.setEnd(container.childNodes[0], i)
+    ranges.push(range)
+  }
+
+  function nearest(tX, tY) {
+    let range = null
+    let distance = Infinity
+
+    ranges.forEach(r => {
+      const { x, y } = r.getBoundingClientRect()
+      const d = (tX - x) ** 2 + (tY - y) ** 2
+      if (d < distance) {
+        distance = d
+        range = r
+      }
+    })
+
+    return range
+  }
 </script>

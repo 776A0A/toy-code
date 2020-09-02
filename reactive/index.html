@@ -9,11 +9,16 @@
     const proxy = new Proxy(obj, {
       get(obj, prop) {
         !usedReactivities.get(obj) && usedReactivities.set(obj, prop)
-        if (typeof prop === 'object' && prop) return reactive(obj[prop]) // 递归
+        if (typeof obj[prop] === 'object' && obj[prop]) return reactive(obj[prop]) // 递归
         return obj[prop]
       },
       set(obj, prop, val) {
-        obj[prop] = val
+        if (typeof val === 'object' && val) {
+          obj[prop] = reactive(val)
+          const oHandlers = handlers.get(obj)?.get(prop)
+          oHandlers.forEach(effect) // 重新触发依赖收集
+        }
+        else obj[prop] = val
         handlers.get(obj)?.get(prop)?.forEach(handler => handler())
         return obj[prop]
       }
@@ -39,11 +44,19 @@
     }
   }
 
-  let dummy
-  const counter = reactive({ num: 0 })
-  effect(() => (dummy = counter.num))
-  console.log(dummy);
-  counter.num = 1
-  console.log(dummy);
+  let res
+  const c = reactive({ a: { b: 0 } })
+  effect(() => (res = c.a.b))
+  console.log(res);
+  c.a.b = 1
+  console.log(res);
+  c.a = { b: 2 }
+  console.log(res);
+  c.a.b = 3
+  console.log(res);
+  c.a = { b: 4 }
+  console.log(res);
+  c.a.b = 5
+  console.log(res);
 
 </script>
