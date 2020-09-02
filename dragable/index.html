@@ -27,14 +27,35 @@
     const { top, left } = e.target.getBoundingClientRect()
     const diffX = sX - left
     const diffY = sY - top
+    let mask = document.createElement('div')
+    mask.style.position = 'fixed'
+    mask.style.width = '100vw'
+    mask.style.height = '100vh'
+    mask.style.top = '0'
+    mask.style.left = '0'
+    mask.style.backgroundColor = '#fff'
+    mask.style.opacity = '.8'
+    document.body.append(mask)
+    let fakeDragable = dragable.cloneNode()
+    fakeDragable.style.position = 'relative'
+    fakeDragable.style.zIndex = '1'
+    fakeDragable.style.opacity = '.5'
+    document.body.append(fakeDragable)
+    let rang = null
     const move = e => {
       // const x = e.clientX - diffX, y = e.clientY - diffY
       // dragable.style.transform = `translate(${x}px, ${y}px)`
 
-      const range = nearest(e.clientX, e.clientY)
-      range.insertNode(dragable)
+      range = nearest(e.clientX, e.clientY)
+      range.insertNode(fakeDragable)
     }
     const up = e => {
+      mask.remove()
+      mask = null
+      fakeDragable.remove()
+      fakeDragable = null
+      range.insertNode(dragable)
+      rang = null
       dragable.style.cursor = 'grab'
       document.removeEventListener('mousemove', move)
       document.removeEventListener('mouseup', up)
