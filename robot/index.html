@@ -1,0 +1,48 @@
+<script>
+  const roads = [
+    "Alice's House-Bob's House", "Alice's House-Cabin",
+    "Alice's House-Post Office", "Bob's House-Town Hall",
+    "Daria's House-Ernie's House", "Daria's House-Town Hall",
+    "Ernie's House-Grete's House", "Grete's House-Farm",
+    "Grete's House-Shop", "Marketplace-Farm",
+    "Marketplace-Post Office", "Marketplace-Shop",
+    "Marketplace-Town Hall", "Shop-Town Hall"
+  ];
+
+  function buildGraph() {
+    const graph = Object.create(null)
+    roads.forEach(road => {
+      const [s, e] = road.split('-')
+      addEdge(s, e)
+      addEdge(e, s)
+    })
+
+    return graph
+
+    function addEdge(s, e) {
+      if (!(s in graph)) graph[s] = []
+      if (!graph[s].includes(e))
+        graph[s].push(e)
+    }
+  }
+
+  const roadGraph = buildGraph()
+
+  class VillageState {
+    constructor(place, parcels) {
+      this.place = place
+      this.parcels = parcels
+    }
+    move(destination) {
+      if (!roadGraph[this.place].includes(destination)) return this
+
+      const parcels = this.parcels.map(parcel => {
+        if (parcel.place !== this.place) return parcel
+        return { place: destination, address: parcel.address }
+      }).filter(parcel => parcel.place !== parcel.address)
+
+      return new VillageState(destination, parcels)
+    }
+  }
+
+</script>
