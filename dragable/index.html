@@ -1,0 +1,29 @@
+<style>
+  #dragable {
+    width: 100px;
+    height: 100px;
+    background-color: pink;
+  }
+</style>
+<div id="dragable"></div>
+
+<script>
+  const dragable = document.getElementById('dragable')
+  dragable.addEventListener('mousedown', e => {
+    const sX = e.clientX, sY = e.clientY
+    const { top, left } = e.target.getBoundingClientRect()
+    const diffX = sX - left
+    const diffY = sY - top
+    const move = e => {
+      const x = e.clientX - diffX, y = e.clientY - diffY
+      dragable.style.transform = `translate(${x}px, ${y}px)`
+    }
+    const up = e => {
+      document.removeEventListener('mousemove', move)
+      document.removeEventListener('mouseup', up)
+    }
+
+    document.addEventListener('mousemove', move)
+    document.addEventListener('mouseup', up)
+  })
+</script>
