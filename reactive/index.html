@@ -1,3 +1,5 @@
+<p id="greeting">Hello {{name}} !</p>
+
 <script>
   let usedReactivities = new Map()
   const handlers = new Map()
@@ -44,19 +46,13 @@
     }
   }
 
-  let res
-  const c = reactive({ a: { b: 0 } })
-  effect(() => (res = c.a.b))
-  console.log(res);
-  c.a.b = 1
-  console.log(res);
-  c.a = { b: 2 }
-  console.log(res);
-  c.a.b = 3
-  console.log(res);
-  c.a = { b: 4 }
-  console.log(res);
-  c.a.b = 5
-  console.log(res);
-
+  const range = document.createRange()
+  const greeting = document.getElementById('greeting')
+  range.setStart(greeting.childNodes[0], 6)
+  range.setEnd(greeting.childNodes[0], 14)
+  const t = reactive({ name: 'world' })
+  effect(() => {
+    range.extractContents()
+    range.insertNode(document.createTextNode(t.name))
+  })
 </script>
