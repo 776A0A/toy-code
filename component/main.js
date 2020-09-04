@@ -1,55 +1,4 @@
-function create(cls, attributes, ...children) {
-	let c
-
-	if (typeof cls === 'string') c = new Element(cls)
-	else c = new cls()
-
-	for (const key in attributes) {
-		if (attributes.hasOwnProperty(key)) {
-			c.setAttribute(key, attributes[key])
-		}
-	}
-	const append = children => {
-		children.forEach(child => {
-			if (typeof child === 'string') child = new Text(child)
-			else if (Array.isArray(child)) return append(child)
-			c.appendChild(child)
-		})
-	}
-
-	append(children)
-
-	return c
-}
-
-class Text {
-	constructor(text) {
-		this.root = document.createTextNode(text)
-	}
-	mountTo(parent) {
-		parent.appendChild(this.root)
-	}
-}
-
-class Element {
-	constructor(type) {
-		this.children = []
-		this.root = document.createElement(type)
-	}
-	setAttribute(k, v) {
-		this.root.setAttribute(k, v)
-	}
-	appendChild(child) {
-		this.children.push(child)
-	}
-	addEventListener() {
-		this.root.addEventListener(...arguments)
-	}
-	mountTo(parent) {
-		parent.appendChild(this.root)
-		this.children.forEach(child => child.mountTo(this.root))
-	}
-}
+import createElement from './createElement'
 
 class Carousel {
 	constructor() {
@@ -63,13 +12,33 @@ class Carousel {
 		this.children.push(child)
 	}
 	render() {
-		return (
-			<div id='container'>
-				{this.data.map(url => (
-					<img src={url} draggable={false} />
-				))}
-			</div>
-		)
+		const children = this.data.map(url => <img src={url} draggable={false} />)
+
+		let position = 0
+		const nextPic = () => {
+			const nextPosition = (position + 1) % this.data.length
+			const current = children[position]
+			const next = children[nextPosition]
+
+			current.style.transition = `none`
+			next.style.transition = `none`
+			current.style.transform = `translateX(${-100 * position}%)`
+			next.style.transform = `translateX(${100 - 100 * nextPosition}%)`
+
+			setTimeout(() => {
+				current.style.transition = `ease .5s`
+				next.style.transition = `ease .5s`
+				current.style.transform = `translateX(${-100 - 100 * position}%)`
+				next.style.transform = `translateX(${-100 * nextPosition}%)`
+				position = nextPosition
+			}, 16)
+
+			setTimeout(nextPic, 1000)
+		}
+
+		setTimeout(nextPic, 1000)
+
+		return <div id='container'>{children}</div>
 	}
 	mountTo(parent) {
 		this.render().mountTo(parent)
