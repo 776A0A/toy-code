@@ -30,27 +30,61 @@
       'https://ranking.xgoo.jp/tool/images/column/2020/01/0128_9.jpg'
     ]
     const container = document.getElementById('container')
+    let position = 0
 
     imgList.forEach(src => {
       const img = document.createElement('img')
       img.src = src
+      img.draggable = false
       container.append(img)
+
+      img.addEventListener('mousedown', e => {
+        const width = img.getBoundingClientRect().width
+        const sX = e.clientX
+
+        const lastPosition = (position - 1 + container.children.length) % container.children.length
+        const nextPosition = (position + 1) % container.children.length
+
+        const last = container.children[lastPosition]
+        const current = container.children[position]
+        const next = container.children[nextPosition]
+
+        last.style.transition = `none`
+        current.style.transition = `none`
+        next.style.transition = `none`
+
+        const move = e => {
+          last.style.transform = `translateX(${-width - width * lastPosition - (sX - e.clientX)}px)`
+          current.style.transform = `translateX(${-width * position - (sX - e.clientX)}px)`
+          next.style.transform = `translateX(${width - width * nextPosition - (sX - e.clientX)}px)`
+        }
+        const up = e => {
+          document.removeEventListener('mousemove', move)
+          document.removeEventListener('mouseup', up)
+        }
+
+        document.addEventListener('mousemove', move)
+        document.addEventListener('mouseup', up)
+      })
     })
-    let position = 0
+
+
     function run() {
       const nextPic = () => {
         const nextPosition = (position + 1) % container.children.length
+        const current = container.children[position]
+        const next = container.children[nextPosition]
 
-        container.children[position].style.transition = `none`
-        container.children[nextPosition].style.transition = `none`
-        container.children[position].style.transform = `translateX(${- 100 * position}%)`;
-        container.children[nextPosition].style.transform = `translateX(${100 - 100 * nextPosition}%)`;
+        current.style.transition = `none`
+        next.style.transition = `none`
+        current.style.transform = `translateX(${- 100 * position}%)`;
+        next.style.transform = `translateX(${100 - 100 * nextPosition}%)`;
 
         setTimeout(() => {
-          container.children[position].style.transition = `ease .5s`
-          container.children[nextPosition].style.transition = `ease .5s`
-          container.children[position].style.transform = `translateX(${-100 - 100 * position}%)`;
-          container.children[nextPosition].style.transform = `translateX(${-100 * nextPosition}%)`;
+          current.style.transition = `ease .5s`
+          next.style.transition = `ease .5s`
+          current.style.transform = `translateX(${-100 - 100 * position}%)`;
+          next.style.transform = `translateX(${-100 * nextPosition}%)`;
           position = nextPosition
         }, 16);
 
@@ -60,7 +94,7 @@
       setTimeout(nextPic, 1000);
     }
 
-    run()
+    // run()
 
   </script>
 </body>
