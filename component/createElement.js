@@ -43,6 +43,9 @@ class Element {
 	get style() {
 		return this.root.style
 	}
+	get getBoundingClientRect() {
+		return this.root.getBoundingClientRect()
+	}
 	appendChild(child) {
 		this.children.push(child)
 	}

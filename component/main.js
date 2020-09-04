@@ -36,7 +36,66 @@ class Carousel {
 			setTimeout(nextPic, 1000)
 		}
 
-		setTimeout(nextPic, 1000)
+		// setTimeout(nextPic, 1000)
+
+		children.forEach(child => {
+			child.addEventListener('mousedown', e => {
+				const width = child.getBoundingClientRect.width
+				const sX = e.clientX
+
+				let lastPosition = (position - 1 + children.length) % children.length
+				let nextPosition = (position + 1) % children.length
+
+				let last = children[lastPosition]
+				let current = children[position]
+				let next = children[nextPosition]
+
+				last.style.transition = `none`
+				current.style.transition = `none`
+				next.style.transition = `none`
+
+				const move = e => {
+					last.style.transform = `translateX(${
+						-width - width * lastPosition - (sX - e.clientX)
+					}px)`
+					current.style.transform = `translateX(${
+						-width * position - (sX - e.clientX)
+					}px)`
+					next.style.transform = `translateX(${
+						width - width * nextPosition - (sX - e.clientX)
+					}px)`
+				}
+				const up = e => {
+					document.removeEventListener('mousemove', move)
+					document.removeEventListener('mouseup', up)
+
+					let offset = 0
+					if (sX - e.clientX > 250) offset = -1
+					else if (sX - e.clientX < -250) offset = 1
+
+					last.style.transition = `ease .5s`
+					current.style.transition = `ease .5s`
+					next.style.transition = `ease .5s`
+
+					position = (position - offset + children.length) % children.length
+					lastPosition = (position - 1 + children.length) % children.length
+					nextPosition = (position + 1) % children.length
+
+					last = children[lastPosition]
+					current = children[position]
+					next = children[nextPosition]
+
+					last.style.transform = `translateX(${
+						-width - width * lastPosition
+					}px)`
+					current.style.transform = `translateX(${-width * position}px)`
+					next.style.transform = `translateX(${width - width * nextPosition}px)`
+				}
+
+				document.addEventListener('mousemove', move)
+				document.addEventListener('mouseup', up)
+			})
+		})
 
 		return <div id='container'>{children}</div>
 	}
