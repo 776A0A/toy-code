@@ -5,6 +5,9 @@
       height: 300px;
       white-space: nowrap;
       overflow: hidden;
+      outline: 1px solid blue;
+      margin: auto;
+      zoom: .5;
     }
 
     #container>img {
@@ -34,14 +37,30 @@
       container.append(img)
     })
     let position = 0
-    function move() {
-      setTimeout(() => {
-        container.children[position].style.transform = `translateX(${-100 * position}%)`;
-        position = (position + 1) % container.children.length
-        move()
-      }, 1000)
+    function run() {
+      const nextPic = () => {
+        const nextPosition = (position + 1) % container.children.length
+
+        container.children[position].style.transition = `none`
+        container.children[nextPosition].style.transition = `none`
+        container.children[position].style.transform = `translateX(${- 100 * position}%)`;
+        container.children[nextPosition].style.transform = `translateX(${100 - 100 * nextPosition}%)`;
+
+        setTimeout(() => {
+          container.children[position].style.transition = `ease .5s`
+          container.children[nextPosition].style.transition = `ease .5s`
+          container.children[position].style.transform = `translateX(${-100 - 100 * position}%)`;
+          container.children[nextPosition].style.transform = `translateX(${-100 * nextPosition}%)`;
+          position = nextPosition
+        }, 16);
+
+        run()
+      }
+
+      setTimeout(nextPic, 1000);
     }
-    move()
+
+    run()
 
   </script>
 </body>
