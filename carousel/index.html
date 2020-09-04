@@ -1,0 +1,47 @@
+<head>
+  <style>
+    #container {
+      width: 500px;
+      height: 300px;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+
+    #container>img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: inline-block;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="container"></div>
+  <script>
+    const imgList = [
+      'https://tse1-mm.cn.bing.net/th/id/OIP.z2Q5yDKbQakzgCcUrKBJkAHaJz?pid=Api&rs=1',
+      'https://tse4-mm.cn.bing.net/th/id/OIP.ZFVnyvQrDwUFrKd4a55VFAHaJ4?pid=Api&rs=1',
+      'https://tse4-mm.cn.bing.net/th/id/OIP.2Fxq5vDKSaEYuTXzKuw_gwHaJ4?pid=Api&rs=1',
+      'https://tse1-mm.cn.bing.net/th/id/OIP.diD6kXAYPVQN1I3YviPYJgHaFj?pid=Api&rs=1',
+      'https://ranking.xgoo.jp/tool/images/column/2020/01/0128_9.jpg'
+    ]
+    const container = document.getElementById('container')
+
+    imgList.forEach(src => {
+      const img = document.createElement('img')
+      img.src = src
+      container.append(img)
+    })
+    let position = 0
+    function move() {
+      setTimeout(() => {
+        container.children[position].style.transform = `translateX(${-100 * position}%)`;
+        position = (position + 1) % container.children.length
+        move()
+      }, 1000)
+    }
+    move()
+
+  </script>
+</body>
