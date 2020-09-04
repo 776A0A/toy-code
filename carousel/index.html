@@ -7,7 +7,7 @@
       overflow: hidden;
       outline: 1px solid blue;
       margin: auto;
-      zoom: .5;
+      /* zoom: .5; */
     }
 
     #container>img {
@@ -42,12 +42,12 @@
         const width = img.getBoundingClientRect().width
         const sX = e.clientX
 
-        const lastPosition = (position - 1 + container.children.length) % container.children.length
-        const nextPosition = (position + 1) % container.children.length
+        let lastPosition = (position - 1 + container.children.length) % container.children.length
+        let nextPosition = (position + 1) % container.children.length
 
-        const last = container.children[lastPosition]
-        const current = container.children[position]
-        const next = container.children[nextPosition]
+        let last = container.children[lastPosition]
+        let current = container.children[position]
+        let next = container.children[nextPosition]
 
         last.style.transition = `none`
         current.style.transition = `none`
@@ -61,6 +61,28 @@
         const up = e => {
           document.removeEventListener('mousemove', move)
           document.removeEventListener('mouseup', up)
+
+          let offset = 0
+          if (sX - e.clientX > 250) offset = -1
+          else if (sX - e.clientX < -250) offset = 1
+
+          last.style.transition = `ease .5s`
+          current.style.transition = `ease .5s`
+          next.style.transition = `ease .5s`
+
+          position = (position - offset + container.children.length) % container.children.length
+          lastPosition = (position - 1 + container.children.length) % container.children.length
+          nextPosition = (position + 1) % container.children.length
+
+          last = container.children[lastPosition]
+          current = container.children[position]
+          next = container.children[nextPosition]
+
+          last.style.transform = `translateX(${-width - width * lastPosition}px)`
+          current.style.transform = `translateX(${-width * position}px)`
+          next.style.transform = `translateX(${width - width * nextPosition}px)`
+
+
         }
 
         document.addEventListener('mousemove', move)
