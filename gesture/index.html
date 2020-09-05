@@ -1,3 +1,18 @@
 <body>
+  <div id="move" style="width:200px;height:200px;background-color:lightblue;transform:translate(0px,0px);"></div>
   <script src="./gesture.js"></script>
+  <script>
+    const move = document.getElementById('move')
+    enableGesture(move)
+    let diffX = 0
+    let diffY = 0
+    move.addEventListener('panstart', e => {
+      diffX = e.detail.startX - e.target.getBoundingClientRect().x;
+      diffY = e.detail.startY - e.target.getBoundingClientRect().y;
+      console.log(diffX, diffY);
+    })
+    move.addEventListener('pan', e => {
+      move.style.transform = `translate(${e.detail.clientX - diffX}px, ${e.detail.clientY - diffY}px)`
+    })
+  </script>
 </body>
