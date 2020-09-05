@@ -40,7 +40,7 @@ class Carousel {
 
 		children.forEach(child => {
 			child.addEventListener('mousedown', e => {
-				const width = child.getBoundingClientRect.width
+				const width = child.getBoundingClientRect().width
 				const sX = e.clientX
 
 				let lastPosition = (position - 1 + children.length) % children.length
