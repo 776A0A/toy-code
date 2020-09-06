@@ -11,7 +11,7 @@ function enableGesture(elem) {
 		ctx.startX = point.clientX
 		ctx.startY = point.clientY
 		ctx.isTap = true
-		ctx.isPan = ctx.isPress = false
+    ctx.isPan = ctx.isPress = false
 		dispatchEvent('start', {
 			startX: ctx.startX,
 			startY: ctx.startY,
@@ -31,18 +31,18 @@ function enableGesture(elem) {
 		}, 500)
 	}
 	const move = (point, ctx) => {
-		const diffX = point.clientX - ctx.startX,
-			diffY = point.clientY - ctx.startY
+		const diffX = Math.abs(point.clientX - ctx.startX),
+			diffY = Math.abs(point.clientY - ctx.startY)
 		// 大于 10px 则进入pan阶段
 		if (!ctx.isPan && diffX ** 2 + diffY ** 2 > 100) {
+			ctx.isPan = true
+      ctx.isTap = ctx.isPress = false
 			dispatchEvent('panstart', {
 				startX: ctx.startX,
 				startY: ctx.startY,
 				clientX: point.clientX,
 				clientY: point.clientY
 			})
-			ctx.isPan = true
-			ctx.isTap = ctx.isPress = false
 		}
 		dispatchEvent('pan', {
 			startX: ctx.startX,
