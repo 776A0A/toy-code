@@ -21,6 +21,7 @@
 
 <body>
   <div id="container"></div>
+  <script src="./gesture.js"></script>
   <script>
     const imgList = [
       'https://tse1-mm.cn.bing.net/th/id/OIP.z2Q5yDKbQakzgCcUrKBJkAHaJz?pid=Api&rs=1',
@@ -30,7 +31,9 @@
       'https://ranking.xgoo.jp/tool/images/column/2020/01/0128_9.jpg'
     ]
     const container = document.getElementById('container')
-    let position = 0
+    let position = 0, lastPosition, nextPosition;
+    let last, current, next
+    const length = container.children.length, children = container.children
 
     imgList.forEach(src => {
       const img = document.createElement('img')
@@ -38,54 +41,47 @@
       img.draggable = false
       container.append(img)
 
-      img.addEventListener('mousedown', e => {
-        const width = img.getBoundingClientRect().width
-        const sX = e.clientX
+      enableGesture(img)
+      const width = img.getBoundingClientRect().width
+      img.addEventListener('panstart', e => {
+        lastPosition = (position - 1 + children.length) % children.length
+        nextPosition = (position + 1) % children.length
 
-        let lastPosition = (position - 1 + container.children.length) % container.children.length
-        let nextPosition = (position + 1) % container.children.length
-
-        let last = container.children[lastPosition]
-        let current = container.children[position]
-        let next = container.children[nextPosition]
+        last = children[lastPosition]
+        current = children[position]
+        next = children[nextPosition]
 
         last.style.transition = `none`
         current.style.transition = `none`
         next.style.transition = `none`
+      })
+      img.addEventListener('pan', e => {
+        const { startX, clientX } = e.detail
+        last.style.transform = `translateX(${- width - width * lastPosition - (startX - clientX)}px)`
+        current.style.transform = `translateX(${- width * position - (startX - clientX)}px)`
+        next.style.transform = `translateX(${width - width * nextPosition - (startX - clientX)}px)`
+      })
+      img.addEventListener('panend', e => {
+        const { startX, clientX } = e.detail
+        let offset = 0
+        if (startX - clientX > 250) offset = -1
+        else if (startX - clientX < -250) offset = 1
 
-        const move = e => {
-          last.style.transform = `translateX(${-width - width * lastPosition - (sX - e.clientX)}px)`
-          current.style.transform = `translateX(${-width * position - (sX - e.clientX)}px)`
-          next.style.transform = `translateX(${width - width * nextPosition - (sX - e.clientX)}px)`
-        }
-        const up = e => {
-          document.removeEventListener('mousemove', move)
-          document.removeEventListener('mouseup', up)
+        last.style.transition = `ease .5s`
+        current.style.transition = `ease .5s`
+        next.style.transition = `ease .5s`
 
-          let offset = 0
-          if (sX - e.clientX > 250) offset = -1
-          else if (sX - e.clientX < -250) offset = 1
+        position = (position - offset + children.length) % children.length
+        lastPosition = (position - 1 + children.length) % children.length
+        nextPosition = (position + 1) % children.length
 
-          last.style.transition = `ease .5s`
-          current.style.transition = `ease .5s`
-          next.style.transition = `ease .5s`
+        last = children[lastPosition]
+        current = children[position]
+        next = children[nextPosition]
 
-          position = (position - offset + container.children.length) % container.children.length
-          lastPosition = (position - 1 + container.children.length) % container.children.length
-          nextPosition = (position + 1) % container.children.length
-
-          last = container.children[lastPosition]
-          current = container.children[position]
-          next = container.children[nextPosition]
-
-          last.style.transform = `translateX(${-width - width * lastPosition}px)`
-          current.style.transform = `translateX(${-width * position}px)`
-          next.style.transform = `translateX(${width - width * nextPosition}px)`
-
-        }
-
-        document.addEventListener('mousemove', move)
-        document.addEventListener('mouseup', up)
+        last.style.transform = `translateX(${-width - width * lastPosition}px)`
+        current.style.transform = `translateX(${-width * position}px)`
+        next.style.transform = `translateX(${width - width * nextPosition}px)`
       })
     })
 
