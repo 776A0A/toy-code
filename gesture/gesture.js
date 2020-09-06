@@ -8,13 +8,13 @@ function enableGesture(elem) {
 		)
 
 	const start = (point, ctx) => {
-		ctx.startX = point.clientX
-		ctx.startY = point.clientY
+		const startX = (ctx.startX = point.clientX)
+		const startY = (ctx.startY = point.clientY)
 		ctx.isTap = true
 		ctx.isPan = ctx.isPress = false
 		dispatchEvent('start', {
-			startX: ctx.startX,
-			startY: ctx.startY,
+			startX,
+			startY,
 			clientX: point.clientX,
 			clientY: point.clientY
 		})
@@ -23,61 +23,66 @@ function enableGesture(elem) {
 			ctx.isPress = true
 			ctx.isTap = false
 			dispatchEvent('pressstart', {
-				startX: ctx.startX,
-				startY: ctx.startY,
+				startX,
+				startY,
 				clientX: point.clientX,
 				clientY: point.clientY
 			})
 		}, 500)
 	}
+
 	const move = (point, ctx) => {
-		const diffX = Math.abs(point.clientX - ctx.startX),
-			diffY = Math.abs(point.clientY - ctx.startY)
+		const x = point.clientX,
+			y = point.clientY,
+			startX = ctx.startX,
+			startY = ctx.startY,
+			diffX = Math.abs(x - startX),
+			diffY = Math.abs(y - startY)
 		// 大于 10px 则进入pan阶段
 		if (!ctx.isPan && diffX ** 2 + diffY ** 2 > 100) {
 			ctx.isPan = true
 			ctx.isTap = ctx.isPress = false
 			dispatchEvent('panstart', {
-				startX: point.clientX,
-				startY: point.clientY,
-				clientX: point.clientX,
-				clientY: point.clientY
+				startX: x,
+				startY: y,
+				clientX: x,
+				clientY: y
 			})
 		}
-		if (ctx.isPan)
-			dispatchEvent('pan', {
-				startX: ctx.startX,
-				startY: ctx.startY,
-				clientX: point.clientX,
-				clientY: point.clientY
-			})
+		if (!ctx.isPan) return
+		dispatchEvent('pan', {
+			startX,
+			startY,
+			clientX: x,
+			clientY: y
+		})
+		const moves = ctx.moves || (ctx.moves = [])
+		moves.push({ x, y, t: Date.now() })
+		ctx.moves = moves.filter(({ t }) => Date.now() - t < 300)
 	}
+
 	const end = (point, ctx) => {
+		const startX = ctx.startX,
+			startY = ctx.startY,
+			clientX = point.clientX,
+			clientY = point.clientY
+		const detail = { startX, startY, clientX, clientY }
 		if (ctx.isPan) {
-			dispatchEvent('panend', {
-				startX: ctx.startX,
-				startY: ctx.startY,
-				clientX: point.clientX,
-				clientY: point.clientY
-			})
+			const { x, y, t } = ctx.moves[0]
+			const speed =
+				Math.sqrt(Math.abs(clientX - x) ** 2 + Math.abs(clientY - y) ** 2) /
+				(Date.now() - t)
+			const isFlick = speed >= 2
+			dispatchEvent('panend', { ...detail, isFlick })
 		} else if (ctx.isTap) {
-			dispatchEvent('tap', {
-				startX: ctx.startX,
-				startY: ctx.startY,
-				clientX: point.clientX,
-				clientY: point.clientY
-			})
+			dispatchEvent('tap', detail)
 		} else if (ctx.isPress) {
-			dispatchEvent('pressend', {
-				startX: ctx.startX,
-				startY: ctx.startY,
-				clientX: point.clientX,
-				clientY: point.clientY
-			})
+			dispatchEvent('pressend', detail)
 		}
 		ctx.isPan = ctx.isTap = ctx.isPress = false
 		clearTimeout(ctx.timer)
 	}
+
 	const cancel = (point, ctx) => {
 		dispatchEvent('cancel', {
 			startX: ctx.startX,
