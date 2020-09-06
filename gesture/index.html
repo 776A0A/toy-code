@@ -6,7 +6,7 @@
     enableGesture(move)
     let diffX = 0
     let diffY = 0
-    move.addEventListener('start', e => {
+    move.addEventListener('panstart', e => {
       diffX = e.detail.startX - move.getBoundingClientRect().x;
       diffY = e.detail.startY - move.getBoundingClientRect().y;
     })
