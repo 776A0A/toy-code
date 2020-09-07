@@ -40,6 +40,7 @@ export default class Carousel {
 		updateState(0)
 
 		let offsetDiffValue = 0 // 偏移的差值
+
 		const onStart = (e, i) => {
 			tl.pause()
 			clearTimeout(nextPicTimer)
@@ -69,14 +70,20 @@ export default class Carousel {
 
 		const onPanend = e => {
 			const {
-				detail: { clientX, startX }
+				detail: { clientX, startX, isFlick }
 			} = e
 			const diffX = clientX - startX + offsetDiffValue
 			const width = currentItem.getBoundingClientRect().width
 
 			let offset = 0
-			if (diffX > 250) offset = -1
-			else if (diffX < -250) offset = 1
+
+			if (isFlick) {
+				if (diffX > 0) offset = -1
+				else if (diffX < 0) offset = 1
+			} else {
+				if (diffX > 250) offset = -1
+				else if (diffX < -250) offset = 1
+			}
 
 			tl.reset()
 			tl.add(
@@ -105,6 +112,7 @@ export default class Carousel {
 			updateState(currentI + offset)
 			nextPicTimer = setTimeout(nextPic, 1000)
 		}
+
 		const nextPic = () => {
 			const width = currentItem.getBoundingClientRect().width
 
