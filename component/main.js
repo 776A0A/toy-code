@@ -1,5 +1,5 @@
 import createElement from './createElement'
-import { Timeline, Animation } from './animation'
+import { Timeline, Animation, timingFunction } from './animation'
 import enableGesture from './gesture'
 
 class Carousel {
@@ -34,7 +34,7 @@ class Carousel {
 					start: -100 * position,
 					end: -100 - 100 * position,
 					duration: 500,
-					timingFunction: v => v,
+					timingFunction: timingFunction.EASE,
 					template: v => `translateX(${v}%)`
 				})
 			).add(
@@ -44,7 +44,7 @@ class Carousel {
 					start: 100 - 100 * nextPosition,
 					end: -100 * nextPosition,
 					duration: 500,
-					timingFunction: v => v,
+					timingFunction: timingFunction.EASE,
 					template: v => `translateX(${v}%)`
 				})
 			)

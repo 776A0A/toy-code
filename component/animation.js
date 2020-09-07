@@ -1,3 +1,5 @@
+import generateCubicBezier from './cubicBezier'
+
 const INITED = Symbol('inited')
 const PLAYING = Symbol('playing')
 const PAUSED = Symbol('paused')
@@ -76,4 +78,12 @@ export class Animation {
 		this.delay = delay || 0
 		this.timingFunction = timingFunction || (() => {})
 	}
+}
+
+export const timingFunction = {
+	LINEAR: v => v,
+	EASE: generateCubicBezier(0.25, 0.1, 0.25, 1),
+	EASEIN: generateCubicBezier(0.42, 0, 1, 1),
+	EASEOUT: generateCubicBezier(0, 0, 0.58, 1),
+	EASEINOUT: generateCubicBezier(0.42, 0, 0.58, 1)
 }
