@@ -1,6 +1,6 @@
 import generateCubicBezier from './cubicBezier'
 
-const INITED = Symbol('inited')
+const INITIALIZED = Symbol('initialized')
 const PLAYING = Symbol('playing')
 const PAUSED = Symbol('paused')
 
@@ -9,7 +9,7 @@ export class Timeline {
 		this.animations = new Set()
 		this.addTimes = new Map()
 		this.requestID = null
-		this.state = INITED
+		this.state = INITIALIZED
 	}
 	tick() {
 		const t = Date.now() - this.startTime, // 已经经过的时间
@@ -41,7 +41,7 @@ export class Timeline {
 	}
 	add(animation, addTime) {
 		this.animations.add(animation)
-		if (this.state === PLAYING && this.requestID === null) this.tick()
+		if (this.state === PLAYING && this.requestID === null) this.tick() // 已经没有在执行动画了，则调用指定动画
 		if (this.state === PLAYING)
 			this.addTimes.set(animation, addTime ?? Date.now() - this.startTime)
 		else this.addTimes.set(animation, addTime ?? 0)
@@ -52,6 +52,7 @@ export class Timeline {
 		this.state = PAUSED
 		this.pauseTime = Date.now()
 		cancelAnimationFrame(this.requestID)
+		this.requestID = null
 	}
 	resume() {
 		if (this.state !== PAUSED) return
@@ -60,7 +61,7 @@ export class Timeline {
 		this.tick()
 	}
 	start() {
-		if (this.state !== INITED) return
+		if (this.state !== INITIALIZED) return
 		this.state = PLAYING
 		this.startTime = Date.now()
 		this.tick()
