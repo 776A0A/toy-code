@@ -22,8 +22,9 @@ export default class Carousel {
 				<img
 					src={url}
 					draggable={false}
-					onPanstart={e => onPanstart(e, i)}
+					onStart={e => onStart(e, i)}
 					onPan={e => onPan(e)}
+					onPanend={e => onPanend(e)}
 				/>
 			)
 			setTransform(child, 0) // 设定初始值
@@ -36,60 +37,74 @@ export default class Carousel {
 			nextI
 		let currentItem, lastItem, nextItem
 
-		updateState()
+		updateState(0)
 
-		let transformedValue = 0
-		const onPanstart = (e, i) => {
+		let offsetDiffValue = 0 // 偏移的差值
+		const onStart = (e, i) => {
 			tl.pause()
 			clearTimeout(nextPicTimer)
+
 			updateState(i)
-			transformedValue =
-				getTransformedValue(currentItem.style.transform) - -500 * currentI
+
+			// 已偏移的量减去应该偏移的量
+			offsetDiffValue =
+				getOffsetValue(currentItem.style.transform) - -500 * currentI
 		}
 
 		const onPan = e => {
 			const {
 				detail: { clientX, startX }
 			} = e
-			const diffX = clientX - startX
+			const diffX = clientX - startX // 拖拽后移动的距离
 
-			setTransform(currentItem, -500 * currentI + transformedValue + diffX)
-			setTransform(lastItem, -500 - 500 * lastI + transformedValue + diffX)
-			setTransform(nextItem, 500 - 500 * nextI + transformedValue + diffX)
+			if (Math.abs(diffX) >= 500) return
+
+			setTransform(currentItem, -500 * currentI + offsetDiffValue + diffX)
+			setTransform(lastItem, -500 - 500 * lastI + offsetDiffValue + diffX)
+			setTransform(nextItem, 500 - 500 * nextI + offsetDiffValue + diffX)
 		}
 
+		const onPanend = e => {
+			const {
+				detail: { clientX, startX }
+			} = e
+			const diffX = clientX - startX
+
+			if (diffX > 250) {
+				updateState(currentI - 1)
+			} else if (diffX < -250) {
+				updateState(currentI + 1)
+			}
+			console.log({ currentI, lastI, nextI })
+			// nextPic()
+		}
 		const nextPic = () => {
-			nextI = (currentI + 1) % this.data.length
-			currentItem = children[currentI]
-
-			nextItem = children[nextI]
-
 			const width = currentItem.getBoundingClientRect().width
 
 			tl.add(
 				new Animation({
 					object: currentItem.style,
 					property: 'transform',
-					start: -100 * currentI,
-					end: -100 - 100 * currentI,
+					start: -width * currentI,
+					end: -width - width * currentI,
 					duration: 1000,
-					timingFunction: timingFunction.EASE,
-					template: v => `translateX(${(width / 100) * v}px)`
+					timingFunction: timingFunction.LINEAR,
+					template: v => `translateX(${v}px)`
 				})
 			).add(
 				new Animation({
 					object: nextItem.style,
 					property: 'transform',
-					start: 100 - 100 * nextI,
-					end: -100 * nextI,
+					start: width - width * nextI,
+					end: -width * nextI,
 					duration: 1000,
-					timingFunction: timingFunction.EASE,
-					template: v => `translateX(${(width / 100) * v}px)`
+					timingFunction: timingFunction.LINEAR,
+					template: v => `translateX(${v}px)`
 				})
 			)
 			tl.start()
 
-			currentI = nextI
+			updateState(nextI)
 			nextPicTimer = setTimeout(nextPic, 2000)
 		}
 
@@ -102,27 +117,19 @@ export default class Carousel {
 		}
 
 		function updateState(i = 0) {
-			updateIndex(i)
-			updateItem()
-		}
-
-		function updateIndex(i = 0) {
 			const len = children.length
-			currentI = i
+
+			currentI = (i + len) % len
 			lastI = (currentI - 1 + len) % len
 			nextI = (i + 1) % len
-			return { currentI, lastI, nextI }
-		}
 
-		function updateItem() {
 			currentItem = children[currentI]
 			lastItem = children[lastI]
 			nextItem = children[nextI]
-			return { currentItem, lastItem, nextItem }
 		}
 
-		function getTransformedValue(transform) {
-			return Number(/translateX\((-?\d*\.?\d+)px\)/.exec(transform)[1])
+		function getOffsetValue(transform) {
+			return Number(/translateX\((-?\d*\.?\d+)px\)/.exec(transform)?.[1])
 		}
 	}
 	mountTo(parent) {
