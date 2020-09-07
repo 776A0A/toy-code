@@ -38,7 +38,9 @@ class Element {
 		this.root = document.createElement(type)
 	}
 	setAttribute(k, v) {
-		this.root.setAttribute(k, v)
+		if (/^on([A-Z][a-z_$]*)$/.test(k))
+			this.addEventListener(RegExp.$1.toLowerCase(), v)
+		else this.root.setAttribute(k, v)
 	}
 	get style() {
 		return this.root.style

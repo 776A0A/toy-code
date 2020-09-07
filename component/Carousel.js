@@ -14,7 +14,19 @@ export default class Carousel {
 		this.children.push(child)
 	}
 	render() {
-		const children = this.data.map(url => <img src={url} draggable={false} />)
+		const tl = new Timeline()
+		let nextPicTimer = null
+
+		const onStart = e => {
+			tl.pause()
+			clearTimeout(nextPicTimer)
+		}
+
+		const children = this.data.map(url => {
+			const child = <img src={url} draggable={false} onStart={onStart} />
+			enableGesture(child.root)
+			return child
+		})
 
 		let position = 0,
 			lastPosition,
@@ -22,7 +34,6 @@ export default class Carousel {
 		let current, last, next
 
 		const nextPic = () => {
-			const tl = new Timeline()
 			const nextPosition = (position + 1) % this.data.length
 			const current = children[position]
 			const next = children[nextPosition]
@@ -51,10 +62,10 @@ export default class Carousel {
 			tl.start()
 
 			position = nextPosition
-			setTimeout(nextPic, 1000)
+			nextPicTimer = setTimeout(nextPic, 1000)
 		}
 
-		setTimeout(nextPic, 1000)
+		nextPicTimer = setTimeout(nextPic, 1000)
 
 		// children.forEach(child => {
 		// 	child = child.root
