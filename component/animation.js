@@ -38,6 +38,7 @@ export class Timeline {
 	}
 	add(a) {
 		this.animations.push(a)
+		return this
 	}
 	pause() {
 		if (this.state !== PLAYING) return

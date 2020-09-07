@@ -20,91 +20,102 @@ class Carousel {
 			lastPosition,
 			nextPosition
 		let current, last, next
-		const tl = new Timeline()
 
 		const nextPic = () => {
+			const tl = new Timeline()
 			const nextPosition = (position + 1) % this.data.length
 			const current = children[position]
 			const next = children[nextPosition]
 
-			current.style.transition = `none`
-			next.style.transition = `none`
-			current.style.transform = `translateX(${-100 * position}%)`
-			next.style.transform = `translateX(${100 - 100 * nextPosition}%)`
+			tl.add(
+				new Animation({
+					object: current.style,
+					property: 'transform',
+					start: -100 * position,
+					end: -100 - 100 * position,
+					duration: 500,
+					timingFunction: v => v,
+					template: v => `translateX(${v}%)`
+				})
+			).add(
+				new Animation({
+					object: next.style,
+					property: 'transform',
+					start: 100 - 100 * nextPosition,
+					end: -100 * nextPosition,
+					duration: 500,
+					timingFunction: v => v,
+					template: v => `translateX(${v}%)`
+				})
+			)
+			tl.start()
 
-			setTimeout(() => {
-				current.style.transition = `ease .5s`
-				next.style.transition = `ease .5s`
-				current.style.transform = `translateX(${-100 - 100 * position}%)`
-				next.style.transform = `translateX(${-100 * nextPosition}%)`
-				position = nextPosition
-			}, 16)
-
+			position = nextPosition
 			setTimeout(nextPic, 1000)
 		}
 
-		// setTimeout(nextPic, 1000)
+		setTimeout(nextPic, 1000)
 
-		children.forEach(child => {
-			child = child.root
+		// children.forEach(child => {
+		// 	child = child.root
 
-			enableGesture(child)
+		// 	enableGesture(child)
 
-			child.addEventListener('panstart', e => {
-				lastPosition = (position - 1 + children.length) % children.length
-				nextPosition = (position + 1) % children.length
+		// 	child.addEventListener('panstart', e => {
+		// 		lastPosition = (position - 1 + children.length) % children.length
+		// 		nextPosition = (position + 1) % children.length
 
-				last = children[lastPosition]
-				current = children[position]
-				next = children[nextPosition]
+		// 		last = children[lastPosition]
+		// 		current = children[position]
+		// 		next = children[nextPosition]
 
-				last.style.transition = `none`
-				current.style.transition = `none`
-				next.style.transition = `none`
-			})
-			child.addEventListener('pan', e => {
-				const width = child.getBoundingClientRect().width
-				const {
-					detail: { startX, clientX }
-				} = e
+		// 		last.style.transition = `none`
+		// 		current.style.transition = `none`
+		// 		next.style.transition = `none`
+		// 	})
+		// 	child.addEventListener('pan', e => {
+		// 		const width = child.getBoundingClientRect().width
+		// 		const {
+		// 			detail: { startX, clientX }
+		// 		} = e
 
-				last.style.transform = `translateX(${
-					-width - width * lastPosition - (startX - clientX)
-				}px)`
-				current.style.transform = `translateX(${
-					-width * position - (startX - clientX)
-				}px)`
-				next.style.transform = `translateX(${
-					width - width * nextPosition - (startX - clientX)
-				}px)`
-			})
-			child.addEventListener('panend', e => {
-				const width = child.getBoundingClientRect().width
-				const {
-					detail: { startX, clientX }
-				} = e
+		// 		last.style.transform = `translateX(${
+		// 			-width - width * lastPosition - (startX - clientX)
+		// 		}px)`
+		// 		current.style.transform = `translateX(${
+		// 			-width * position - (startX - clientX)
+		// 		}px)`
+		// 		next.style.transform = `translateX(${
+		// 			width - width * nextPosition - (startX - clientX)
+		// 		}px)`
+		// 	})
+		// 	child.addEventListener('panend', e => {
+		// 		const width = child.getBoundingClientRect().width
+		// 		const {
+		// 			detail: { startX, clientX }
+		// 		} = e
 
-				let offset = 0
-				if (startX - clientX > 250) offset = -1
-				else if (startX - clientX < -250) offset = 1
+		// 		let offset = 0
+		// 		if (startX - clientX > 250) offset = -1
+		// 		else if (startX - clientX < -250) offset = 1
 
-				last.style.transition = `ease .5s`
-				current.style.transition = `ease .5s`
-				next.style.transition = `ease .5s`
+		// 		last.style.transition = `ease .5s`
+		// 		current.style.transition = `ease .5s`
+		// 		next.style.transition = `ease .5s`
 
-				position = (position - offset + children.length) % children.length
-				lastPosition = (position - 1 + children.length) % children.length
-				nextPosition = (position + 1) % children.length
+		// 		position = (position - offset + children.length) % children.length
+		// 		lastPosition = (position - 1 + children.length) % children.length
+		// 		nextPosition = (position + 1) % children.length
 
-				last = children[lastPosition]
-				current = children[position]
-				next = children[nextPosition]
+		// 		last = children[lastPosition]
+		// 		current = children[position]
+		// 		next = children[nextPosition]
 
-				last.style.transform = `translateX(${-width - width * lastPosition}px)`
-				current.style.transform = `translateX(${-width * position}px)`
-				next.style.transform = `translateX(${width - width * nextPosition}px)`
-			})
-		})
+		// 		last.style.transform = `translateX(${-width - width * lastPosition}px)`
+		// 		current.style.transform = `translateX(${-width * position}px)`
+		// 		next.style.transform = `translateX(${width - width * nextPosition}px)`
+		// 	})
+		// })
 
 		return <div id='container'>{children}</div>
 	}
