@@ -6,10 +6,7 @@ const PAUSED = Symbol('paused')
 
 export class Timeline {
 	constructor() {
-		this.animations = new Set()
-		this.addTimes = new Map()
-		this.requestID = null
-		this.state = INITIALIZED
+		this.init()
 	}
 	tick() {
 		const t = Date.now() - this.startTime, // 已经经过的时间
@@ -65,6 +62,15 @@ export class Timeline {
 		this.state = PLAYING
 		this.startTime = Date.now()
 		this.tick()
+	}
+	init() {
+		this.reset()
+	}
+	reset() {
+		this.animations = new Set()
+		this.addTimes = new Map()
+		this.state = INITIALIZED
+		this.requestID = this.startTime = this.pauseTime = null
 	}
 }
 

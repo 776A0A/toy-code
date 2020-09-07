@@ -46,37 +46,76 @@ export default class Carousel {
 
 			updateState(i)
 
+			const width = currentItem.getBoundingClientRect().width
 			// 已偏移的量减去应该偏移的量
 			offsetDiffValue =
-				getOffsetValue(currentItem.style.transform) - -500 * currentI
+				getOffsetValue(currentItem.style.transform) - -width * currentI
 		}
 
 		const onPan = e => {
 			const {
 				detail: { clientX, startX }
 			} = e
-			const diffX = clientX - startX // 拖拽后移动的距离
+			const diffX = clientX - startX + offsetDiffValue // 拖拽距离
+			const width = currentItem.getBoundingClientRect().width
 
-			if (Math.abs(diffX) >= 500) return
+			// 只允许拖拽一张图的宽度
+			if (Math.abs(diffX) >= width) return
 
-			setTransform(currentItem, -500 * currentI + offsetDiffValue + diffX)
-			setTransform(lastItem, -500 - 500 * lastI + offsetDiffValue + diffX)
-			setTransform(nextItem, 500 - 500 * nextI + offsetDiffValue + diffX)
+			setTransform(currentItem, -width * currentI + diffX)
+			setTransform(lastItem, -width - width * lastI + diffX)
+			setTransform(nextItem, width - width * nextI + diffX)
 		}
 
 		const onPanend = e => {
 			const {
 				detail: { clientX, startX }
 			} = e
-			const diffX = clientX - startX
+			const diffX = clientX - startX + offsetDiffValue
+			const width = currentItem.getBoundingClientRect().width
 
-			if (diffX > 250) {
-				updateState(currentI - 1)
-			} else if (diffX < -250) {
-				updateState(currentI + 1)
-			}
-			console.log({ currentI, lastI, nextI })
-			// nextPic()
+			let offset = 0
+			if (diffX > 250) offset = -1
+			else if (diffX < -250) offset = 1
+
+			tl.reset()
+			tl.add(
+				new Animation({
+					object: lastItem.style,
+					property: 'transform',
+					start: -width - width * lastI + diffX,
+					end: -width - width * lastI - offset * width,
+					duration: 1000,
+					timingFunction: timingFunction.LINEAR,
+					template: v => `translateX(${v}px)`
+				})
+			)
+				.add(
+					new Animation({
+						object: currentItem.style,
+						property: 'transform',
+						start: -width * currentI + diffX,
+						end: -width * currentI - offset * width,
+						duration: 1000,
+						timingFunction: timingFunction.LINEAR,
+						template: v => `translateX(${v}px)`
+					})
+				)
+				.add(
+					new Animation({
+						object: nextItem.style,
+						property: 'transform',
+						start: width - width * nextI + diffX,
+						end: width - width * nextI - offset * width,
+						duration: 1000,
+						timingFunction: timingFunction.LINEAR,
+						template: v => `translateX(${v}px)`
+					})
+				)
+
+			tl.start()
+			updateState(currentI + offset)
+			nextPicTimer = setTimeout(nextPic, 2000)
 		}
 		const nextPic = () => {
 			const width = currentItem.getBoundingClientRect().width
@@ -102,6 +141,7 @@ export default class Carousel {
 					template: v => `translateX(${v}px)`
 				})
 			)
+
 			tl.start()
 
 			updateState(nextI)
