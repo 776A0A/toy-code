@@ -15,7 +15,7 @@
     return false
   }
 
-  function find1(source, pattern) {
+  function find(source, pattern) {
     const next = generateNext(pattern)
     let j = 0
     for (let i = 0; i < source.length; i++) {
@@ -51,10 +51,10 @@
     return next
   }
 
-  console.log(find1('aaaaaaaax', 'aax'));
-  console.log(find1('abcababcabx', 'abcabx'));
-  console.log(find1('abcdabcdabcxabcd', 'abcdabcxabcd'));
-  console.log(find1('abcdabcdabcx', 'abcdabcx'));
-  console.log(find1('abcxxyz', 'xy'));
-  console.log(find1('abcxyz', 'xy'));
+  console.log(find('aaaaaaaax', 'aax'));
+  console.log(find('abcababcabx', 'abcabx'));
+  console.log(find('abcdabcdabcxabcd', 'abcdabcxabcd'));
+  console.log(find('abcdabcdabcx', 'abcdabcx'));
+  console.log(find('abcxxyz', 'xy'));
+  console.log(find('abcxyz', 'xy'));
 </script>
