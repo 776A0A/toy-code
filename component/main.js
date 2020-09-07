@@ -35,7 +35,7 @@ class Carousel {
 					end: -100 - 100 * position,
 					duration: 500,
 					timingFunction: timingFunction.EASE,
-					template: v => `translateX(${v}%)`
+					template: v => `translateX(${v}%)`,
 				})
 			).add(
 				new Animation({
@@ -45,7 +45,7 @@ class Carousel {
 					end: -100 * nextPosition,
 					duration: 500,
 					timingFunction: timingFunction.EASE,
-					template: v => `translateX(${v}%)`
+					template: v => `translateX(${v}%)`,
 				})
 			)
 			tl.start()

@@ -6,15 +6,15 @@ const PAUSED = Symbol('paused')
 
 export class Timeline {
 	constructor() {
-		this.animations = []
+		this.animations = new Set()
+		this.addTimes = new Map()
 		this.requestID = null
 		this.state = INITED
 	}
 	tick() {
-		const t = Date.now() - this.startTime
-		const animations = this.animations.filter(
-			animation => !animation.isFinished
-		)
+		const t = Date.now() - this.startTime, // 已经经过的时间
+			animations = this.animations
+
 		for (const animation of animations) {
 			const {
 				object,
@@ -26,20 +26,25 @@ export class Timeline {
 				delay,
 				timingFunction
 			} = animation
-			let progression = timingFunction((t - delay) / duration) // 得到当前进度 0 - 1 之间
-			if (t > animation.duration + animation.delay) {
+			const addTime = this.addTimes.get(animation)
+			let progression = timingFunction((t - delay - addTime) / duration) // 得到当前进度 0 - 1 之间
+			if (t > animation.duration + animation.delay + addTime) {
 				progression = 1
-				animation.isFinished = true
+				this.animations.delete(animation)
 			}
 			if (progression < 0) continue
-			const value = start + progression * (end - start) // 通过进度算出值
-			object[property] = template(value)
+			object[property] = template(start + progression * (end - start)) // 通过进度算出值
 		}
-		if (animations.length)
+		if (animations.size)
 			this.requestID = requestAnimationFrame(() => this.tick())
+		else this.requestID = null
 	}
-	add(a) {
-		this.animations.push(a)
+	add(animation, addTime) {
+		this.animations.add(animation)
+		if (this.state === PLAYING && this.requestID === null) this.tick()
+		if (this.state === PLAYING)
+			this.addTimes.set(animation, addTime ?? Date.now() - this.startTime)
+		else this.addTimes.set(animation, addTime ?? 0)
 		return this
 	}
 	pause() {
