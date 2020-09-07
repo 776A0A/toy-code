@@ -80,75 +80,55 @@ export default class Carousel {
 
 			tl.reset()
 			tl.add(
-				new Animation({
+				animationFactory({
 					object: lastItem.style,
-					property: 'transform',
 					start: -width - width * lastI + diffX,
-					end: -width - width * lastI - offset * width,
-					duration: 1000,
-					timingFunction: timingFunction.LINEAR,
-					template: v => `translateX(${v}px)`
+					end: -width - width * lastI - offset * width
 				})
 			)
 				.add(
-					new Animation({
+					animationFactory({
 						object: currentItem.style,
-						property: 'transform',
 						start: -width * currentI + diffX,
-						end: -width * currentI - offset * width,
-						duration: 1000,
-						timingFunction: timingFunction.LINEAR,
-						template: v => `translateX(${v}px)`
+						end: -width * currentI - offset * width
 					})
 				)
 				.add(
-					new Animation({
+					animationFactory({
 						object: nextItem.style,
-						property: 'transform',
 						start: width - width * nextI + diffX,
-						end: width - width * nextI - offset * width,
-						duration: 1000,
-						timingFunction: timingFunction.LINEAR,
-						template: v => `translateX(${v}px)`
+						end: width - width * nextI - offset * width
 					})
 				)
 
 			tl.start()
 			updateState(currentI + offset)
-			nextPicTimer = setTimeout(nextPic, 2000)
+			nextPicTimer = setTimeout(nextPic, 1000)
 		}
 		const nextPic = () => {
 			const width = currentItem.getBoundingClientRect().width
 
 			tl.add(
-				new Animation({
+				animationFactory({
 					object: currentItem.style,
-					property: 'transform',
 					start: -width * currentI,
-					end: -width - width * currentI,
-					duration: 1000,
-					timingFunction: timingFunction.LINEAR,
-					template: v => `translateX(${v}px)`
+					end: -width - width * currentI
 				})
 			).add(
-				new Animation({
+				animationFactory({
 					object: nextItem.style,
-					property: 'transform',
 					start: width - width * nextI,
-					end: -width * nextI,
-					duration: 1000,
-					timingFunction: timingFunction.LINEAR,
-					template: v => `translateX(${v}px)`
+					end: -width * nextI
 				})
 			)
 
 			tl.start()
 
 			updateState(nextI)
-			nextPicTimer = setTimeout(nextPic, 2000)
+			nextPicTimer = setTimeout(nextPic, 1000)
 		}
 
-		nextPicTimer = setTimeout(nextPic, 2000)
+		nextPicTimer = setTimeout(nextPic, 1000)
 
 		return <div id='container'>{children}</div>
 
@@ -170,6 +150,16 @@ export default class Carousel {
 
 		function getOffsetValue(transform) {
 			return Number(/translateX\((-?\d*\.?\d+)px\)/.exec(transform)?.[1])
+		}
+
+		function animationFactory(config) {
+			return new Animation({
+				property: 'transform',
+				duration: 500,
+				template: v => `translateX(${v}px)`,
+				timingFunction: timingFunction.EASE,
+				...config
+			})
 		}
 	}
 	mountTo(parent) {
