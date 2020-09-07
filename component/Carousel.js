@@ -17,118 +17,113 @@ export default class Carousel {
 		const tl = new Timeline()
 		let nextPicTimer = null
 
-		const onStart = e => {
-			tl.pause()
-			clearTimeout(nextPicTimer)
-		}
-
-		const children = this.data.map(url => {
-			const child = <img src={url} draggable={false} onStart={onStart} />
+		const children = this.data.map((url, i) => {
+			const child = (
+				<img
+					src={url}
+					draggable={false}
+					onPanstart={e => onPanstart(e, i)}
+					onPan={e => onPan(e)}
+				/>
+			)
+			setTransform(child, 0) // 设定初始值
 			enableGesture(child.root)
 			return child
 		})
 
-		let position = 0,
-			lastPosition,
-			nextPosition
-		let current, last, next
+		let currentI = 0,
+			lastI,
+			nextI
+		let currentItem, lastItem, nextItem
+
+		updateState()
+
+		let transformedValue = 0
+		const onPanstart = (e, i) => {
+			tl.pause()
+			clearTimeout(nextPicTimer)
+			updateState(i)
+			transformedValue =
+				getTransformedValue(currentItem.style.transform) - -500 * currentI
+		}
+
+		const onPan = e => {
+			const {
+				detail: { clientX, startX }
+			} = e
+			const diffX = clientX - startX
+
+			setTransform(currentItem, -500 * currentI + transformedValue + diffX)
+			setTransform(lastItem, -500 - 500 * lastI + transformedValue + diffX)
+			setTransform(nextItem, 500 - 500 * nextI + transformedValue + diffX)
+		}
 
 		const nextPic = () => {
-			const nextPosition = (position + 1) % this.data.length
-			const current = children[position]
-			const next = children[nextPosition]
+			nextI = (currentI + 1) % this.data.length
+			currentItem = children[currentI]
+
+			nextItem = children[nextI]
+
+			const width = currentItem.getBoundingClientRect().width
 
 			tl.add(
 				new Animation({
-					object: current.style,
+					object: currentItem.style,
 					property: 'transform',
-					start: -100 * position,
-					end: -100 - 100 * position,
-					duration: 500,
+					start: -100 * currentI,
+					end: -100 - 100 * currentI,
+					duration: 1000,
 					timingFunction: timingFunction.EASE,
-					template: v => `translateX(${v}%)`
+					template: v => `translateX(${(width / 100) * v}px)`
 				})
 			).add(
 				new Animation({
-					object: next.style,
+					object: nextItem.style,
 					property: 'transform',
-					start: 100 - 100 * nextPosition,
-					end: -100 * nextPosition,
-					duration: 500,
+					start: 100 - 100 * nextI,
+					end: -100 * nextI,
+					duration: 1000,
 					timingFunction: timingFunction.EASE,
-					template: v => `translateX(${v}%)`
+					template: v => `translateX(${(width / 100) * v}px)`
 				})
 			)
 			tl.start()
 
-			position = nextPosition
-			nextPicTimer = setTimeout(nextPic, 1000)
+			currentI = nextI
+			nextPicTimer = setTimeout(nextPic, 2000)
 		}
 
-		nextPicTimer = setTimeout(nextPic, 1000)
-
-		// children.forEach(child => {
-		// 	child = child.root
-
-		// 	enableGesture(child)
-
-		// 	child.addEventListener('panstart', e => {
-		// 		lastPosition = (position - 1 + children.length) % children.length
-		// 		nextPosition = (position + 1) % children.length
-
-		// 		last = children[lastPosition]
-		// 		current = children[position]
-		// 		next = children[nextPosition]
-
-		// 		last.style.transition = `none`
-		// 		current.style.transition = `none`
-		// 		next.style.transition = `none`
-		// 	})
-		// 	child.addEventListener('pan', e => {
-		// 		const width = child.getBoundingClientRect().width
-		// 		const {
-		// 			detail: { startX, clientX }
-		// 		} = e
-
-		// 		last.style.transform = `translateX(${
-		// 			-width - width * lastPosition - (startX - clientX)
-		// 		}px)`
-		// 		current.style.transform = `translateX(${
-		// 			-width * position - (startX - clientX)
-		// 		}px)`
-		// 		next.style.transform = `translateX(${
-		// 			width - width * nextPosition - (startX - clientX)
-		// 		}px)`
-		// 	})
-		// 	child.addEventListener('panend', e => {
-		// 		const width = child.getBoundingClientRect().width
-		// 		const {
-		// 			detail: { startX, clientX }
-		// 		} = e
-
-		// 		let offset = 0
-		// 		if (startX - clientX > 250) offset = -1
-		// 		else if (startX - clientX < -250) offset = 1
-
-		// 		last.style.transition = `ease .5s`
-		// 		current.style.transition = `ease .5s`
-		// 		next.style.transition = `ease .5s`
-
-		// 		position = (position - offset + children.length) % children.length
-		// 		lastPosition = (position - 1 + children.length) % children.length
-		// 		nextPosition = (position + 1) % children.length
-
-		// 		last = children[lastPosition]
-		// 		current = children[position]
-		// 		next = children[nextPosition]
-
-		// 		last.style.transform = `translateX(${-width - width * lastPosition}px)`
-		// 		current.style.transform = `translateX(${-width * position}px)`
-		// 		next.style.transform = `translateX(${width - width * nextPosition}px)`
-		// 	})
-		// })
+		nextPicTimer = setTimeout(nextPic, 2000)
 
 		return <div id='container'>{children}</div>
+
+		function setTransform(item, v) {
+			return (item.style.transform = `translateX(${v}px)`)
+		}
+
+		function updateState(i = 0) {
+			updateIndex(i)
+			updateItem()
+		}
+
+		function updateIndex(i = 0) {
+			const len = children.length
+			currentI = i
+			lastI = (currentI - 1 + len) % len
+			nextI = (i + 1) % len
+			return { currentI, lastI, nextI }
+		}
+
+		function updateItem() {
+			currentItem = children[currentI]
+			lastItem = children[lastI]
+			nextItem = children[nextI]
+			return { currentItem, lastItem, nextItem }
+		}
+
+		function getTransformedValue(transform) {
+			return Number(/translateX\((-?\d*\.?\d+)px\)/.exec(transform)[1])
+		}
 	}
 	mountTo(parent) {
 		this.render().mountTo(parent)
