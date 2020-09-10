@@ -3,3 +3,5 @@
 /test-tool/.nyc_output
 /generator-tool/node_modules
 /.vscode
+/node_modules
+/.nyc_output

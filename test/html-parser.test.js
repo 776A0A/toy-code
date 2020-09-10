@@ -1,5 +1,5 @@
 var assert = require('assert')
-const { parseHTML } = require('../src/parser')
+const { parseHTML } = require('../parser/html-parser/html-parser')
 
 describe('parseHTML', () => {
 	it('parse a div', () => {
@@ -97,7 +97,7 @@ describe('parseHTML', () => {
 		try {
 			parseHTML('<div></->')
 		} catch (error) {
-			assert.equal(error.message.includes('unexpected token: '), true)
+			assert.equal(error.message, 'unexpected token: -')
 		}
 	})
 })
