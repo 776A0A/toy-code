@@ -44,9 +44,7 @@ export default class Carousel {
 		const onStart = (e, i) => {
 			tl.pause()
 			clearTimeout(nextPicTimer)
-
 			updateState(i)
-
 			const width = currentItem.getBoundingClientRect().width
 			// 已偏移的量减去应该偏移的量
 			offsetDiffValue =
@@ -86,6 +84,7 @@ export default class Carousel {
 			}
 
 			tl.reset()
+			// start为当前的位置，就是pan中的位置，end为应该到达的位置
 			tl.add(
 				animationFactory({
 					object: lastItem.style,

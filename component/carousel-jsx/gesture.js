@@ -1,4 +1,4 @@
-function enableGesture(elem) {
+export default function enableGesture(elem) {
 	const contexts = Object.create(null)
 	const MOUSE_SYMBOL = Symbol('mouse')
 
@@ -18,6 +18,7 @@ function enableGesture(elem) {
 			clientX: point.clientX,
 			clientY: point.clientY
 		})
+		// 按下500ms，转到长按状态
 		ctx.timer = setTimeout(() => {
 			if (ctx.isPan) return
 			ctx.isPress = true
@@ -38,7 +39,7 @@ function enableGesture(elem) {
 			startY = ctx.startY,
 			diffX = Math.abs(x - startX),
 			diffY = Math.abs(y - startY)
-		// 大于 10px 则进入pan阶段
+		// 移动距离大于10px则进入pan阶段
 		if (!ctx.isPan && diffX ** 2 + diffY ** 2 > 100) {
 			ctx.isPan = true
 			ctx.isTap = ctx.isPress = false
@@ -56,6 +57,7 @@ function enableGesture(elem) {
 			clientX: x,
 			clientY: y
 		})
+		// 记录位置和时间，主要用于后续判断是否是flick
 		const moves = ctx.moves || (ctx.moves = [])
 		moves.push({ x, y, t: Date.now() })
 		ctx.moves = moves.filter(({ t }) => Date.now() - t < 300)
@@ -94,22 +96,6 @@ function enableGesture(elem) {
 		clearTimeout(ctx.timer)
 	}
 
-	// 为null的时候是触摸设备，为undefined是电脑
-	if (document.ontouchstart !== null)
-		elem.addEventListener('mousedown', e => {
-			start(e, (contexts[MOUSE_SYMBOL] = Object.create(null)))
-			const mousemove = e => {
-				move(e, contexts[MOUSE_SYMBOL])
-			}
-			const mouseup = e => {
-				end(e, contexts[MOUSE_SYMBOL])
-				document.removeEventListener('mousemove', mousemove)
-				document.removeEventListener('mouseup', mouseup)
-			}
-			document.addEventListener('mousemove', mousemove)
-			document.addEventListener('mouseup', mouseup)
-		})
-
 	elem.addEventListener('touchstart', e => {
 		for (const touch of e.changedTouches) {
 			start(touch, (contexts[touch.identifier] = Object.create(null)))
@@ -132,4 +118,18 @@ function enableGesture(elem) {
 			delete contexts[touch.identifier]
 		}
 	})
+
+	// 为null的时候是触摸设备，为undefined是电脑
+	if (document.ontouchstart !== null)
+		elem.addEventListener('mousedown', e => {
+			start(e, (contexts[MOUSE_SYMBOL] = Object.create(null)))
+			const mousemove = e => move(e, contexts[MOUSE_SYMBOL])
+			const mouseup = e => {
+				end(e, contexts[MOUSE_SYMBOL])
+				document.removeEventListener('mousemove', mousemove)
+				document.removeEventListener('mouseup', mouseup)
+			}
+			document.addEventListener('mousemove', mousemove)
+			document.addEventListener('mouseup', mouseup)
+		})
 }

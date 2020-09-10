@@ -8,7 +8,7 @@ export class Timeline {
 	constructor() {
 		this.init()
 	}
-	tick() {
+	run() {
 		const t = Date.now() - this.startTime, // 已经经过的时间
 			animations = this.animations
 
@@ -33,12 +33,12 @@ export class Timeline {
 			object[property] = template(start + progression * (end - start)) // 通过进度算出值
 		}
 		if (animations.size)
-			this.requestID = requestAnimationFrame(() => this.tick())
+			this.requestID = requestAnimationFrame(() => this.run())
 		else this.requestID = null
 	}
 	add(animation, addTime) {
 		this.animations.add(animation)
-		if (this.state === PLAYING && this.requestID === null) this.tick() // 已经没有在执行动画了，则调用指定动画
+		if (this.state === PLAYING && this.requestID === null) this.run() // 已经没有在执行动画了，则调用指定动画
 		if (this.state === PLAYING)
 			this.addTimes.set(animation, addTime ?? Date.now() - this.startTime)
 		else this.addTimes.set(animation, addTime ?? 0)
@@ -55,13 +55,13 @@ export class Timeline {
 		if (this.state !== PAUSED) return
 		this.state = PLAYING
 		this.startTime += Date.now() - this.pauseTime
-		this.tick()
+		this.run()
 	}
 	start() {
 		if (this.state !== INITIALIZED) return
 		this.state = PLAYING
 		this.startTime = Date.now()
-		this.tick()
+		this.run()
 	}
 	init() {
 		this.reset()

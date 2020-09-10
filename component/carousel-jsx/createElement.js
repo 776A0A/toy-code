@@ -38,6 +38,7 @@ class Element {
 		this.root = document.createElement(type)
 	}
 	setAttribute(k, v) {
+		// 事件监听
 		if (/^on([A-Z][a-z_$]*)$/.test(k))
 			this.addEventListener(RegExp.$1.toLowerCase(), v)
 		else this.root.setAttribute(k, v)

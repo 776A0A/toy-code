@@ -266,8 +266,6 @@ function beforeAttributeValue(s) {
 	else return unquotedAttributeValue(s)
 }
 
-// parseHTML('<input />')
-
 module.exports = {
 	stack,
 	parseHTML
