@@ -1,78 +1,33 @@
-const EOF = Symbol('EOF')
-const lettersRx = /^[a-zA-Z]$/
-const spaceRx = /^[\t\n\f ]$/
+const {
+	EOF,
+	lettersRegExp,
+	spaceRegExp,
+	numberRegExp,
+	stack
+} = require('./shared')
+const token = require('./token')
 
-let currentToken = null
-let currentAttribute = null
-let currentTextNode = null
-
-let stack = []
+const emit = require('./emitter')
 
 function parseHTML(html) {
-	stack = [
-		{
-			type: 'document',
-			children: []
-		}
-	]
+	stack.push({
+		type: 'document',
+		children: []
+	})
 	let state = data
 	for (const s of html) {
 		state = state(s)
 	}
 	state = state(EOF)
-	return stack[0]
-}
-
-function emit(token) {
-	const top = stack[stack.length - 1]
-	if (token.type === 'startTag') {
-		const element = {
-			type: 'element',
-			children: [],
-			attributes: []
-		}
-		element.tagName = token.tagName
-		for (const t in token) {
-			if (token.hasOwnProperty(t)) {
-				if (t !== 'type' && t !== 'tagName') {
-					element.attributes.push({
-						name: t,
-						value: token[t]
-					})
-				}
-			}
-		}
-
-		top.children.push(element)
-		element.parent = top
-
-		// 自封闭标签入栈后马上出栈，所以不用处理
-		if (!token.isSelfClosing) {
-			stack.push(element) // 把startTag暂时存放在这里，在emit endTag时会拿出
-		}
-		currentTextNode = null
-	} else if (token.type === 'endTag') {
-		if (top.tagName !== token.tagName) {
-			throw new Error("tag start end doesn't match")
-		} else {
-			stack.pop()
-		}
-		currentTextNode = null
-	} else if (token.type === 'text') {
-		if (currentTextNode == null) {
-			currentTextNode = {
-				type: 'text',
-				content: ''
-			}
-			top.children.push(currentTextNode)
-		}
-		currentTextNode.content += token.content
-	}
+	return stack.pop()
 }
 
 function data(s) {
 	// 这里有三种情况，开始；结束；自封闭标签
 	if (s === '<') return tagOpen
+	// else if (s === '&') {
+	// 	return characterReference(s)
+	// }
 	else if (s === EOF) {
 		emit({ type: 'EOF' })
 		return
@@ -85,14 +40,100 @@ function data(s) {
 	}
 }
 
+function DOCTYPE(s) {
+	if (spaceRegExp.test(s)) return beforeDOCTYPEName
+	else if (s === '>') {
+		return beforeDOCTYPEName(s)
+	} else if (s === EOF) {
+		throw TypeError('eof-in-doctype')
+	} else {
+		return beforeDOCTYPEName(s)
+	}
+}
+
+function beforeDOCTYPEName(s) {
+	if (spaceRegExp.test(s)) return beforeDOCTYPEName
+	else if (/[A-Z]/.test(s)) {
+		token.currentDOCTYPEToken = {
+			type: 'doctype',
+			value: s.toLowerCase()
+		}
+		return DOCTYPEName
+	} else if (s === '>') {
+		throw TypeError(`missing-doctype-name`)
+	} else if (s === EOF) {
+		throw TypeError(`eof-in-doctype`)
+	} else {
+		token.currentDOCTYPEToken = {
+			type: 'doctype',
+			value: s.toLowerCase()
+		}
+		return DOCTYPEName
+	}
+}
+
+function DOCTYPEName(s) {
+	if (spaceRegExp.test(s)) return afterDOCTYPEName
+	else if (s === '>') {
+		emit(token.currentDOCTYPEToken)
+		return data
+	} else if (/[A-Z]/.test(s)) {
+		token.currentDOCTYPEToken.value += s
+		return DOCTYPEName
+	} else if (s === EOF) {
+		throw TypeError(`eof-in-doctype`)
+	} else {
+		token.currentDOCTYPEToken.value += s
+		return DOCTYPEName
+	}
+}
+
+function afterDOCTYPEName(s) {
+	if (spaceRegExp.test(s)) return afterDOCTYPEName
+	else if (s === '>') {
+		emit(token.currentDOCTYPEToken)
+		return data
+	} else if (s === EOF) {
+		throw TypeError(`eof-in-doctype`)
+	} else {
+		throw TypeError(`unexpected token: ${s}`)
+	}
+}
+
+// function characterReference(s) {
+// 	if(s === '&') {
+// 		temporaryBuffer = s
+// 		return characterReference
+// 	} else if(lettersRegExp.test(s) || numberRegExp.test(s)) {
+// 		return namedCharacterReference(s)
+// 	} else if (s === '#') {
+// 		temporaryBuffer += s
+// 		return numericCharacterReference
+// 	} else {
+// 		return data
+// 	}
+// }
+
+// function namedCharacterReference(s) {
+
+// }
+
+// function numericCharacterReference(s){
+
+// }
+
 function tagOpen(s) {
-	if (s === '/') return endTagOpen
-	else if (lettersRx.test(s)) {
-		currentToken = {
+	// <!
+	if (s === '!') return markupDeclarationOpen
+	else if (s === '/') return endTagOpen
+	else if (lettersRegExp.test(s)) {
+		token.currentToken = {
 			type: 'startTag',
 			tagName: ''
 		}
 		return tagName(s)
+	} else if (s === EOF) {
+		throw TypeError('eof-before-tag-name')
 	} else {
 		// 文本中包含<符号，那么也就是说前一个是<符号，才会进入tagOpen阶段
 		// 所以这里要emit两个
@@ -108,45 +149,62 @@ function tagOpen(s) {
 	}
 }
 
+// <!
+function markupDeclarationOpen(s) {
+	if (s === '-') {
+		token.currentComment = {
+			type: 'comment',
+			content: ''
+		}
+		return comment
+	} else if (spaceRegExp.test(s)) {
+		return DOCTYPE
+	} else {
+		throw TypeError('incorrectly-opened-comment')
+	}
+}
+
+function comment(s) {}
+
 function endTagOpen(s) {
-	if (lettersRx.test(s)) {
-		currentToken = {
+	if (lettersRegExp.test(s)) {
+		token.currentToken = {
 			type: 'endTag',
 			tagName: ''
 		}
 		return tagName(s)
 	} else if (s === '>') {
-		throw Error('no end tag name')
+		throw TypeError('no end tag name')
 	} else if (s === EOF) {
-		throw Error('unexpected token: ' + s)
-	} else throw Error('unexpected token: ' + s)
+		throw TypeError('unexpected token: ' + s)
+	} else throw TypeError('unexpected token: ' + s)
 }
 
 function tagName(s) {
 	// 接收到了空格，那么就进入等待属性状态
-	if (spaceRx.test(s)) return beforeAttributeName
+	if (spaceRegExp.test(s)) return beforeAttributeName
 	// 自封闭标签
 	else if (s === '/') return selfClosingStartTag
 	// 回到起始状态
 	else if (s === '>') {
-		emit(currentToken)
+		emit(token.currentToken)
 		return data
-	} else if (lettersRx.test(s)) {
-		currentToken.tagName += s.toLowerCase() // 所以html不缺分大小写
+	} else if (lettersRegExp.test(s)) {
+		token.currentToken.tagName += s.toLowerCase() // 所以html不缺分大小写
 		return tagName
 	} else {
-		throw Error(`unexpected token: ${s}`)
+		throw TypeError(`unexpected token: ${s}`)
 	}
 }
 
 function beforeAttributeName(s) {
 	// 多个空格
-	if (spaceRx.test(s)) return beforeAttributeName
+	if (spaceRegExp.test(s)) return beforeAttributeName
 	else if (s === '>' || s === '/' || s === EOF) return afterAttributeName(s)
 	else if (s === '=') {
-		throw Error("invalid token '=' in tagOpen")
+		throw TypeError("invalid token '=' in tagOpen")
 	} else {
-		currentAttribute = {
+		token.currentAttribute = {
 			name: '',
 			value: ''
 		}
@@ -155,26 +213,27 @@ function beforeAttributeName(s) {
 }
 function selfClosingStartTag(s) {
 	if (s === '>') {
-		currentToken.isSelfClosing = true
-		emit(currentToken)
+		token.currentToken.isSelfClosing = true
+		emit(token.currentToken)
 		return data
-	} else if (s === EOF) throw Error('selfClosing-tag with no >')
-	else throw Error('selfClosing-tag with no >')
+	} else if (s === EOF) throw TypeError('selfClosing-tag with no >')
+	else throw TypeError('selfClosing-tag with no >')
 }
 
 function afterAttributeName(s) {
 	// 这种情况就是值为true或false的属性
-	if (spaceRx.test(s)) return afterAttributeName
+	if (spaceRegExp.test(s)) return afterAttributeName
 	else if (s === '/') return selfClosingStartTag
 	else if (s === '=') return beforeAttributeValue
 	// 类似于checked这种属性，没有=和value，只需要一个key就ok
 	else if (s === '>') {
-		currentToken[currentAttribute.name] = currentAttribute.value
-		emit(currentToken)
+		token.currentToken[token.currentAttribute.name] =
+			token.currentAttribute.value
+		emit(token.currentToken)
 		return data
-	} else if (s === EOF) throw Error(`unexpected token: ${s.toString()}`)
+	} else if (s === EOF) throw TypeError(`unexpected token: ${s.toString()}`)
 	else {
-		currentToken = {
+		token.currentToken = {
 			type: 'attributeName'
 		}
 		return attributeName(s)
@@ -183,60 +242,65 @@ function afterAttributeName(s) {
 
 function attributeName(s) {
 	// 类似于checked这种属性，没有=和value，只需要一个key就ok
-	if (spaceRx.test(s) || s === '/' || s === '>' || s === EOF) {
-		currentAttribute.value = true
+	if (spaceRegExp.test(s) || s === '/' || s === '>' || s === EOF) {
+		token.currentAttribute.value = true
 		return afterAttributeName(s)
 	} else if (s === '=') return beforeAttributeValue
-	else if (s === '<' || s === '"' || s === "'") throw Error()
+	else if (s === '<' || s === '"' || s === "'") throw TypeError()
 	else {
-		currentAttribute.name += s
+		token.currentAttribute.name += s
 		return attributeName
 	}
 }
 
 function doubleQuoteAttributeValue(s) {
 	if (s === '"') {
-		currentToken[currentAttribute.name] = currentAttribute.value
+		token.currentToken[token.currentAttribute.name] =
+			token.currentAttribute.value
 		return afterQuotedAttributeValue
 	} else if (s === '\u0000' || s === EOF) {
 	} else {
-		currentAttribute.value += s
+		token.currentAttribute.value += s
 		return doubleQuoteAttributeValue
 	}
 }
 
 function singleQuoteAttributeValue(s) {
 	if (s === "'") {
-		currentToken[currentAttribute.name] = currentAttribute.value
+		token.currentToken[token.currentAttribute.name] =
+			token.currentAttribute.value
 		return afterQuotedAttributeValue
 	} else if (s === '\u0000' || s === EOF) {
 	} else {
-		currentAttribute.value += s
+		token.currentAttribute.value += s
 		return singleQuoteAttributeValue
 	}
 }
 
 function afterQuotedAttributeValue(s) {
-	if (spaceRx.test(s)) return beforeAttributeName
+	if (spaceRegExp.test(s)) return beforeAttributeName
 	else if (s === '/') return selfClosingStartTag
 	else if (s === '>') {
-		currentToken[currentAttribute.name] = currentAttribute.value
-		emit(currentToken)
+		token.currentToken[token.currentAttribute.name] =
+			token.currentAttribute.value
+		emit(token.currentToken)
 		return data
 	} else if (s === EOF) {
 	} else {
-		throw Error('missing-whitespace-between-attributes parse error')
+		throw TypeError('missing-whitespace-between-attributes')
 		// return beforeAttributeName(s)
 	}
 }
 
 function unquotedAttributeValue(s) {
-	if (spaceRx.test(s)) {
-		currentToken[currentAttribute.name] = currentAttribute.value
+	if (spaceRegExp.test(s)) {
+		token.currentToken[token.currentAttribute.name] =
+			token.currentAttribute.value
 		return beforeAttributeName
 	} else if (s === '>') {
-		currentToken[currentAttribute.name] = currentAttribute.value
-		emit(currentToken)
+		token.currentToken[token.currentAttribute.name] =
+			token.currentAttribute.value
+		emit(token.currentToken)
 		return data
 	} else if (
 		s === '"' ||
@@ -249,7 +313,7 @@ function unquotedAttributeValue(s) {
 	}
 	// 即使遇到了/也会解析为value
 	else {
-		currentAttribute.value += s
+		token.currentAttribute.value += s
 		return unquotedAttributeValue
 	}
 }
@@ -259,14 +323,11 @@ function beforeAttributeValue(s) {
 	 * =等号后面可以有空格?? 标准里这里会处理为转到beforeAttributeName状态，
 	 * 但实际实验的时候是会转换为value的，即使是/也会成为value的一部分，直到遇到下一个空格
 	 */
-	if (spaceRx.test(s)) return beforeAttributeName
+	if (spaceRegExp.test(s)) return beforeAttributeName
 	else if (s === '"') return doubleQuoteAttributeValue
 	else if (s === "'") return singleQuoteAttributeValue
-	else if (s === '>') throw Error("unexpected token '>' after =")
+	else if (s === '>') throw TypeError("unexpected token '>' after =")
 	else return unquotedAttributeValue(s)
 }
 
-module.exports = {
-	stack,
-	parseHTML
-}
+module.exports = parseHTML

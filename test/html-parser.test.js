@@ -1,5 +1,5 @@
 var assert = require('assert')
-const { parseHTML } = require('../parser/html-parser/html-parser')
+const parseHTML = require('../parser/html-parser/html-parser')
 
 describe('parseHTML', () => {
 	it('parse a div', () => {
@@ -66,10 +66,7 @@ describe('parseHTML', () => {
 		try {
 			parseHTML('<div class="b"id="a"></div>')
 		} catch (error) {
-			assert.equal(
-				error.message,
-				'missing-whitespace-between-attributes parse error'
-			)
+			assert.equal(error.message, 'missing-whitespace-between-attributes')
 		}
 	})
 	it('selfClosing-tag with no >', () => {
@@ -99,5 +96,10 @@ describe('parseHTML', () => {
 		} catch (error) {
 			assert.equal(error.message, 'unexpected token: -')
 		}
+	})
+	it('parse doctype', () => {
+		const doctype = parseHTML('<! DOCTYPE>').children[0]
+		assert.equal(doctype.tagName, 'doctype')
+		assert.equal(doctype.type, 'doctype')
 	})
 })
