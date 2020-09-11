@@ -31,7 +31,8 @@ function data(s) {
 	else if (s === EOF) {
 		emit({ type: 'EOF' })
 		return
-	} else {
+	} else if (/\r\n/.test(s)) return data
+	else {
 		emit({
 			type: 'text',
 			content: s
@@ -47,7 +48,7 @@ function DOCTYPE(s) {
 	} else if (s === EOF) {
 		throw TypeError('eof-in-doctype')
 	} else {
-		return beforeDOCTYPEName(s)
+		throw TypeError(`missing-whitespace-before-doctype-name`)
 	}
 }
 
@@ -157,10 +158,46 @@ function markupDeclarationOpen(s) {
 			content: ''
 		}
 		return comment
-	} else if (spaceRegExp.test(s)) {
-		return DOCTYPE
+	} else if (s.toLowerCase() === 'd') {
+		return doctypeO
 	} else {
 		throw TypeError('incorrectly-opened-comment')
+	}
+}
+function doctypeO(s) {
+	if (s.toLowerCase() === 'o') return doctypeC
+	else {
+		throw TypeError(`unexpected token: ${s} in doctypeO`)
+	}
+}
+function doctypeC(s) {
+	if (s.toLowerCase() === 'c') return doctypeT
+	else {
+		throw TypeError(`unexpected token: ${s} in doctypeC`)
+	}
+}
+function doctypeT(s) {
+	if (s.toLowerCase() === 't') return doctypeY
+	else {
+		throw TypeError(`unexpected token: ${s} in doctypeT`)
+	}
+}
+function doctypeY(s) {
+	if (s.toLowerCase() === 'y') return doctypeP
+	else {
+		throw TypeError(`unexpected token: ${s} in doctypeY`)
+	}
+}
+function doctypeP(s) {
+	if (s.toLowerCase() === 'p') return doctypeE
+	else {
+		throw TypeError(`unexpected token: ${s} in doctypeP`)
+	}
+}
+function doctypeE(s) {
+	if (s.toLowerCase() === 'e') return DOCTYPE
+	else {
+		throw TypeError(`unexpected token: ${s} in doctypeE`)
 	}
 }
 

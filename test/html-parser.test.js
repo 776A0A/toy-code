@@ -97,9 +97,22 @@ describe('parseHTML', () => {
 			assert.equal(error.message, 'unexpected token: -')
 		}
 	})
+	it('parse doctype with error: incorrectly-opened-comment', () => {
+		try {
+			parseHTML('<! DOCTYPE html>')
+		} catch (error) {
+			assert.equal(error.message, 'incorrectly-opened-comment')
+		}
+	})
 	it('parse doctype', () => {
-		const doctype = parseHTML('<! DOCTYPE>').children[0]
+		try {
+			parseHTML('<! DOCTYPE html>')
+		} catch (error) {
+			assert.equal(error.message, 'incorrectly-opened-comment')
+		}
+		const doctype = parseHTML('<!DOCTYPE html>').children[0]
 		assert.equal(doctype.tagName, 'doctype')
 		assert.equal(doctype.type, 'doctype')
+		assert.equal(doctype.value, 'html')
 	})
 })
