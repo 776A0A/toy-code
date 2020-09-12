@@ -10,6 +10,7 @@
 
 <body>
   <div id="w-uploader">
+    <div id="file-list-wrapper"></div>
     <label id="w-uploader-trigger">
       <div class="uploader-process">
         <div class="process-text">上传中...</div>
@@ -20,20 +21,37 @@
   </div>
   <script src="./index.js"></script>
   <script>
+    const imgItem = `
+      <div class="img-item" style="width:200px;height:200px;">
+        <img src="__preview__" style="width:100%;height:100%;object-fit:contain;" >  
+      <div>
+    `
     const action = `http://client2.365hy.com/niumore123456/upload`
     const _ = sel => document.querySelector(sel)
     const xhr = createXhr()
+    let preview = null
     const $uploader = {
       trigger: _('#w-uploader-trigger'),
       input: _('#trigger-input'),
-      processBar: _('.process-bar')
+      process: _('.uploader-process'),
+      processBar: _('.process-bar'),
+      fileListWrapper: _('#file-list-wrapper')
     }
     $uploader.input.addEventListener('change', e => {
       const file = e.target.files[0]
+      createPreview(file)
       const formData = new FormData
       formData.append('file', file)
       xhr.send(formData)
     })
+
+    function createPreview(file) {
+      const f = new FileReader()
+      f.readAsDataURL(file)
+      f.onload = e => {
+        preview = e.target.result
+      }
+    }
 
     function createXhr() {
       const xhr = new XMLHttpRequest
@@ -58,7 +76,13 @@
       })
       xhr.onload = e => {
         $uploader.processBar.classList.add('p-10')
-        console.log('完成了');
+        setTimeout(() => {
+          $uploader.process.style.display = 'none'
+        }, 300);
+        const res = JSON.parse(e.target.response)
+        console.log(preview);
+        const img = imgItem.replace('__preview__', preview)
+        $uploader.fileListWrapper.innerHTML = img
       }
       xhr.open('POST', action)
       return xhr
