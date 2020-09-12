@@ -1,0 +1,43 @@
+#w-uploader-trigger {
+	display: inline-flex;
+	border: 1px solid;
+	width: 200px;
+	height: 200px;
+}
+
+#w-uploader-trigger > input {
+	display: none;
+}
+.uploader-process {
+	margin: auto;
+	width: 80%;
+}
+.process-bar {
+	height: 2px;
+	background-color: #000;
+	position: relative;
+}
+.process-bar.p-2::after {
+	width: 20%;
+}
+.process-bar.p-4::after {
+	width: 40%;
+}
+.process-bar.p-6::after {
+	width: 60%;
+}
+.process-bar.p-8::after {
+	width: 80%;
+}
+.process-bar.p-10::after {
+	width: 100%;
+}
+.process-bar::after {
+	content: '';
+	position: absolute;
+	height: 2px;
+	background-color: red;
+	top: 0;
+	left: 0;
+	transition: all 0.1s ease;
+}
