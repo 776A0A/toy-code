@@ -1,4 +1,4 @@
-var assert = require('assert')
+const assert = require('assert')
 const parseHTML = require('../parser/html-parser/html-parser')
 
 describe('parseHTML', () => {
