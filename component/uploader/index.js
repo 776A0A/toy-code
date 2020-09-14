@@ -1,4 +1,4 @@
-class Uploader {
+export default class Uploader {
 	constructor(config) {
 		const { action } = config
 		if (!action) throw Error('action 是必须的')

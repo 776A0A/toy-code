@@ -12,6 +12,15 @@
   <div id="w-uploader">
     <div id="file-list-wrapper"></div>
     <label id="w-uploader-trigger">
+      <div class="add-file-icon">
+        <i aria-label="图标: plus" class="anticon anticon-plus">
+          <svg viewBox="64 64 896 896" data-icon="plus" width="1em" height="1em" fill="currentColor" aria-hidden="true"
+            focusable="false" class="">
+            <path d="M482 152h60q8 0 8 8v704q0 8-8 8h-60q-8 0-8-8V160q0-8 8-8z"></path>
+            <path d="M176 474h672q8 0 8 8v60q0 8-8 8H176q-8 0-8-8v-60q0-8 8-8z"></path>
+          </svg>
+        </i>
+      </div>
       <div class="uploader-process">
         <div class="process-text">上传中...</div>
         <div class="process-bar"></div>
@@ -19,17 +28,11 @@
       <input type="file" accept="image/*" id="trigger-input">
     </label>
   </div>
-  <script src="./index.js"></script>
-  <script>
-    const imgItem = `
-      <div class="img-item" style="width:200px;height:200px;">
-        <img src="__preview__" style="width:100%;height:100%;object-fit:contain;" >  
-      <div>
-    `
+  <script type="module">
+    import createPreview from './preview.js'
+    import UploadXHR from './xhr.js'
     const action = `http://client2.365hy.com/niumore123456/upload`
     const _ = sel => document.querySelector(sel)
-    const xhr = createXhr()
-    let preview = null
     const $uploader = {
       trigger: _('#w-uploader-trigger'),
       input: _('#trigger-input'),
@@ -37,25 +40,24 @@
       processBar: _('.process-bar'),
       fileListWrapper: _('#file-list-wrapper')
     }
-    $uploader.input.addEventListener('change', e => {
-      const file = e.target.files[0]
-      createPreview(file)
-      const formData = new FormData
-      formData.append('file', file)
-      xhr.send(formData)
-    })
 
-    function createPreview(file) {
-      const f = new FileReader()
-      f.readAsDataURL(file)
-      f.onload = e => {
-        preview = e.target.result
-      }
-    }
+    const imgItem = `
+      <div class="img-item" style="width:200px;height:200px;">
+        <img src="__preview__" style="width:100%;height:100%;object-fit:contain;" >  
+      <div>
+    `
 
-    function createXhr() {
-      const xhr = new XMLHttpRequest
-      xhr.upload.addEventListener('progress', e => {
+    const xhr = new UploadXHR({
+      onLoad(e) {
+        $uploader.processBar.classList.add('p-10')
+        setTimeout(() => {
+          $uploader.process.style.display = 'none'
+        }, 300);
+        const res = JSON.parse(e.target.response)
+        const img = imgItem.replace('__preview__', preview)
+        $uploader.fileListWrapper.innerHTML = img
+      },
+      onProcess(e) {
         if (e.lengthComputable) {
           const percent = e.loaded / e.total * 100
           if (percent >= 20) {
@@ -73,20 +75,18 @@
             $uploader.processBar.classList.add('p-10')
           }
         }
-      })
-      xhr.onload = e => {
-        $uploader.processBar.classList.add('p-10')
-        setTimeout(() => {
-          $uploader.process.style.display = 'none'
-        }, 300);
-        const res = JSON.parse(e.target.response)
-        console.log(preview);
-        const img = imgItem.replace('__preview__', preview)
-        $uploader.fileListWrapper.innerHTML = img
       }
-      xhr.open('POST', action)
-      return xhr
-    }
+    })
+    let preview = null
+
+    $uploader.input.addEventListener('change', async e => {
+      const file = e.target.files[0]
+      preview = await createPreview(file)
+      const formData = new FormData
+      formData.append('file', file)
+      xhr.send(formData)
+    })
+
   </script>
 </body>
 
