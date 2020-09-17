@@ -1,4 +1,4 @@
-import { noop } from './utils.js'
+import { noop } from './utils'
 
 export default class UploadXHR {
 	constructor(config) {
@@ -30,7 +30,7 @@ export default class UploadXHR {
 		this.xhr?.addEventListener(type, callback.bind(this))
 		return this
 	}
-	send(method, action) {
+	send(method, action?: string) {
 		this.method = method ?? this.method
 		this.action = action ?? this.action
 		if (!this.action) throw Error('action 是必须的')
