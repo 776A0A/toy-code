@@ -1,3 +1,6 @@
+#root {
+	display: flex;
+}
 #trigger {
 	display: inline-flex;
 	border: 1px solid;
@@ -11,13 +14,31 @@
 	transition: border-color 0.3s ease;
 	justify-content: center;
 	align-items: center;
+	flex-shrink: 0;
 }
 #trigger:hover {
 	border-color: #1890ff;
 }
-
 #trigger > input {
 	display: none;
+}
+#file-list {
+	display: flex;
+}
+.file-item {
+	width: 128px;
+	height: 128px;
+	padding: 8px;
+	border: 1px solid #d9d9d9;
+	border-radius: 4px;
+	box-sizing: border-box;
+	margin-right: 8px;
+	position: relative;
+}
+.file-item > img {
+	height: 100%;
+	width: 100%;
+	object-fit: contain;
 }
 
 .plus-icon {
@@ -29,6 +50,13 @@
 .process-bar {
 	margin: auto;
 	width: 80%;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+}
+.process-text {
+	margin: 8px;
 }
 .process-bar-animation {
 	height: 2px;
@@ -57,7 +85,8 @@
 	background-color: red;
 	top: 0;
 	left: 0;
-	transition: all 0.1s ease;
+	width: 0%;
+	transition: all 1s ease;
 }
 .hide {
 	display: none;
