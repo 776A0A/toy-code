@@ -1,4 +1,5 @@
-import { ImageObject, ImageState } from './types'
+import { ImageObject } from './types'
+import { IMAGE_STATE } from './enums'
 
 export default function preloadImage(
 	images: Array<string | object>,
@@ -7,7 +8,7 @@ export default function preloadImage(
 ) {
 	let count: number = 0
 	let success: boolean = true
-	let timeoutId: number | string = 0
+	let timeoutId: NodeJS.Timeout
 	let isTimeout: boolean = false
 
 	Object.keys(images).forEach(key => {
@@ -24,21 +25,29 @@ export default function preloadImage(
 		doLoad(item)
 	})
 
+	if (!count) {
+		callback(success)
+	} else if (timeout) {
+		timeoutId = setTimeout(onTimeout, timeout)
+	}
+
 	function doLoad(item: ImageObject): void {
 		const img = item.img
-		item.state = ImageState.LOADING
+		item.state = IMAGE_STATE.LOADING
 
 		img.onload = () => {
 			success = success ? true : false
-			item.state = ImageState.LOADED
+			item.state = IMAGE_STATE.LOADED
 			done()
 		}
 
 		img.onerror = () => {
 			success = false
-			item.state = ImageState.ERROR
+			item.state = IMAGE_STATE.ERROR
 			done()
 		}
+
+		img.src = item.src
 
 		function done(): void {
 			img.onload = img.onerror = null
@@ -46,10 +55,16 @@ export default function preloadImage(
 				delete globalThis[item.id]
 			} catch (error) {}
 
-			if (!--count) {
+			if (!--count && !isTimeout) {
+				clearTimeout(timeoutId)
 				callback(success)
 			}
 		}
+	}
+
+	function onTimeout() {
+		isTimeout = true
+		callback(false)
 	}
 }
 
