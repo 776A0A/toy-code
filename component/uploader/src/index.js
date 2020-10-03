@@ -1,6 +1,5 @@
-import './styles/index.css'
-import { _, __ } from './utils'
-import { fileItem } from './template'
+import { _, __ } from './utils.js'
+import { fileItem } from './template.js'
 
 const triggerDom = _('#trigger')
 const processBarDom = _('.process-bar')
@@ -12,8 +11,8 @@ triggerDom.addEventListener(
 	'change',
 	e => {
 		e.stopPropagation()
-    const file = e.target.files[0]
-    const item = getDom()
+		const file = e.target.files[0]
+		const item = getDom()
 		switchHide(plusIconDom)
 		switchHide(processBarDom, false)
 		setTimeout(() => {
