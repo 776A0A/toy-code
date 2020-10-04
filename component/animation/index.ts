@@ -1,208 +1,69 @@
-import preloadImage from './preloadImage'
-import { TaskObject, TaskFn, TimelineObject } from './types'
-import { TASK_TYPE } from './enums'
-import Timeline from './Timeline'
+import animation from './animation'
 
-enum ANIMATION_STATE {
-	INITIAL,
-	START,
-	STOP
-}
+const images = [
+	require('./assets/rabbit-big.png'),
+	require('./assets/rabbit-lose.png'),
+	require('./assets/rabbit-win.png')
+]
 
-export default class _Animation {
-	private taskQueue: Array<TaskObject> = []
-	private index: number = 0 // 当前正在执行的task的索引
-	private state: ANIMATION_STATE = ANIMATION_STATE.INITIAL
-	private timeline: TimelineObject = new Timeline()
-	interval: number
+const rightRunningMap = [
+	'0 -854',
+	'-174 -852',
+	'-349 -852',
+	'-524 -852',
+	'-698 -851',
+	'-873 -848'
+]
+const leftRunningMap = [
+	'0 -373',
+	'-175 -376',
+	'-350 -377',
+	'-524 -377',
+	'-699 -377',
+	'-873 -379'
+]
+const rabbitWinMap = [
+	'0 0',
+	'-198 0',
+	'-401 0',
+	'-609 0',
+	'-816 0',
+	'0 -96',
+	'-208 -97',
+	'-415 -97',
+	'-623 -97',
+	'-831 -97',
+	'0 -203',
+	'-207 -203',
+	'-415 -203',
+	'-623 -203',
+	'-831 -203',
+	'0 -307',
+	'-206 -307',
+	'-414 -307',
+	'-623 -307'
+]
+const rabbitLoseMap = [
+	'0 0',
+	'-163 0',
+	'-327 0',
+	'-491 0',
+	'-655 0',
+	'-819 0',
+	'0 -135',
+	'-166 -135',
+	'-333 -135',
+	'-500 -135',
+	'-668 -135',
+	'-835 -135',
+	'0 -262'
+]
 
-	loadImage(imgList: Array<string | object>) {
-		const taskFn: TaskFn = next => {
-			preloadImage(imgList.slice(), next)
-		}
+const elem = document.getElementById('rabbit')
 
-		let type = TASK_TYPE.SYNC
+const repeatAnimation = animation()
+	.loadImage(images)
+	.changePosition(elem, rightRunningMap, images[0])
+	.repeatInfinity()
 
-		return this._add(taskFn, type)
-	}
-
-	start(interval): _Animation {
-		if (this.state === ANIMATION_STATE.START || !this.taskQueue.length)
-			return this
-		this.state = ANIMATION_STATE.START
-		this.interval = interval
-		this._runTask()
-		return this
-	}
-
-	changePosition(
-		ele: HTMLElement,
-		positions: Array<string>,
-		imageURL?: string
-	) {
-		function next(callback: () => void) {
-			callback && callback()
-		}
-
-		const length = positions.length
-		let taskFn: TaskFn, type: TASK_TYPE
-
-		if (length) {
-			taskFn = (next, time) => {
-				if (imageURL) ele.style.backgroundImage = `url(${imageURL})`
-				const index = Math.min((time / this.interval) | 0, length - 1)
-				const [x, y] = positions[index].split(' ')
-				ele.style.backgroundPosition = `${x}px ${y}px`
-				if (index === length - 1) next()
-			}
-			type = TASK_TYPE.ASYNC
-		} else {
-			taskFn = next
-			type = TASK_TYPE.SYNC
-		}
-
-		return this._add(taskFn, type)
-	}
-
-	changeSrc(ele: HTMLImageElement, imgList: Array<string>) {
-		function next(callback: () => void) {
-			callback && callback()
-		}
-
-		const length = imgList.length
-		let taskFn: TaskFn, type: TASK_TYPE
-
-		if (length) {
-			taskFn = (next, time) => {
-				const index = Math.min((time / this.interval) | 0, length - 1)
-				ele.src = imgList[index]
-				if (index === length - 1) next()
-			}
-			type = TASK_TYPE.ASYNC
-		} else {
-			taskFn = next
-			type = TASK_TYPE.SYNC
-		}
-
-		return this._add(taskFn, type)
-	}
-
-	enterFrame(taskFn: TaskFn) {
-		return this._add(taskFn, TASK_TYPE.ASYNC)
-	}
-
-	then(callback: () => void) {
-		const taskFn: TaskFn = next => {
-			callback()
-			next()
-		}
-		const type = TASK_TYPE.SYNC
-
-		return this._add(taskFn, type)
-	}
-
-	repeat(times?: number) {
-		const taskFn: TaskFn = () => {
-			// 无限循环
-			if (!times) {
-				this.index--
-				this._runTask()
-				return
-			}
-
-			if (times) {
-				times--
-				this.index--
-				this._runTask()
-			} else {
-				this._next(this.taskQueue[this.index])
-			}
-		}
-
-		const type = TASK_TYPE.SYNC
-
-		return this._add(taskFn, type)
-	}
-
-	repeatInfinity() {
-		return this.repeat()
-	}
-
-	wait(time: number) {
-		if (this.taskQueue.length > 0) {
-			this.taskQueue[this.taskQueue.length - 1].wait = time
-		}
-		return this
-	}
-
-	pause() {
-		if (this.state === ANIMATION_STATE.START) {
-			this.state = ANIMATION_STATE.STOP
-			this.timeline.stop()
-		}
-		return this
-	}
-
-	restart() {
-		if (this.state === ANIMATION_STATE.STOP) {
-			this.state = ANIMATION_STATE.START
-			this.timeline.restart()
-		}
-		return this
-	}
-
-	dispose() {
-		if (this.state !== ANIMATION_STATE.INITIAL) {
-			this.state = ANIMATION_STATE.INITIAL
-			this.taskQueue = []
-			this.timeline.stop()
-			this.timeline = null
-		}
-		return this
-	}
-
-	private _add(taskFn: TaskFn, type: TASK_TYPE): _Animation {
-		this.taskQueue.push({ taskFn, type })
-		return this
-	}
-	private _runTask() {
-		if (this.state !== ANIMATION_STATE.START || !this.taskQueue.length)
-			return this
-		if (this.index === this.taskQueue.length) {
-			this.dispose()
-			return this
-		}
-
-		const task = this.taskQueue[this.index]
-		if (task.type === TASK_TYPE.SYNC) {
-			this._syncTask(task)
-		} else {
-			this._asyncTask(task)
-		}
-	}
-	private _syncTask(task: TaskObject) {
-		const next = () => this._next(task)
-		task.taskFn(next)
-	}
-	private _asyncTask(task: TaskObject) {
-		// 定义每一帧执行的回调函数
-		const enterFrame = (time: number) => {
-			const next = () => {
-				this.timeline.stop()
-				this._next(task)
-			}
-			task.taskFn(next, time)
-		}
-
-		this.timeline.onenterframe = enterFrame
-		this.timeline.start(this.interval)
-	}
-	private _next(task: TaskObject) {
-		this.index++
-		if (task && task.wait) {
-			setTimeout(() => {
-				this._runTask()
-			}, task.wait)
-		} else this._runTask()
-	}
-}
+repeatAnimation.start(80)

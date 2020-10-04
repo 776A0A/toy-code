@@ -5,3 +5,5 @@
 /.vscode
 /node_modules
 /.nyc_output
+/component/animation/.cache
+/component/animation/dist

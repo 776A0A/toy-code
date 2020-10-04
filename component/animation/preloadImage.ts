@@ -8,7 +8,7 @@ export default function preloadImage(
 ) {
 	let count: number = 0
 	let success: boolean = true
-	let timeoutId: NodeJS.Timeout
+	let timeoutId: any
 	let isTimeout: boolean = false
 
 	Object.keys(images).forEach(key => {
@@ -41,7 +41,7 @@ export default function preloadImage(
 			done()
 		}
 
-		img.onerror = () => {
+		img.onerror = (err) => {
 			success = false
 			item.state = IMAGE_STATE.ERROR
 			done()
