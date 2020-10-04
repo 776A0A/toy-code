@@ -3,17 +3,22 @@ import { TaskObject, TaskFn, TimelineObject } from './types'
 import { TASK_TYPE } from './enums'
 import Timeline from './Timeline'
 
-enum ANIMATION_STATE {
+export enum ANIMATION_STATE {
 	INITIAL,
 	START,
 	STOP
 }
-
+/**
+ * taskQueue是一个任务队列，收集了同步和异步的任务，异步的任务只有在
+ * 异步代码执行完毕或者动画目标完成的时候才会执行next，才会跳到下一个任务
+ * 所以当动画目标没有完成时，同一个任务函数会被重复执行，该任务函数会被赋值给timeline 的 onenterframe
+ * 而该 onterframe 就是该时间帧应该执行的函数
+ */
 class _Animation {
 	private taskQueue: Array<TaskObject> = []
 	private index: number = 0 // 当前正在执行的task的索引
-	private state: ANIMATION_STATE = ANIMATION_STATE.INITIAL
 	private timeline: TimelineObject = new Timeline()
+	state: ANIMATION_STATE = ANIMATION_STATE.INITIAL
 	interval: number
 
 	loadImage(imgList: Array<string | object>) {
@@ -50,7 +55,7 @@ class _Animation {
 		if (length) {
 			taskFn = (next, time) => {
 				if (imageURL) ele.style.backgroundImage = `url(${imageURL})`
-				const index = Math.min((time / this.interval) | 0, length - 1)
+				const index = Math.min((time / this.interval) | 0, length - 1) // 取到当前时间应当成为的index
 				const [x, y] = positions[index].split(' ')
 				ele.style.backgroundPosition = `${x}px ${y}px`
 				if (index === length - 1) next()
@@ -100,10 +105,11 @@ class _Animation {
 
 		return this._add(taskFn, type)
 	}
-
+	// 重复前一个任务
 	repeat(times?: number) {
+		// 做一层包装
 		const taskFn: TaskFn = () => {
-			// 无限循环
+			// 无限循环同一个任务
 			if (!times) {
 				this.index--
 				this._runTask()
@@ -156,7 +162,9 @@ class _Animation {
 			this.state = ANIMATION_STATE.INITIAL
 			this.taskQueue = []
 			this.timeline.stop()
-			this.timeline = null
+			this.timeline = new Timeline()
+			this.index = 0
+			this.interval = undefined
 		}
 		return this
 	}

@@ -18,6 +18,7 @@ export type TaskFn = (next: () => void, time?: number) => void
 export interface TimelineObject {
 	onenterframe: (time: number) => void
 	startTime?: number
+	stopTime?: number
 	interval?: number
 	animationHandlerId?: number
 	start: (time: number) => void

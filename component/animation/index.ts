@@ -1,4 +1,4 @@
-import animation from './animation'
+import animation, { ANIMATION_STATE } from './animation'
 
 const images = [
 	require('./assets/rabbit-big.png'),
@@ -67,3 +67,9 @@ const repeatAnimation = animation()
 	.repeatInfinity()
 
 repeatAnimation.start(80)
+
+elem.onclick = e => {
+	if (repeatAnimation.state === ANIMATION_STATE.START) repeatAnimation.pause()
+	else if (repeatAnimation.state === ANIMATION_STATE.STOP)
+		repeatAnimation.restart()
+}

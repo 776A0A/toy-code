@@ -19,8 +19,8 @@ export default function preloadImage(
 		if (!item || !item.src) return
 
 		count++
-		item.id = `__img__${key}${getId()}`
-		item.img = globalThis[item.id] = new Image()
+		item.id = `__img__${key}__${getId()}`
+		item.img = new Image()
 
 		doLoad(item)
 	})
@@ -41,7 +41,7 @@ export default function preloadImage(
 			done()
 		}
 
-		img.onerror = (err) => {
+		img.onerror = err => {
 			success = false
 			item.state = IMAGE_STATE.ERROR
 			done()
@@ -51,9 +51,6 @@ export default function preloadImage(
 
 		function done(): void {
 			img.onload = img.onerror = null
-			try {
-				delete globalThis[item.id]
-			} catch (error) {}
 
 			if (!--count && !isTimeout) {
 				clearTimeout(timeoutId)

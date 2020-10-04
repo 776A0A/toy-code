@@ -6,12 +6,14 @@ enum TIMELINE_STATE {
 	STOP
 }
 
+const DEFAULT_INTERVAL = 1000 / 60
+
 export default class Timeline {
-	interval: number = 1000 / 16
+	interval: number = DEFAULT_INTERVAL
 	state: TIMELINE_STATE = TIMELINE_STATE.INITIAL
 	animationHandlerId: number = 0
 	startTime?: number
-	duration?: number
+	stopTime?: number
 
 	onenterframe(time: number) {}
 
@@ -25,29 +27,21 @@ export default class Timeline {
 	stop() {
 		if (this.state !== TIMELINE_STATE.START) return
 		this.state = TIMELINE_STATE.STOP
-		if (this.startTime) {
-			this.duration = Date.now() - this.startTime
-		}
+		this.stopTime = Date.now()
 		cancelAnimationFrame(this.animationHandlerId)
 	}
 
 	restart() {
-		if (
-			this.state === TIMELINE_STATE.START ||
-			!this.duration ||
-			!this.interval
-		) {
-			return
-		}
+		if (this.state === TIMELINE_STATE.START) return
 
 		this.state = TIMELINE_STATE.START
 
-		startTimeline(this, Date.now() - this.duration)
+		startTimeline(this, Date.now())
 	}
 }
 
 function startTimeline(timeline: TimelineObject, startTime: number) {
-	let lastTick: number = Date.now() // 上一次回调的时间戳
+	let lastTick = Date.now() // 上一次回调的时间戳
 
 	const nextTick: NextTick = () => {
 		const now = Date.now()
@@ -59,7 +53,10 @@ function startTimeline(timeline: TimelineObject, startTime: number) {
 		}
 	}
 
-	timeline.startTime = startTime
+	if (timeline.stopTime) {
+		timeline.startTime = Date.now() - timeline.stopTime + timeline.startTime
+	} else timeline.startTime = startTime
+
 	nextTick.interval = timeline.interval
 
 	nextTick()
