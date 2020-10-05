@@ -1,4 +1,3 @@
-
 export enum IMAGE_STATE {
 	LOADING,
 	LOADED,

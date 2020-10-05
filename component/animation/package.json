@@ -1,0 +1,12 @@
+{
+  "name": "animation",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "npx parcel index.html --no-cache"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT"
+}

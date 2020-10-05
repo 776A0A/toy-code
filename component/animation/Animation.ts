@@ -188,10 +188,12 @@ class _Animation {
 			this._asyncTask(task)
 		}
 	}
+	// 同步任务直接执行
 	private _syncTask(task: TaskObject) {
 		const next = () => this._next(task)
 		task.taskFn(next)
 	}
+	// 异步任务代理给timeline执行
 	private _asyncTask(task: TaskObject) {
 		// 定义每一帧执行的回调函数
 		const enterFrame = (time: number) => {
