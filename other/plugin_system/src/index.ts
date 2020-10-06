@@ -1,3 +1,8 @@
+/**
+ * 参考自
+ * https://css-tricks.com/designing-a-javascript-plugin-system/
+ */
+
 import { PluginStatic, Exec, BetaCalc } from './types'
 
 const betaCalc: BetaCalc = {
@@ -8,7 +13,7 @@ const betaCalc: BetaCalc = {
 	},
 	core: {
 		plus: (currentValue, newVal) => currentValue + newVal,
-		minus: (currentValue, newVal) => currentValue - newVal
+		minus: (currentValue, newVal) => currentValue - newVal,
 	},
 	plugins: {},
 	press(this: BetaCalc, buttonName, newVal?) {
