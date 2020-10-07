@@ -19,7 +19,7 @@ export interface BetaCalc {
 	setValue: (value: number) => void
 	core: BetaCalcMethodObject
 	plugins: BetaCalcMethodObject
-	press: (this: BetaCalc, buttonName: string, newVal?: any) => void
+	press: (buttonName: string, newVal?: any) => void
 	register: (plugin: PluginStatic) => void
 	lifecycle: Lifecycle
 	run: () => void
