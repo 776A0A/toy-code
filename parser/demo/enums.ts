@@ -2,11 +2,12 @@ export const enum DfaState {
 	Initial,
 	Id,
 	IntConstant,
-	GT
+	GT,
+	GE /* greater than & equal */
 }
 
-export const enum TokenType {
-	Identifier,
-	IntConstant,
-	RelOp
+export enum TokenType {
+	Identifier = 'Identifier',
+	IntConstant = 'IntConstant',
+	RelOp = 'RelOp'
 }
