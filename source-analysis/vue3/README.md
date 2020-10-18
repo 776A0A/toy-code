@@ -1,9 +1,9 @@
 # 学习分析vue3源码
 
 ## 计划目录
-1. - [ ] reactivity
+1. - [x] reactivity
     - - [x] baseHandlers
-    - - [ ] collectionHandlers
+    - - [x] collectionHandlers
     - - [x] computed
     - - [x] effect
     - - [x] reactive
