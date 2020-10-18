@@ -21,6 +21,7 @@ export const enum ReactiveFlags {
   RAW = '__v_raw'
 }
 
+// IMP 注意，这几个属性并没有设置到对象上，而是在每次通过if-else来判断
 export interface Target {
   [ReactiveFlags.SKIP]?: boolean
   [ReactiveFlags.IS_REACTIVE]?: boolean

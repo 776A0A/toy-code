@@ -171,7 +171,7 @@ function createSetter(shallow = false) {
       // 根据是否是新的key来决定传参
       if (!hadKey) {
         trigger(target, TriggerOpTypes.ADD, key, value)
-      } 
+      }
       // 如果未改变，也不会触发trigger
       else if (hasChanged(value, oldValue)) {
         trigger(target, TriggerOpTypes.SET, key, value, oldValue)
@@ -202,7 +202,7 @@ function has(target: object, key: string | symbol): boolean {
 }
 
 function ownKeys(target: object): (string | number | symbol)[] {
-  track(target, TrackOpTypes.ITERATE, ITERATE_KEY) // QUE 这个ITERATE_KEY的作用是？
+  track(target, TrackOpTypes.ITERATE, ITERATE_KEY)
   return Reflect.ownKeys(target)
 }
 

@@ -67,6 +67,9 @@ describe('reactivity/reactive', () => {
     effect(() => (dummy = cset.has('value')))
     expect(dummy).toBe(false)
     cset.add('value')
+    cset.forEach(item => {
+      console.log(item);
+    })
     expect(dummy).toBe(true)
     cset.delete('value')
     expect(dummy).toBe(false)

@@ -1,3 +1,5 @@
+/* done */
+
 import { toRaw, reactive, readonly, ReactiveFlags } from './reactive'
 import { track, trigger, ITERATE_KEY, MAP_KEY_ITERATE_KEY } from './effect'
 import { TrackOpTypes, TriggerOpTypes } from './operations'
@@ -23,6 +25,7 @@ const toReactive = <T extends unknown>(value: T): T =>
 const toReadonly = <T extends unknown>(value: T): T =>
   isObject(value) ? readonly(value as Record<any, any>) : value
 
+// 传入什么返回什么
 const toShallow = <T extends unknown>(value: T): T => value
 
 const getProto = <T extends CollectionTypes>(v: T): any =>
@@ -43,8 +46,9 @@ function get(
     !isReadonly && track(rawTarget, TrackOpTypes.GET, key)
   }
   !isReadonly && track(rawTarget, TrackOpTypes.GET, rawKey)
-  const { has } = getProto(rawTarget)
+  const { has } = getProto(rawTarget) // 获取原型上的has
   const wrap = isReadonly ? toReadonly : isShallow ? toShallow : toReactive
+  // 在key和rawKey中都调用
   if (has.call(rawTarget, key)) {
     return wrap(target.get(key))
   } else if (has.call(rawTarget, rawKey)) {
@@ -53,16 +57,18 @@ function get(
 }
 
 function has(this: CollectionTypes, key: unknown, isReadonly = false): boolean {
+  // 这个target就是传入reactive中的set或map
   const target = (this as any)[ReactiveFlags.RAW]
   const rawTarget = toRaw(target)
   const rawKey = toRaw(key)
+  // 调用has也会触发track
   if (key !== rawKey) {
     !isReadonly && track(rawTarget, TrackOpTypes.HAS, key)
   }
   !isReadonly && track(rawTarget, TrackOpTypes.HAS, rawKey)
   return key === rawKey
-    ? target.has(key)
-    : target.has(key) || target.has(rawKey)
+    ? target.has(key) // set
+    : target.has(key) || target.has(rawKey) // map
 }
 
 function size(target: IterableCollections, isReadonly = false) {
@@ -71,18 +77,21 @@ function size(target: IterableCollections, isReadonly = false) {
   return Reflect.get(target, 'size', target)
 }
 
+// 使用add的肯定是set了
 function add(this: SetTypes, value: unknown) {
   value = toRaw(value)
   const target = toRaw(this)
   const proto = getProto(target)
   const hadKey = proto.has.call(target, value)
   const result = target.add(value)
+  // set不会重复值，所以重复值不需要trigger
   if (!hadKey) {
     trigger(target, TriggerOpTypes.ADD, value, value)
   }
   return result
 }
 
+// 肯定是map啦
 function set(this: MapTypes, key: unknown, value: unknown) {
   value = toRaw(value)
   const target = toRaw(this)
@@ -115,6 +124,7 @@ function deleteEntry(this: CollectionTypes, key: unknown) {
   const target = toRaw(this)
   const { has, get } = getProto(target)
   let hadKey = has.call(target, key)
+  // 和set内的一致
   if (!hadKey) {
     key = toRaw(key)
     hadKey = has.call(target, key)
@@ -122,6 +132,7 @@ function deleteEntry(this: CollectionTypes, key: unknown) {
     checkIdentityKeys(target, has, key)
   }
 
+  // set没有get方法
   const oldValue = get ? get.call(target, key) : undefined
   // forward the operation before queueing reactions
   const result = target.delete(key)
@@ -134,6 +145,7 @@ function deleteEntry(this: CollectionTypes, key: unknown) {
 function clear(this: IterableCollections) {
   const target = toRaw(this)
   const hadItems = target.size !== 0
+  // 这个oldTarget只在用户传入了onTrigger的时候有用
   const oldTarget = __DEV__
     ? isMap(target)
       ? new Map(target)
@@ -157,6 +169,7 @@ function createForEach(isReadonly: boolean, isShallow: boolean) {
     const target = observed[ReactiveFlags.RAW]
     const rawTarget = toRaw(target)
     const wrap = isReadonly ? toReadonly : isShallow ? toShallow : toReactive
+    // QUE track这个ITERATE_KEY好像没啥用？暂时没有看到trigger这个ITERATE_KEY的地方
     !isReadonly && track(rawTarget, TrackOpTypes.ITERATE, ITERATE_KEY)
     return target.forEach((value: unknown, key: unknown) => {
       // important: make sure the callback is
@@ -167,6 +180,7 @@ function createForEach(isReadonly: boolean, isShallow: boolean) {
   }
 }
 
+//可迭代对象以及可迭代协议
 interface Iterable {
   [Symbol.iterator](): Iterator
 }
@@ -195,7 +209,7 @@ function createIterableMethod(
     const isPair =
       method === 'entries' || (method === Symbol.iterator && targetIsMap)
     const isKeyOnly = method === 'keys' && targetIsMap
-    const innerIterator = target[method](...args)
+    const innerIterator = target[method](...args) // 拿到可迭代器对象
     const wrap = isReadonly ? toReadonly : isShallow ? toShallow : toReactive
     !isReadonly &&
       track(
@@ -208,7 +222,7 @@ function createIterableMethod(
     return {
       // iterator protocol
       next() {
-        const { value, done } = innerIterator.next()
+        const { value, done } = innerIterator.next() // 手动调用
         return done
           ? { value, done }
           : {
@@ -277,6 +291,7 @@ const readonlyInstrumentations: Record<string, Function> = {
   has(this: MapTypes, key: unknown) {
     return has.call(this, key, true)
   },
+  // 调用这些方法都会报错
   add: createReadonlyMethod(TriggerOpTypes.ADD),
   set: createReadonlyMethod(TriggerOpTypes.SET),
   delete: createReadonlyMethod(TriggerOpTypes.DELETE),
@@ -284,6 +299,7 @@ const readonlyInstrumentations: Record<string, Function> = {
   forEach: createForEach(true, false)
 }
 
+// 对这些方法做代理
 const iteratorMethods = ['keys', 'values', 'entries', Symbol.iterator]
 iteratorMethods.forEach(method => {
   mutableInstrumentations[method as string] = createIterableMethod(
@@ -303,6 +319,10 @@ iteratorMethods.forEach(method => {
   )
 })
 
+/**
+ * collection的代理对象只有一个get代理
+ * 但是has、add、set等操作都会代理到这个get上
+ */
 function createInstrumentationGetter(isReadonly: boolean, shallow: boolean) {
   // GOOD 在这里进行统一，注意这里使用了三元运算符来简化if-else操作
   const instrumentations = shallow
@@ -327,9 +347,13 @@ function createInstrumentationGetter(isReadonly: boolean, shallow: boolean) {
 
     /**
      * map和set大部分操作都是触发get
-     * 所以只代理了get，然后在get内部进行其他处理
+     * 所以只代理了get，然后在get内部又进行了代理，只不过是代理到了Reflect上
      * 如果是instrumentations里的key，那就就代理到instrumentations里
      * 否则就是原对象里，就是target
+     */
+    /**
+     * 例如调用的是has方法，那么下面就会返回has函数并接收传入has的值
+     * // IMP这相当于给原本set的has方法加了层代理，然后在这个代理里面进行一些处理后再调用原生的has方法
      */
     return Reflect.get(
       hasOwn(instrumentations, key) && key in target

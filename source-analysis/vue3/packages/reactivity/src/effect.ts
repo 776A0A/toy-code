@@ -56,6 +56,7 @@ export interface DebuggerEventExtraInfo {
 const effectStack: ReactiveEffect[] = []
 let activeEffect: ReactiveEffect | undefined // 依赖
 
+// 需要遍历的方法，就会使用这个key，然后在这个key上存放effect，当调用遍历方法时就会触发这些effect
 export const ITERATE_KEY = Symbol(__DEV__ ? 'iterate' : '')
 export const MAP_KEY_ITERATE_KEY = Symbol(__DEV__ ? 'Map key iterate' : '')
 
@@ -96,7 +97,7 @@ function createReactiveEffect<T = any>(
   fn: () => T,
   options: ReactiveEffectOptions
 ): ReactiveEffect<T> {
-  // 真正被执行的effect函数
+  // 真正被执行的effect函数，当这个被调用，那么就会有activeEffect
   const effect = function reactiveEffect(): unknown {
     if (!effect.active) {
       return options.scheduler ? undefined : fn()
@@ -226,6 +227,7 @@ export function trigger(
     }
   }
 
+  // 如果是清空的话，那么触发所有的effect
   if (type === TriggerOpTypes.CLEAR) {
     // collection being cleared
     // trigger all effects for target
