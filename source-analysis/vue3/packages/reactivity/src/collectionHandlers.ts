@@ -89,10 +89,13 @@ function set(this: MapTypes, key: unknown, value: unknown) {
   const { has, get } = getProto(target)
 
   let hadKey = has.call(target, key)
+  // 如果是新增属性
   if (!hadKey) {
+    // 这里和处理数组includes的方式一样，如果没有结果就是用toRaw处理后再处理一遍
     key = toRaw(key)
     hadKey = has.call(target, key)
   } else if (__DEV__) {
+    // 不能将一个对象和该对象的reactive都作为key
     checkIdentityKeys(target, has, key)
   }
 
@@ -100,7 +103,9 @@ function set(this: MapTypes, key: unknown, value: unknown) {
   const result = target.set(key, value)
   if (!hadKey) {
     trigger(target, TriggerOpTypes.ADD, key, value)
-  } else if (hasChanged(value, oldValue)) {
+  }
+  // 只有变化了才trigger
+  else if (hasChanged(value, oldValue)) {
     trigger(target, TriggerOpTypes.SET, key, value, oldValue)
   }
   return result
@@ -299,6 +304,7 @@ iteratorMethods.forEach(method => {
 })
 
 function createInstrumentationGetter(isReadonly: boolean, shallow: boolean) {
+  // GOOD 在这里进行统一，注意这里使用了三元运算符来简化if-else操作
   const instrumentations = shallow
     ? shallowInstrumentations
     : isReadonly
@@ -307,9 +313,10 @@ function createInstrumentationGetter(isReadonly: boolean, shallow: boolean) {
 
   return (
     target: CollectionTypes,
-    key: string | symbol,
+    key: string | symbol, // 就是set、get、has这些collection中的方法
     receiver: CollectionTypes
   ) => {
+    // 内置属性的检测
     if (key === ReactiveFlags.IS_REACTIVE) {
       return !isReadonly
     } else if (key === ReactiveFlags.IS_READONLY) {
@@ -318,6 +325,12 @@ function createInstrumentationGetter(isReadonly: boolean, shallow: boolean) {
       return target
     }
 
+    /**
+     * map和set大部分操作都是触发get
+     * 所以只代理了get，然后在get内部进行其他处理
+     * 如果是instrumentations里的key，那就就代理到instrumentations里
+     * 否则就是原对象里，就是target
+     */
     return Reflect.get(
       hasOwn(instrumentations, key) && key in target
         ? instrumentations
@@ -328,9 +341,9 @@ function createInstrumentationGetter(isReadonly: boolean, shallow: boolean) {
   }
 }
 
-/** 
- * 以下三种都是WeakSet的proxy代理
- * 都只包含了 get 代理
+/**
+ * 以下三种都是map和set的proxy代理
+ * // IMP 都只包含了 get 代理
  */
 
 export const mutableCollectionHandlers: ProxyHandler<CollectionTypes> = {
@@ -345,6 +358,10 @@ export const readonlyCollectionHandlers: ProxyHandler<CollectionTypes> = {
   get: createInstrumentationGetter(true, false)
 }
 
+/**
+ * 检查是否即使用了一个对象作为key，又使用了该对象的reactive作为key
+ * 如果是，那就是非法的
+ */
 function checkIdentityKeys(
   target: CollectionTypes,
   has: (key: unknown) => boolean,

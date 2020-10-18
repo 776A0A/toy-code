@@ -39,14 +39,17 @@ const enum TargetType {
 
 function targetTypeMap(rawType: string) {
   switch (rawType) {
+    // 对象和数组就是common
     case 'Object':
     case 'Array':
       return TargetType.COMMON
+    // map和set就是collection
     case 'Map':
     case 'Set':
     case 'WeakMap':
     case 'WeakSet':
       return TargetType.COLLECTION
+    // 其他都是非法的
     default:
       return TargetType.INVALID
   }
@@ -71,7 +74,7 @@ export function reactive(target: object) {
   return createReactiveObject(
     target,
     false /* isReadonly */,
-    mutableHandlers, /* 普通对象的代理 */
+    mutableHandlers /* 普通对象的代理 */,
     mutableCollectionHandlers /* weakSet */
   )
 }
@@ -173,7 +176,9 @@ function createReactiveObject(
   }
   const proxy = new Proxy(
     target,
-    targetType === TargetType.COLLECTION ? collectionHandlers /* weakSet */ : baseHandlers
+    targetType === TargetType.COLLECTION
+      ? collectionHandlers /* weakSet */
+      : baseHandlers
   )
   proxyMap.set(target, proxy)
   return proxy
