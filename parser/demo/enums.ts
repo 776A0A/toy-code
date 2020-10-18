@@ -3,7 +3,10 @@ export const enum DfaState {
 	Id,
 	IntConstant,
 	GT,
-	GE /* greater than & equal */
+	GE /* greater than & equal */,
+	Id_int1,
+	Id_int2,
+	Id_int3
 }
 
 export enum TokenType {

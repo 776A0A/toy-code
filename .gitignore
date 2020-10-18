@@ -7,3 +7,4 @@
 /.nyc_output
 /component/animation/.cache
 /component/animation/dist
+node_modules

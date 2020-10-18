@@ -29,10 +29,14 @@ const initial: Parser = s => {
 		tokenText.push(s)
 		return gt
 	} else if (isAlpha(s) && !isDigit(s)) {
-		nextState = DfaState.Id
-		token.type = TokenType.Identifier
-		tokenText.push(s)
-		return id
+		if (s === 'i') {
+			return intI(s)
+		} else {
+			nextState = DfaState.Id
+			token.type = TokenType.Identifier
+			tokenText.push(s)
+			return id
+		}
 	} else if (isDigit(s)) {
 		nextState = DfaState.IntConstant
 		token.type = TokenType.IntConstant
@@ -41,6 +45,41 @@ const initial: Parser = s => {
 	} else {
 		nextState = DfaState.Initial
 		return initial
+	}
+}
+
+const intI: Parser = s => {
+	nextState = DfaState.Id_int1
+	return intN
+}
+
+const intN: Parser = s => {
+	if (s === 'n') {
+		nextState = DfaState.Id_int2
+		return intT
+	} else {
+		return initial(s)
+	}
+}
+
+const intT: Parser = s => {
+	if (s === 't') {
+		nextState = DfaState.Id_int3
+		return afterInt
+	} else {
+		return initial(s)
+	}
+}
+
+const afterInt: Parser = s => {
+	if (isSpace(s)) {
+		initToken()
+		return initial
+	} else {
+		nextState = DfaState.Id
+		token.type = TokenType.Identifier
+		tokenText.push(s)
+		return id
 	}
 }
 
