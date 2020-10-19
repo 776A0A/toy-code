@@ -1,3 +1,5 @@
+/* done */
+
 import {
   computed as _computed,
   ComputedRef,
@@ -15,6 +17,6 @@ export function computed<T>(
   getterOrOptions: ComputedGetter<T> | WritableComputedOptions<T>
 ) {
   const c = _computed(getterOrOptions as any)
-  recordInstanceBoundEffect(c.effect)
+  recordInstanceBoundEffect(c.effect) // 保存带副作用的函数
   return c
 }

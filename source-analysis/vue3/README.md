@@ -10,7 +10,7 @@
     - - [x] ref
 2. - [ ] runtime-core
     - - [ ] apiAsyncComponent
-    - - [ ] apiComputed
+    - - [x] apiComputed
     - - [ ] apiCreateApp
     - - [ ] apiDefineComponent
     - - [ ] apiInject

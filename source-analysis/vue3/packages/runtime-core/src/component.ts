@@ -770,6 +770,7 @@ function createSetupContext(instance: ComponentInternalInstance): SetupContext {
 
 // record effects created during a component's setup() so that they can be
 // stopped when the component unmounts
+// 记录实例上绑定的副作用函数, 在卸载时就可以同时卸载副作用函数
 export function recordInstanceBoundEffect(effect: ReactiveEffect) {
   if (currentInstance) {
     ;(currentInstance.effects || (currentInstance.effects = [])).push(effect)
