@@ -8,3 +8,26 @@
     - - [x] effect
     - - [x] reactive
     - - [x] ref
+2. - [ ] runtime-core
+    - - [ ] apiAsyncComponent
+    - - [ ] apiComputed
+    - - [ ] apiCreateApp
+    - - [ ] apiDefineComponent
+    - - [ ] apiInject
+    - - [ ] apiLifecycle
+    - - [ ] apiWatch
+    - - [ ] component
+    - - [ ] componentEmits
+    - - [ ] componentOptions
+    - - [ ] componentPublicInstance
+    - - [ ] componentRenderUtils
+    - - [ ] componentSlots
+    - - [ ] customFormatter
+    - - [ ] devtools
+    - - [ ] directives
+    - - [ ] errorHandling
+    - - [ ] h
+    - - [ ] renderer
+    - - [ ] scheduler
+    - - [ ] vnode
+    - - [ ] warning
