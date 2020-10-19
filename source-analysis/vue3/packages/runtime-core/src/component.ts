@@ -400,9 +400,14 @@ export function createComponentInstance(
 ) {
   const type = vnode.type as ConcreteComponent
   // inherit parent app context - or - if root, adopt from root vnode
+  /**
+   * 将应用上下文设置为parent的appContext, 或者如果是根节点, 则设置为本身
+   * 实际上所有实例的appContext都是根vnode上的appContext
+   */
   const appContext =
     (parent ? parent.appContext : vnode.appContext) || emptyAppContext
 
+  // 组件实例
   const instance: ComponentInternalInstance = {
     uid: uid++,
     vnode,
@@ -417,7 +422,7 @@ export function createComponentInstance(
     proxy: null,
     withProxy: null,
     effects: null,
-    provides: parent ? parent.provides : Object.create(appContext.provides),
+    provides: parent ? parent.provides : Object.create(appContext.provides), // 这里将provides传到了子组件当中
     accessCache: null!,
     renderCache: [],
 
@@ -469,12 +474,12 @@ export function createComponentInstance(
     ec: null
   }
   if (__DEV__) {
-    instance.ctx = createRenderContext(instance)
+    instance.ctx = createRenderContext(instance) // 创建实例上下文, 包含了$data, $props等属性
   } else {
     instance.ctx = { _: instance }
   }
   instance.root = parent ? parent.root : instance
-  instance.emit = emit.bind(null, instance)
+  instance.emit = emit.bind(null, instance) // emit中没有this, 并且实现传入了实例
 
   if (__DEV__ || __FEATURE_PROD_DEVTOOLS__) {
     devtoolsComponentAdded(instance)
@@ -498,6 +503,7 @@ const isBuiltInTag = /*#__PURE__*/ makeMap('slot,component')
 
 export function validateComponentName(name: string, config: AppConfig) {
   const appIsNativeTag = config.isNativeTag || NO
+  // 是否是内置组件名或者原生tag名
   if (isBuiltInTag(name) || appIsNativeTag(name)) {
     warn(
       'Do not use built-in or reserved HTML elements as component id: ' + name
@@ -514,10 +520,12 @@ export function setupComponent(
   isInSSRComponentSetup = isSSR
 
   const { props, children, shapeFlag } = instance.vnode
-  const isStateful = shapeFlag & ShapeFlags.STATEFUL_COMPONENT
+  const isStateful = shapeFlag & ShapeFlags.STATEFUL_COMPONENT // 普通组件都是有状态组件
+  // 先初始化props, 然后是slots
   initProps(instance, props, isStateful, isSSR)
   initSlots(instance, children)
 
+  // 根据是否是有状态组件来分支代码
   const setupResult = isStateful
     ? setupStatefulComponent(instance, isSSR)
     : undefined
@@ -529,11 +537,11 @@ function setupStatefulComponent(
   instance: ComponentInternalInstance,
   isSSR: boolean
 ) {
-  const Component = instance.type as ComponentOptions
+  const Component = instance.type as ComponentOptions // 这是实际就是传入createApp的第一个参数
 
   if (__DEV__) {
     if (Component.name) {
-      validateComponentName(Component.name, instance.appContext.config)
+      validateComponentName(Component.name, instance.appContext.config) // 主要是校验名称是否是内置组件或者原生tag名
     }
     if (Component.components) {
       const names = Object.keys(Component.components)
@@ -544,7 +552,7 @@ function setupStatefulComponent(
     if (Component.directives) {
       const names = Object.keys(Component.directives)
       for (let i = 0; i < names.length; i++) {
-        validateDirectiveName(names[i])
+        validateDirectiveName(names[i]) // 校验是否是内置指令
       }
     }
   }
@@ -559,6 +567,7 @@ function setupStatefulComponent(
   // 2. call setup()
   const { setup } = Component
   if (setup) {
+    // GOOD 如果写了两个参数, 那么就创建上下文, 也就是attrs, slots, emit, 这里使用length判断的方式, 不用每个都去创建, 而是根据条件去创建
     const setupContext = (instance.setupContext =
       setup.length > 1 ? createSetupContext(instance) : null)
 
@@ -568,7 +577,7 @@ function setupStatefulComponent(
       setup,
       instance,
       ErrorCodes.SETUP_FUNCTION,
-      [__DEV__ ? shallowReadonly(instance.props) : instance.props, setupContext]
+      [__DEV__ ? shallowReadonly(instance.props) : instance.props, setupContext] // 传给setUp的参数
     )
     resetTracking()
     currentInstance = null
@@ -602,10 +611,12 @@ export function handleSetupResult(
   setupResult: unknown,
   isSSR: boolean
 ) {
+  // setUp返回函数
   if (isFunction(setupResult)) {
     // setup returned an inline render function
-    instance.render = setupResult as InternalRenderFunction
+    instance.render = setupResult as InternalRenderFunction // 返回的函数将会变成render函数
   } else if (isObject(setupResult)) {
+    // 不能直接返回vnode, 需要返回一个render函数
     if (__DEV__ && isVNode(setupResult)) {
       warn(
         `setup() should not return VNodes directly - ` +
@@ -653,6 +664,7 @@ function finishComponentSetup(
   const Component = instance.type as ComponentOptions
 
   // template / render function normalization
+  // 标准化template和render
   if (__NODE_JS__ && isSSR) {
     if (Component.render) {
       instance.render = Component.render as InternalRenderFunction
@@ -663,6 +675,7 @@ function finishComponentSetup(
       if (__DEV__) {
         startMeasure(instance, `compile`)
       }
+      // 编译template为render
       Component.render = compile(Component.template, {
         isCustomElement: instance.appContext.config.isCustomElement,
         delimiters: Component.delimiters
@@ -735,6 +748,7 @@ function createSetupContext(instance: ComponentInternalInstance): SetupContext {
     // We use getters in dev in case libs like test-utils overwrite instance
     // properties (overwrites should not be done in prod)
     return Object.freeze({
+      // attrs和slots都不可写
       get attrs() {
         return new Proxy(instance.attrs, attrHandlers)
       },

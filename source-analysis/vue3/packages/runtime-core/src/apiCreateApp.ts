@@ -78,7 +78,7 @@ export interface AppContext {
    * Flag for de-optimizing props normalization
    * @internal
    */
-  deopt?: boolean
+  deopt?: boolean // 是否不要进行优化
   /**
    * HMR only
    * @internal
@@ -97,10 +97,11 @@ export type Plugin =
 export function createAppContext(): AppContext {
   return {
     app: null as any,
+    // 这里就是可配置config的地方
     config: {
       isNativeTag: NO,
       performance: false,
-      globalProperties: {},
+      globalProperties: {}, // 全局属性配置地
       optionMergeStrategies: {},
       isCustomElement: NO,
       errorHandler: undefined,
@@ -130,24 +131,26 @@ export function createAppAPI<HostElement>(
       rootProps = null
     }
 
+    // 创建app的全局context上下文
     const context = createAppContext()
     const installedPlugins = new Set()
 
     let isMounted = false
 
+    // 没有用new的方式创建，更多的是使用闭包，抛弃了this
     const app: App = (context.app = {
       _uid: uid++,
       _component: rootComponent as ConcreteComponent,
-      _props: rootProps,
+      _props: rootProps, // 存放了root的props
       _container: null,
-      _context: context,
+      _context: context, // 上面创建的上下文
 
       version,
 
       get config() {
         return context.config
       },
-
+      // config不可覆盖
       set config(v) {
         if (__DEV__) {
           warn(
@@ -159,18 +162,26 @@ export function createAppAPI<HostElement>(
       use(plugin: Plugin, ...options: any[]) {
         if (installedPlugins.has(plugin)) {
           __DEV__ && warn(`Plugin has already been applied to target app.`)
-        } else if (plugin && isFunction(plugin.install)) {
+        }
+        // 有install方法
+        else if (plugin && isFunction(plugin.install)) {
           installedPlugins.add(plugin)
+          // 传入vm
           plugin.install(app, ...options)
-        } else if (isFunction(plugin)) {
+        }
+        // 直接就是函数
+        else if (isFunction(plugin)) {
           installedPlugins.add(plugin)
           plugin(app, ...options)
-        } else if (__DEV__) {
+        }
+        // 其他形式会报错
+        else if (__DEV__) {
           warn(
             `A plugin must either be a function or an object with an "install" ` +
               `function.`
           )
         }
+        // 返回了app，可进行链式调用
         return app
       },
 
@@ -180,6 +191,7 @@ export function createAppAPI<HostElement>(
             context.mixins.push(mixin)
             // global mixin with props/emits de-optimizes props/emits
             // normalization caching.
+            // QUE 如果全局mixin有props和emits，则不进行优化，为什么？
             if (mixin.props || mixin.emits) {
               context.deopt = true
             }
@@ -197,18 +209,20 @@ export function createAppAPI<HostElement>(
 
       component(name: string, component?: Component): any {
         if (__DEV__) {
+          // 校验组件名称
           validateComponentName(name, context.config)
         }
+        // 不传就会从已注册的组件中找，不管找没找到都返回
         if (!component) {
           return context.components[name]
         }
         if (__DEV__ && context.components[name]) {
           warn(`Component "${name}" has already been registered in target app.`)
         }
-        context.components[name] = component
+        context.components[name] = component // 缓存组件选项
         return app
       },
-
+      // directive和component的逻辑完全一致
       directive(name: string, directive?: Directive) {
         if (__DEV__) {
           validateDirectiveName(name)
@@ -226,15 +240,17 @@ export function createAppAPI<HostElement>(
 
       mount(rootContainer: HostElement, isHydrate?: boolean): any {
         if (!isMounted) {
+          // 内部会调用_createVNode
           const vnode = createVNode(
-            rootComponent as ConcreteComponent,
+            rootComponent as ConcreteComponent, // 根据传入的组件创建vnode
             rootProps
           )
           // store app context on the root VNode.
           // this will be set on the root instance on initial mount.
-          vnode.appContext = context
+          vnode.appContext = context // 在根vnode上保存应用上下文
 
           // HMR root reload
+          // 用于开发时的热重载
           if (__DEV__) {
             context.reload = () => {
               render(cloneVNode(vnode), rootContainer)
@@ -268,7 +284,7 @@ export function createAppAPI<HostElement>(
 
       unmount() {
         if (isMounted) {
-          render(null, app._container)
+          render(null, app._container) // 将挂载的元素传入
           if (__DEV__ || __FEATURE_PROD_DEVTOOLS__) {
             devtoolsUnmountApp(app)
           }

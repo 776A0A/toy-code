@@ -421,6 +421,7 @@ function baseCreateRenderer(
 ): HydrationRenderer
 
 // implementation
+// 这个函数超大..
 function baseCreateRenderer(
   options: RendererOptions,
   createHydrationFns?: typeof createHydrationFunctions
@@ -460,6 +461,7 @@ function baseCreateRenderer(
     optimized = false
   ) => {
     // patching & not same type, unmount old tree
+    // 类型已经不一样了, 直接卸载原来的vnode
     if (n1 && !isSameVNodeType(n1, n2)) {
       anchor = getNextHostNode(n1)
       unmount(n1, parentComponent, parentSuspense, true)
@@ -473,12 +475,15 @@ function baseCreateRenderer(
 
     const { type, ref, shapeFlag } = n2
     switch (type) {
+      // 文本节点
       case Text:
         processText(n1, n2, container, anchor)
         break
+      // 注释节点
       case Comment:
         processCommentNode(n1, n2, container, anchor)
         break
+      // 静态节点
       case Static:
         if (n1 == null) {
           mountStaticNode(n2, container, anchor, isSVG)
@@ -1208,6 +1213,7 @@ function baseCreateRenderer(
     optimized: boolean
   ) => {
     if (n1 == null) {
+      // 是否是keep-alive
       if (n2.shapeFlag & ShapeFlags.COMPONENT_KEPT_ALIVE) {
         ;(parentComponent!.ctx as KeepAliveContext).activate(
           n2,
@@ -1217,6 +1223,7 @@ function baseCreateRenderer(
           optimized
         )
       } else {
+        // 新创建组件
         mountComponent(
           n2,
           container,
@@ -1228,6 +1235,7 @@ function baseCreateRenderer(
         )
       }
     } else {
+      // 更新组件
       updateComponent(n1, n2, optimized)
     }
   }
@@ -1253,7 +1261,7 @@ function baseCreateRenderer(
 
     if (__DEV__) {
       pushWarningContext(initialVNode)
-      startMeasure(instance, `mount`)
+      startMeasure(instance, `mount`) // 性能相关检测
     }
 
     // inject renderer internals for keepAlive
@@ -1265,6 +1273,7 @@ function baseCreateRenderer(
     if (__DEV__) {
       startMeasure(instance, `init`)
     }
+    // 装载组件
     setupComponent(instance)
     if (__DEV__) {
       endMeasure(instance, `init`)
@@ -2191,6 +2200,7 @@ function baseCreateRenderer(
   }
 
   const render: RootRenderFunction = (vnode, container) => {
+    // 卸载的时候会传入null
     if (vnode == null) {
       if (container._vnode) {
         unmount(container._vnode, null, null, true)

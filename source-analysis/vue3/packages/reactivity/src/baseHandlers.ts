@@ -83,6 +83,7 @@ const arrayInstrumentations: Record<string, Function> = {} // 扩展数组的方
 function createGetter(isReadonly = false, shallow = false) {
   return function get(target: Target, key: string | symbol, receiver: object) {
     /* 这些都是内置的隐藏属性，以__v_开头的 */
+
     // 使用__v_isReactive
     if (key === ReactiveFlags.IS_REACTIVE) {
       return !isReadonly
@@ -117,6 +118,7 @@ function createGetter(isReadonly = false, shallow = false) {
       track(target, TrackOpTypes.GET, key)
     }
 
+    // 是shallow的话直接返回结果
     if (shallow) {
       return res
     }
@@ -158,6 +160,7 @@ function createSetter(shallow = false) {
         return true
       }
     } else {
+      // 如果是shallow模式, 那么就直接set, 不管值是否是响应式的
       // in shallow mode, objects are set as-is regardless of reactive or not
     }
 
@@ -242,7 +245,7 @@ export const shallowReactiveHandlers: ProxyHandler<object> = extend(
   mutableHandlers,
   {
     get: shallowGet,
-    set: shallowSet
+    set: shallowSet // shallow的不同之处只在于传入proxy的get和set的区别
   }
 )
 

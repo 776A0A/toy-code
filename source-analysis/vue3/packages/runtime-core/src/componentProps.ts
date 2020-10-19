@@ -122,13 +122,14 @@ export function initProps(
   def(attrs, InternalObjectKey, 1)
   setFullProps(instance, rawProps, props, attrs)
   // validation
+  // 只有在生成环境才会进行验证
   if (__DEV__) {
     validateProps(props, instance)
   }
 
   if (isStateful) {
     // stateful
-    instance.props = isSSR ? props : shallowReactive(props)
+    instance.props = isSSR ? props : shallowReactive(props) // IMP 出入的props会做一层浅的响应式处理
   } else {
     if (!instance.type.props) {
       // functional w/ optional props, props === attrs
@@ -255,6 +256,7 @@ function setFullProps(
     for (const key in rawProps) {
       const value = rawProps[key]
       // key, ref are reserved and never passed down
+      // 处理key和ref以及vnode生命周期hook
       if (isReservedProp(key)) {
         continue
       }
@@ -267,6 +269,7 @@ function setFullProps(
         // Any non-declared (either as a prop or an emitted event) props are put
         // into a separate `attrs` object for spreading. Make sure to preserve
         // original key casing
+        // 将未在props和emits中声明的都放入attrs中, 并且存放的是没有处理过的key
         attrs[key] = value
       }
     }
@@ -296,13 +299,15 @@ function resolvePropValue(
 ) {
   const opt = options[key]
   if (opt != null) {
-    const hasDefault = hasOwn(opt, 'default')
+    const hasDefault = hasOwn(opt, 'default') // prop是否提供了默认值
     // default values
+    // 设置默认值
     if (hasDefault && value === undefined) {
       const defaultValue = opt.default
+      // 默认值是函数并且type不是函数
       if (opt.type !== Function && isFunction(defaultValue)) {
         setCurrentInstance(instance)
-        value = defaultValue(props)
+        value = defaultValue(props) // 默认函数会接收到props
         setCurrentInstance(null)
       } else {
         value = defaultValue
@@ -409,6 +414,10 @@ function validatePropName(key: string) {
 
 // use function string name to check type constructors
 // so that it works across vms / iframes.
+/**
+ * 因为传入的type都是构造函数, 所以使用toString配合match来那么到构造函数名
+ * 不知道为什么不用name属性?
+ */
 function getType(ctor: Prop<any>): string {
   const match = ctor && ctor.toString().match(/^\s*function (\w+)/)
   return match ? match[1] : ''
@@ -467,11 +476,13 @@ function validateProp(
     return
   }
   // type check
+  // 如果type为null或者true, 那么就不会进行type的校验
   if (type != null && type !== true) {
     let isValid = false
     const types = isArray(type) ? type : [type]
     const expectedTypes = []
     // value is valid as long as one of the specified types match
+    // 注意条件判断, 只要合法了就不会继续
     for (let i = 0; i < types.length && !isValid; i++) {
       const { valid, expectedType } = assertType(value, types[i])
       expectedTypes.push(expectedType || '')
@@ -483,6 +494,7 @@ function validateProp(
     }
   }
   // custom validator
+  // 自定义校验函数
   if (validator && !validator(value)) {
     warn('Invalid prop: custom validator check failed for prop "' + name + '".')
   }
@@ -502,11 +514,13 @@ type AssertionResult = {
  */
 function assertType(value: unknown, type: PropConstructor): AssertionResult {
   let valid
-  const expectedType = getType(type)
+  const expectedType = getType(type) // 拿到构造器名称
+  // 包含了可以用typeof来判断出类型的类型
   if (isSimpleType(expectedType)) {
     const t = typeof value
     valid = t === expectedType.toLowerCase()
     // for primitive wrapper objects
+    // 如果是基础类型, 但是使用了构造函数包装过
     if (!valid && t === 'object') {
       valid = value instanceof type
     }
@@ -515,6 +529,7 @@ function assertType(value: unknown, type: PropConstructor): AssertionResult {
   } else if (expectedType === 'Array') {
     valid = isArray(value)
   } else {
+    // 用户写的构造函数
     valid = value instanceof type
   }
   return {

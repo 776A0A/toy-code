@@ -115,13 +115,16 @@ export function unref<T>(ref: T): T extends Ref<infer V> ? V : T {
 }
 
 const shallowUnwrapHandlers: ProxyHandler<any> = {
-  get: (target, key, receiver) => unref(Reflect.get(target, key, receiver)),
+  get: (target, key, receiver) => unref(Reflect.get(target, key, receiver)), // 将值解开, 也就是把.value返回
   set: (target, key, value, receiver) => {
     const oldValue = target[key]
+    // 原来的是ref, 但新赋值的不是ref, 则直接将值赋值给原来的.value
     if (isRef(oldValue) && !isRef(value)) {
       oldValue.value = value
       return true
-    } else {
+    }
+    // 原来的值不是ref, 或者新值是ref
+    else {
       return Reflect.set(target, key, value, receiver)
     }
   }

@@ -7,7 +7,7 @@ import {
   createBlock,
   Fragment
 } from '../../src'
-import { PatchFlags } from '@vue/shared/src'
+import { PatchFlags } from '@vue/shared'
 
 describe('renderSlot', () => {
   it('should render slot', () => {

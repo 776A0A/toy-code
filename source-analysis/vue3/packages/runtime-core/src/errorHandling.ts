@@ -5,6 +5,7 @@ import { isPromise, isFunction } from '@vue/shared'
 
 // contexts where user provided function may be executed, in addition to
 // lifecycle hooks.
+// GOOD 根据不同的函数, 来规定不同的错误code, 然后根据不同的code又规定不同的错误提示, 参考下面的ErrorTypeStrings
 export const enum ErrorCodes {
   SETUP_FUNCTION,
   RENDER_FUNCTION,
@@ -110,6 +111,7 @@ export function handleError(
     // in production the hook receives only the error code
     const errorInfo = __DEV__ ? ErrorTypeStrings[type] : type
     while (cur) {
+      // 将错误一层一层的向上传递
       const errorCapturedHooks = cur.ec
       if (errorCapturedHooks) {
         for (let i = 0; i < errorCapturedHooks.length; i++) {
@@ -123,6 +125,7 @@ export function handleError(
       cur = cur.parent
     }
     // app-level handling
+    // 全局的错误处理函数
     const appErrorHandler = instance.appContext.config.errorHandler
     if (appErrorHandler) {
       callWithErrorHandling(

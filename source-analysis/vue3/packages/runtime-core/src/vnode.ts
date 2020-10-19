@@ -158,7 +158,7 @@ export interface VNode<
   dynamicChildren: VNode[] | null
 
   // application root node only
-  appContext: AppContext | null
+  appContext: AppContext | null // 只有根vnode有
 }
 
 // Since v-if and v-for are the two possible ways node structure can dynamically
@@ -310,6 +310,7 @@ const normalizeRef = ({ ref }: VNodeProps): VNodeNormalizedRefAtom | null => {
     : null) as any
 }
 
+// 会根据环境调用不同的createVNode
 export const createVNode = (__DEV__
   ? createVNodeWithArgsTransform
   : _createVNode) as typeof _createVNode
@@ -326,9 +327,11 @@ function _createVNode(
     if (__DEV__ && !type) {
       warn(`Invalid vnode type when creating vnode: ${type}.`)
     }
+    // 注释节点
     type = Comment
   }
 
+  // 如果已经是vnode，内部简单的使用__v_isVNode来标记
   if (isVNode(type)) {
     // createVNode receiving an existing vnode. This happens in cases like
     // <component :is="vnode"/>
@@ -341,6 +344,7 @@ function _createVNode(
   }
 
   // class component normalization.
+  // 类风格的组件
   if (isClassComponent(type)) {
     type = type.__vccOpts
   }
@@ -349,12 +353,14 @@ function _createVNode(
   if (props) {
     // for reactive or proxy objects, we need to clone it to enable mutation.
     if (isProxy(props) || InternalObjectKey in props) {
-      props = extend({}, props)
+      props = extend({}, props) // 就是原生assign
     }
     let { class: klass, style } = props
+    // 如果传了class并且不是字符串，就标准化class
     if (klass && !isString(klass)) {
       props.class = normalizeClass(klass)
     }
+    // 处理style
     if (isObject(style)) {
       // reactive state objects need to be cloned since they are likely to be
       // mutated
@@ -366,6 +372,7 @@ function _createVNode(
   }
 
   // encode the vnode type information into a bitmap
+  // 确定vnode的类型
   const shapeFlag = isString(type)
     ? ShapeFlags.ELEMENT
     : __FEATURE_SUSPENSE__ && isSuspense(type)
@@ -378,8 +385,10 @@ function _createVNode(
             ? ShapeFlags.FUNCTIONAL_COMPONENT
             : 0
 
+  // 使用&来做运算，如果&是0，那么返回就是false
   if (__DEV__ && shapeFlag & ShapeFlags.STATEFUL_COMPONENT && isProxy(type)) {
     type = toRaw(type)
+    // 传入了一个响应式对象，会造成性能问题
     warn(
       `Vue received a Component which was made a reactive object. This can ` +
         `lead to unnecessary performance overhead, and should be avoided by ` +
@@ -392,10 +401,10 @@ function _createVNode(
 
   const vnode: VNode = {
     __v_isVNode: true,
-    [ReactiveFlags.SKIP]: true,
+    [ReactiveFlags.SKIP]: true, // vnode对象不会被响应式化
     type,
     props,
-    key: props && normalizeKey(props),
+    key: props && normalizeKey(props), // 返回key或者null
     ref: props && normalizeRef(props),
     scopeId: currentScopeId,
     children: null,
@@ -418,6 +427,7 @@ function _createVNode(
   }
 
   // validate key
+  // 使用NaN作为key
   if (__DEV__ && vnode.key !== vnode.key) {
     warn(`VNode created with invalid key (NaN). VNode type:`, vnode.type)
   }
@@ -425,6 +435,7 @@ function _createVNode(
   normalizeChildren(vnode, children)
 
   // normalize suspense children
+  // 如果是suspense
   if (__FEATURE_SUSPENSE__ && shapeFlag & ShapeFlags.SUSPENSE) {
     const { content, fallback } = normalizeSuspenseChildren(vnode)
     vnode.ssContent = content
@@ -578,6 +589,7 @@ export function normalizeChildren(vnode: VNode, children: unknown) {
   } else if (isArray(children)) {
     type = ShapeFlags.ARRAY_CHILDREN
   } else if (typeof children === 'object') {
+    // 当vnode的类型是element或者teleport
     if (shapeFlag & ShapeFlags.ELEMENT || shapeFlag & ShapeFlags.TELEPORT) {
       // Normalize slot to plain children for plain element and Teleport
       const slot = (children as any).default
@@ -594,26 +606,37 @@ export function normalizeChildren(vnode: VNode, children: unknown) {
       if (!slotFlag && !(InternalObjectKey in children!)) {
         // if slots are not normalized, attach context instance
         // (compiled / normalized slots already have context)
+        // 如果slots尚未标准化处理或者编译过，那么就赋值一个上下文
         ;(children as RawSlots)._ctx = currentRenderingInstance
       } else if (slotFlag === SlotFlags.FORWARDED && currentRenderingInstance) {
         // a child component receives forwarded slots from the parent.
         // its slot type is determined by its parent's slot type.
+        /* 组件收到来自父级的slot，那么组件的slot类型将由父级传入的slot来决定 */
+
+        // 如果是动态的slots
         if (
           currentRenderingInstance.vnode.patchFlag & PatchFlags.DYNAMIC_SLOTS
         ) {
           ;(children as RawSlots)._ = SlotFlags.DYNAMIC
           vnode.patchFlag |= PatchFlags.DYNAMIC_SLOTS
-        } else {
+        } 
+        // 静态的slots
+        else {
           ;(children as RawSlots)._ = SlotFlags.STABLE
         }
       }
     }
-  } else if (isFunction(children)) {
+  } 
+  // 传入函数
+  else if (isFunction(children)) {
+    // 包装为对象
     children = { default: children, _ctx: currentRenderingInstance }
     type = ShapeFlags.SLOTS_CHILDREN
   } else {
+    // 文本
     children = String(children)
     // force teleport children to array so it can be moved around
+    // QUE 如果是teleport, 强制转为array, 以方便移动, 暂不知道为什么
     if (shapeFlag & ShapeFlags.TELEPORT) {
       type = ShapeFlags.ARRAY_CHILDREN
       children = [createTextVNode(children as string)]
@@ -622,6 +645,7 @@ export function normalizeChildren(vnode: VNode, children: unknown) {
     }
   }
   vnode.children = children as VNodeNormalizedChildren
+  //  QUE why?
   vnode.shapeFlag |= type
 }
 

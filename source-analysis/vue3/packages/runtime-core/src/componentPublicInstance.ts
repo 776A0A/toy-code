@@ -200,6 +200,8 @@ export type ComponentPublicInstance<
 
 type PublicPropertiesMap = Record<string, (i: ComponentInternalInstance) => any>
 
+// 公开的属性
+// GOOD 将所有的公开属性放在map中, 然后属性值都是函数, 该函数接收实例对象, 然后返回相应的值
 const publicPropertiesMap: PublicPropertiesMap = extend(Object.create(null), {
   $: i => i,
   $el: i => i.vnode.el,
@@ -258,7 +260,11 @@ export const PublicInstanceProxyHandlers: ProxyHandler<any> = {
     // is the multiple hasOwn() calls. It's much faster to do a simple property
     // access on a plain object, so we use an accessCache object (with null
     // prototype) to memoize what access type a key corresponds to.
+    /**
+     * // GOOD 使用accessCache来缓存访问, 使用key-type来缓存该key是在哪一个对象里, 分别有setUp, data, context, props
+     */
     let normalizedProps
+    // 不是vue内部公开出来的属性
     if (key[0] !== '$') {
       const n = accessCache![key]
       if (n !== undefined) {
@@ -273,7 +279,9 @@ export const PublicInstanceProxyHandlers: ProxyHandler<any> = {
             return props![key]
           // default: just fallthrough
         }
-      } else if (setupState !== EMPTY_OBJ && hasOwn(setupState, key)) {
+      }
+      // 如果同一个key出现在setUp和data中, 那么setUp中的优先级更高, setUp > data > props > context > other
+      else if (setupState !== EMPTY_OBJ && hasOwn(setupState, key)) {
         accessCache![key] = AccessTypes.SETUP
         return setupState[key]
       } else if (data !== EMPTY_OBJ && hasOwn(data, key)) {
@@ -298,6 +306,7 @@ export const PublicInstanceProxyHandlers: ProxyHandler<any> = {
     const publicGetter = publicPropertiesMap[key]
     let cssModule, globalProperties
     // public $xxx properties
+    // 访问$xxx属性
     if (publicGetter) {
       if (key === '$attrs') {
         track(instance, TrackOpTypes.GET, key)
@@ -310,11 +319,15 @@ export const PublicInstanceProxyHandlers: ProxyHandler<any> = {
       (cssModule = cssModule[key])
     ) {
       return cssModule
-    } else if (ctx !== EMPTY_OBJ && hasOwn(ctx, key)) {
+    }
+    // 用户自定义了$开口的属性在context上
+    else if (ctx !== EMPTY_OBJ && hasOwn(ctx, key)) {
       // user may set custom properties to `this` that start with `$`
       accessCache![key] = AccessTypes.CONTEXT
       return ctx[key]
-    } else if (
+    }
+    // 全局属性
+    else if (
       // global properties
       ((globalProperties = appContext.config.globalProperties),
       hasOwn(globalProperties, key))
@@ -323,11 +336,14 @@ export const PublicInstanceProxyHandlers: ProxyHandler<any> = {
     } else if (
       __DEV__ &&
       currentRenderingInstance &&
+      /* 不是string或者不是以__v开头的 */
       (!isString(key) ||
         // #1091 avoid internal isRef/isVNode checks on component instance leading
         // to infinite warning loop
         key.indexOf('__v') !== 0)
     ) {
+      // 存放在data中, 以$或者_开头的将不会被代理, 因为这些可能会和vue内部的属性名产生冲突
+      // 但是可以在vm.$data._property中访问到
       if (
         data !== EMPTY_OBJ &&
         (key[0] === '$' || key[0] === '_') &&
@@ -340,6 +356,7 @@ export const PublicInstanceProxyHandlers: ProxyHandler<any> = {
             `character ("$" or "_") and is not proxied on the render context.`
         )
       } else {
+        // 在template中使用了, 但是未在属性中定义
         warn(
           `Property ${JSON.stringify(key)} was accessed during render ` +
             `but is not defined on instance.`
@@ -354,11 +371,13 @@ export const PublicInstanceProxyHandlers: ProxyHandler<any> = {
     value: any
   ): boolean {
     const { data, setupState, ctx } = instance
+    // 这里的优先级也是先处理setUp中返回的状态
     if (setupState !== EMPTY_OBJ && hasOwn(setupState, key)) {
       setupState[key] = value
     } else if (data !== EMPTY_OBJ && hasOwn(data, key)) {
       data[key] = value
     } else if (key in instance.props) {
+      // 不得修改props中的值, 但是如果是复合对象, 那么是可以修改对象内部的属性值的
       __DEV__ &&
         warn(
           `Attempting to mutate prop "${key}". Props are readonly.`,
@@ -367,6 +386,7 @@ export const PublicInstanceProxyHandlers: ProxyHandler<any> = {
       return false
     }
     if (key[0] === '$' && key.slice(1) in instance) {
+      // 公开的内部属性不得修改
       __DEV__ &&
         warn(
           `Attempting to mutate public property "${key}". ` +
@@ -374,8 +394,11 @@ export const PublicInstanceProxyHandlers: ProxyHandler<any> = {
           instance
         )
       return false
-    } else {
+    } 
+    // 全局属性
+    else {
       if (__DEV__ && key in instance.appContext.config.globalProperties) {
+        // 在实例上下文中添加属性
         Object.defineProperty(ctx, key, {
           enumerable: true,
           configurable: true,
@@ -396,12 +419,19 @@ export const PublicInstanceProxyHandlers: ProxyHandler<any> = {
   ) {
     let normalizedProps
     return (
+      // 先在缓存里找
       accessCache![key] !== undefined ||
+      // data找
       (data !== EMPTY_OBJ && hasOwn(data, key)) ||
+      // setUp中找
       (setupState !== EMPTY_OBJ && hasOwn(setupState, key)) ||
+      // props中找
       ((normalizedProps = propsOptions[0]) && hasOwn(normalizedProps, key)) ||
+      // 实例上下文中
       hasOwn(ctx, key) ||
+      // $data, $props等中找
       hasOwn(publicPropertiesMap, key) ||
+      // 全局属性中找
       hasOwn(appContext.config.globalProperties, key)
     )
   }
@@ -445,6 +475,7 @@ export const RuntimeCompiledPublicInstanceProxyHandlers = extend(
 // In dev mode, the proxy target exposes the same properties as seen on `this`
 // for easier console inspection. In prod mode it will be an empty object so
 // these properties definitions can be skipped.
+// 创建了一个实例上下文
 export function createRenderContext(instance: ComponentInternalInstance) {
   const target: Record<string, any> = {}
 
@@ -456,6 +487,7 @@ export function createRenderContext(instance: ComponentInternalInstance) {
   })
 
   // expose public properties
+  // GOOD 值得学习的实现map的方法, 当然用到了闭包
   Object.keys(publicPropertiesMap).forEach(key => {
     Object.defineProperty(target, key, {
       configurable: true,
@@ -473,7 +505,7 @@ export function createRenderContext(instance: ComponentInternalInstance) {
     Object.defineProperty(target, key, {
       configurable: true,
       enumerable: false,
-      get: () => globalProperties[key],
+      get: () => globalProperties[key], // 将全局属性扩展到每个组件实例的ctx上
       set: NOOP
     })
   })
@@ -482,6 +514,7 @@ export function createRenderContext(instance: ComponentInternalInstance) {
 }
 
 // dev only
+// 将props中的值放入实例上下文中, 做一层代理来访问
 export function exposePropsOnRenderContext(
   instance: ComponentInternalInstance
 ) {
@@ -502,6 +535,7 @@ export function exposePropsOnRenderContext(
 }
 
 // dev only
+// 一样的, 将setUp返回的对象属性代理到实例上下文中
 export function exposeSetupStateOnRenderContext(
   instance: ComponentInternalInstance
 ) {

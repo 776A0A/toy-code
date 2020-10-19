@@ -56,16 +56,18 @@ export function stringifyStyle(styles: NormalizedStyle | undefined): string {
   return ret
 }
 
+// 就是将类名进行拼接
 export function normalizeClass(value: unknown): string {
   let res = ''
   if (isString(value)) {
     res = value
   } else if (isArray(value)) {
     for (let i = 0; i < value.length; i++) {
-      res += normalizeClass(value[i]) + ' '
+      res += normalizeClass(value[i]) + ' ' // 递归
     }
   } else if (isObject(value)) {
     for (const name in value) {
+      // 为true
       if (value[name]) {
         res += name + ' '
       }

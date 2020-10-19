@@ -484,6 +484,7 @@ export function applyOptions(
     )
     isInBeforeCreate = false
     // global mixins are applied first
+    // 全局mixin会在beforeCreate后注入
     applyMixins(
       instance,
       globalMixins,
@@ -505,6 +506,7 @@ export function applyOptions(
     )
   }
   // local mixins
+  // 局部混入注入
   if (mixins) {
     applyMixins(instance, mixins, deferredData, deferredWatch, deferredProvide)
   }

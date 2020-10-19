@@ -93,6 +93,7 @@ export const isIntegerKey = (key: unknown) =>
   key[0] !== '-' &&
   '' + parseInt(key, 10) === key
 
+  // IMP 可以在组件上监听vnode的声明周期状态
 export const isReservedProp = /*#__PURE__*/ makeMap(
   'key,ref,' +
     'onVnodeBeforeMount,onVnodeMounted,' +
@@ -110,6 +111,7 @@ const cacheStringFunction = <T extends (str: string) => string>(fn: T): T => {
 
 const camelizeRE = /-(\w)/g
 /**
+ * 将-格式的名称转换为驼峰式名称
  * @private
  */
 export const camelize = cacheStringFunction(
