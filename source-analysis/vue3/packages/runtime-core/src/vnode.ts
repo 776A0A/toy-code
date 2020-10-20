@@ -312,7 +312,7 @@ const normalizeRef = ({ ref }: VNodeProps): VNodeNormalizedRefAtom | null => {
 
 // 会根据环境调用不同的createVNode
 export const createVNode = (__DEV__
-  ? createVNodeWithArgsTransform
+  ? createVNodeWithArgsTransform // 主要为了测试用的，正常情况走下面的逻辑分支
   : _createVNode) as typeof _createVNode
 
 function _createVNode(
@@ -399,6 +399,7 @@ function _createVNode(
     )
   }
 
+  // 定义vnode
   const vnode: VNode = {
     __v_isVNode: true,
     [ReactiveFlags.SKIP]: true, // vnode对象不会被响应式化
@@ -432,6 +433,7 @@ function _createVNode(
     warn(`VNode created with invalid key (NaN). VNode type:`, vnode.type)
   }
 
+  // 标准化子节点，转换为数组或者字符串
   normalizeChildren(vnode, children)
 
   // normalize suspense children

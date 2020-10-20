@@ -130,14 +130,14 @@ export function createAppAPI<HostElement>(
       __DEV__ && warn(`root props passed to app.mount() must be an object.`)
       rootProps = null
     }
-
+ 
     // 创建app的全局context上下文
     const context = createAppContext()
     const installedPlugins = new Set()
 
     let isMounted = false
 
-    // 没有用new的方式创建，更多的是使用闭包，抛弃了this
+    // 实例对象，没有用new的方式创建，更多的是使用闭包，抛弃了this
     const app: App = (context.app = {
       _uid: uid++,
       _component: rootComponent as ConcreteComponent,
@@ -240,7 +240,7 @@ export function createAppAPI<HostElement>(
 
       mount(rootContainer: HostElement, isHydrate?: boolean): any {
         if (!isMounted) {
-          // 内部会调用_createVNode
+          // 创建vnode，内部会调用_createVNode
           const vnode = createVNode(
             rootComponent as ConcreteComponent, // 根据传入的组件创建vnode
             rootProps
@@ -260,6 +260,7 @@ export function createAppAPI<HostElement>(
           if (isHydrate && hydrate) {
             hydrate(vnode as VNode<Node, Element>, rootContainer as any)
           } else {
+            // 渲染vnode
             render(vnode, rootContainer)
           }
           isMounted = true

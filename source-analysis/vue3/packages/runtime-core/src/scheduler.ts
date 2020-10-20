@@ -159,6 +159,7 @@ export function flushPostFlushCbs(seen?: CountMap) {
     pendingPostFlushCbs.length = 0
 
     // #1947 already has active queue, nested flushPostFlushCbs call
+    // GOOD 这里会直接进行拼接，然后activePostFlushCbs就会实时的加长，这样做没问题，因为如果执行完了，activePostFlushCbs会置为null
     if (activePostFlushCbs) {
       activePostFlushCbs.push(...deduped)
       return

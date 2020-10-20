@@ -516,6 +516,7 @@ function baseCreateRenderer(
             optimized
           )
         } else if (shapeFlag & ShapeFlags.COMPONENT) {
+          // 处理组件
           processComponent(
             n1,
             n2,
@@ -1249,6 +1250,7 @@ function baseCreateRenderer(
     isSVG,
     optimized
   ) => {
+    // 创建组件实例
     const instance: ComponentInternalInstance = (initialVNode.component = createComponentInstance(
       initialVNode,
       parentComponent,
@@ -1273,7 +1275,7 @@ function baseCreateRenderer(
     if (__DEV__) {
       startMeasure(instance, `init`)
     }
-    // 装载组件
+    // 装载组件实例
     setupComponent(instance)
     if (__DEV__) {
       endMeasure(instance, `init`)
@@ -1293,6 +1295,7 @@ function baseCreateRenderer(
       return
     }
 
+    // 装载并运行带副作用的渲染函数，其实就是创建一个reactiveEffect然后放在实例的update上
     setupRenderEffect(
       instance,
       initialVNode,
@@ -1355,6 +1358,7 @@ function baseCreateRenderer(
   ) => {
     // create reactive effect for rendering
     instance.update = effect(function componentEffect() {
+      // 挂载组件
       if (!instance.isMounted) {
         let vnodeHook: VNodeHook | null | undefined
         const { el, props } = initialVNode
@@ -1373,6 +1377,7 @@ function baseCreateRenderer(
         if (__DEV__) {
           startMeasure(instance, `render`)
         }
+        // 渲染子树vnode
         const subTree = (instance.subTree = renderComponentRoot(instance))
         if (__DEV__) {
           endMeasure(instance, `render`)
@@ -1396,6 +1401,7 @@ function baseCreateRenderer(
           if (__DEV__) {
             startMeasure(instance, `patch`)
           }
+          // 将子树vnode挂载到container上
           patch(
             null,
             subTree,
@@ -1431,7 +1437,9 @@ function baseCreateRenderer(
           queuePostRenderEffect(a, parentSuspense)
         }
         instance.isMounted = true
-      } else {
+      }
+      // 更新组件
+      else {
         // updateComponent
         // This is triggered by mutation of component's own state (next: null)
         // OR parent calling processComponent (next: VNode)
@@ -1512,7 +1520,7 @@ function baseCreateRenderer(
           popWarningContext()
         }
       }
-    }, __DEV__ ? createDevEffectOptions(instance) : prodEffectOptions)
+    }, __DEV__ ? createDevEffectOptions(instance) : prodEffectOptions) // 根据环境传入不同配置
   }
 
   const updateComponentPreRender = (
@@ -2199,6 +2207,7 @@ function baseCreateRenderer(
     return hostNextSibling((vnode.anchor || vnode.el)!)
   }
 
+  // render内部要么是卸载，要么是patch，而patch会根据传入的vnode类型做相应处理
   const render: RootRenderFunction = (vnode, container) => {
     // 卸载的时候会传入null
     if (vnode == null) {
@@ -2206,9 +2215,11 @@ function baseCreateRenderer(
         unmount(container._vnode, null, null, true)
       }
     } else {
+      // 创建或者更新组件
       patch(container._vnode || null, vnode, container)
     }
     flushPostFlushCbs()
+    // 缓存vnode
     container._vnode = vnode
   }
 
@@ -2237,7 +2248,7 @@ function baseCreateRenderer(
   return {
     render,
     hydrate,
-    createApp: createAppAPI(render, hydrate)
+    createApp: createAppAPI(render, hydrate) // 在这里传入render
   }
 }
 

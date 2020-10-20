@@ -29,6 +29,7 @@ let renderer: Renderer<Element> | HydrationRenderer
 
 let enabledHydration = false
 
+// 返回renderer，传入配置参数
 function ensureRenderer() {
   return renderer || (renderer = createRenderer<Node, Element>(rendererOptions))
 }
@@ -50,25 +51,32 @@ export const hydrate = ((...args) => {
   ensureHydrationRenderer().hydrate(...args)
 }) as RootHydrateFunction
 
+// 浏览器端的入口函数
 export const createApp = ((...args) => {
+  // ensureRender会返回{render，createApp}等属性对象
+  // app为实例对象
   const app = ensureRenderer().createApp(...args)
 
   if (__DEV__) {
-    injectNativeTagCheck(app)
+    injectNativeTagCheck(app) // 注入原生tag的检测，也就是不允许组件名为原生tag名
   }
 
   const { mount } = app
+  // 专门为浏览器环境重写mount
   app.mount = (containerOrSelector: Element | string): any => {
-    const container = normalizeContainer(containerOrSelector)
+    const container = normalizeContainer(containerOrSelector) // 返回dom元素
     if (!container) return
-    const component = app._component
+    const component = app._component // createApp时传入的组件
+    // component不是函数，也没有render和template，则直接使用dom元素下的innerHTML
     if (!isFunction(component) && !component.render && !component.template) {
       component.template = container.innerHTML
     }
     // clear content before mounting
+    // 将会清空dom元素下原来的html
     container.innerHTML = ''
+    // 装载，内部有render操作
     const proxy = mount(container)
-    container.removeAttribute('v-cloak')
+    container.removeAttribute('v-cloak') // 如果使用了v-cloak
     container.setAttribute('data-v-app', '')
     return proxy
   }
