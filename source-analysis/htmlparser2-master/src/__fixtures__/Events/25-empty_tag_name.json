@@ -1,0 +1,10 @@
+{
+    "name": "Empty tag name",
+    "html": "< ></ >",
+    "expected": [
+        {
+            "event": "text",
+            "data": ["< ></ >"]
+        }
+    ]
+}

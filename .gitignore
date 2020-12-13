@@ -8,3 +8,4 @@
 /component/animation/.cache
 /component/animation/dist
 node_modules
+/source-analysis/acorn-master/acorn-loose/node_modules

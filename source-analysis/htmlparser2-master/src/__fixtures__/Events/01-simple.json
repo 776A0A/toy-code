@@ -1,0 +1,31 @@
+{
+    "name": "simple",
+    "html": "<h1 class=test>adsf</h1>",
+    "expected": [
+        {
+            "event": "opentagname",
+            "data": ["h1"]
+        },
+        {
+            "event": "attribute",
+            "data": ["class", "test", null]
+        },
+        {
+            "event": "opentag",
+            "data": [
+                "h1",
+                {
+                    "class": "test"
+                }
+            ]
+        },
+        {
+            "event": "text",
+            "data": ["adsf"]
+        },
+        {
+            "event": "closetag",
+            "data": ["h1"]
+        }
+    ]
+}

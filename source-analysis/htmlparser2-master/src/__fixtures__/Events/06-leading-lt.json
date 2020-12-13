@@ -1,0 +1,10 @@
+{
+    "name": "leading lt",
+    "html": ">a>",
+    "expected": [
+        {
+            "event": "text",
+            "data": [">a>"]
+        }
+    ]
+}

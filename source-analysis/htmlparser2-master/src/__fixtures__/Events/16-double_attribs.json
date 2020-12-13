@@ -1,0 +1,31 @@
+{
+    "name": "double attribute",
+    "html": "<h1 class=test class=boo></h1>",
+    "expected": [
+        {
+            "event": "opentagname",
+            "data": ["h1"]
+        },
+        {
+            "event": "attribute",
+            "data": ["class", "test", null]
+        },
+        {
+            "event": "attribute",
+            "data": ["class", "boo", null]
+        },
+        {
+            "event": "opentag",
+            "data": [
+                "h1",
+                {
+                    "class": "test"
+                }
+            ]
+        },
+        {
+            "event": "closetag",
+            "data": ["h1"]
+        }
+    ]
+}

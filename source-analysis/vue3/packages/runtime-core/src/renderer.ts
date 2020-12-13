@@ -431,6 +431,7 @@ function baseCreateRenderer(
     initFeatureFlags()
   }
 
+  // 所有这些带host都是宿主环境下的相应实现，根据宿主环境的不同实现不同
   const {
     insert: hostInsert,
     remove: hostRemove,
@@ -681,6 +682,7 @@ function baseCreateRenderer(
   ) => {
     isSVG = isSVG || (n2.type as string) === 'svg'
     if (n1 == null) {
+      // 挂载dom
       mountElement(
         n2,
         container,
@@ -691,6 +693,7 @@ function baseCreateRenderer(
         optimized
       )
     } else {
+      // 更新dom
       patchElement(n1, n2, parentComponent, parentSuspense, isSVG, optimized)
     }
   }
@@ -727,6 +730,7 @@ function baseCreateRenderer(
       // only do this in production since cloned trees cannot be HMR updated.
       el = vnode.el = hostCloneNode(vnode.el)
     } else {
+      // 创建dom
       el = vnode.el = hostCreateElement(
         vnode.type as string,
         isSVG,
@@ -736,7 +740,7 @@ function baseCreateRenderer(
       // mount children first, since some props may rely on child content
       // being already rendered, e.g. `<select value>`
       if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
-        hostSetElementText(el, vnode.children as string)
+        hostSetElementText(el, vnode.children as string) // 使用textContent设置文本
       } else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
         mountChildren(
           vnode.children as VNodeArrayChildren,
@@ -798,7 +802,9 @@ function baseCreateRenderer(
     if (needCallTransitionHooks) {
       transition!.beforeEnter(el)
     }
-    hostInsert(el, container, anchor)
+    // 把创建的 DOM 元素节点挂载到 container 上
+    hostInsert(el, container, anchor) // 根据是否有anchor调用inserBefore或者appendChild
+
     if (
       (vnodeHook = props && props.onVnodeMounted) ||
       needCallTransitionHooks ||
@@ -858,6 +864,8 @@ function baseCreateRenderer(
       const child = (children[i] = optimized
         ? cloneIfMounted(children[i] as VNode)
         : normalizeVNode(children[i]))
+
+      // 递归挂载子vnode
       patch(
         null,
         child,

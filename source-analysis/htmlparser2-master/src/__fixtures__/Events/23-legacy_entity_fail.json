@@ -1,0 +1,10 @@
+{
+    "name": "legacy entities",
+    "html": "M&M",
+    "expected": [
+        {
+            "event": "text",
+            "data": ["M&M"]
+        }
+    ]
+}

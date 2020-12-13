@@ -1,0 +1,10 @@
+{
+    "name": "lt followed by whitespace",
+    "html": "a < b",
+    "expected": [
+        {
+            "event": "text",
+            "data": ["a < b"]
+        }
+    ]
+}
