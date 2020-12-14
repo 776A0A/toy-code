@@ -6,7 +6,8 @@
     "test": "test"
   },
   "scripts": {
-    "test": "nyc mocha"
+    "test": "nyc mocha",
+    "cz": "cz"
   },
   "repository": {
     "type": "git",
