@@ -20,6 +20,7 @@ module.exports = function enhanceError(error, config, code, request, response) {
   error.response = response;
   error.isAxiosError = true;
 
+  // 提供toJSON方法
   error.toJSON = function toJSON() {
     return {
       // Standard

@@ -43,6 +43,8 @@ module.exports = function xhrAdapter(config) {
       // handled by onerror instead
       // With one exception: request that using file: protocol, most browsers
       // will return status as 0 even though it's a successful request
+      // 如果使用file协议发起请求，status会被置为0，即使请求成功也如此
+      // 其他情况下，如果请求出错，那么status为0，在请求完成前也为0
       if (request.status === 0 && !(request.responseURL && request.responseURL.indexOf('file:') === 0)) {
         return;
       }
@@ -50,6 +52,7 @@ module.exports = function xhrAdapter(config) {
       // Prepare the response
       var responseHeaders = 'getAllResponseHeaders' in request ? parseHeaders(request.getAllResponseHeaders()) : null;
       var responseData = !config.responseType || config.responseType === 'text' ? request.responseText : request.response;
+      // 包装response
       var response = {
         data: responseData,
         status: request.status,
@@ -66,6 +69,7 @@ module.exports = function xhrAdapter(config) {
     };
 
     // Handle browser request cancellation (as opposed to a manual cancellation)
+    // 当调用cancel时，实际调用的是abort
     request.onabort = function handleAbort() {
       if (!request) {
         return;
@@ -146,17 +150,20 @@ module.exports = function xhrAdapter(config) {
     }
 
     // Handle progress if needed
+    // 下载进度监控
     if (typeof config.onDownloadProgress === 'function') {
       request.addEventListener('progress', config.onDownloadProgress);
     }
 
     // Not all browsers support upload events
+    // 上传进度检控，不是所有浏览器都支持监听upload事件
     if (typeof config.onUploadProgress === 'function' && request.upload) {
       request.upload.addEventListener('progress', config.onUploadProgress);
     }
 
     if (config.cancelToken) {
       // Handle cancellation
+      // 如果调用了cancel，那么then就会触发
       config.cancelToken.promise.then(function onCanceled(cancel) {
         if (!request) {
           return;
