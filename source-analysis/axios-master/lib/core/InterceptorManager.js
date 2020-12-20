@@ -14,6 +14,7 @@ function InterceptorManager() {
  *
  * @return {Number} An ID used to remove interceptor later
  */
+// 返回该interceptor的序号
 InterceptorManager.prototype.use = function use(fulfilled, rejected) {
   this.handlers.push({
     fulfilled: fulfilled,
@@ -27,7 +28,8 @@ InterceptorManager.prototype.use = function use(fulfilled, rejected) {
  *
  * @param {Number} id The ID that was returned by `use`
  */
-InterceptorManager.prototype.eject = function eject(id) {
+// 根据index清空interceptor
+InterceptorManager.prototype.eject = function eject(id) { 
   if (this.handlers[id]) {
     this.handlers[id] = null;
   }

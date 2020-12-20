@@ -10,6 +10,7 @@ var defaults = require('../defaults');
  */
 function throwIfCancellationRequested(config) {
   if (config.cancelToken) {
+    // 如果已经调用过cancel，那么throwIfRequested中的条件判断就会通过，那么就会抛出reason
     config.cancelToken.throwIfRequested();
   }
 }
@@ -21,6 +22,7 @@ function throwIfCancellationRequested(config) {
  * @returns {Promise} The Promise to be fulfilled
  */
 module.exports = function dispatchRequest(config) {
+  // 在前面任何一个interceptor中调用cancel，那么这就会抛出错误reason
   throwIfCancellationRequested(config);
 
   // Ensure headers exist
@@ -47,8 +49,10 @@ module.exports = function dispatchRequest(config) {
     }
   );
 
+  // adapter实际就是发起请求的函数，要么是xhr，要么是http
   var adapter = config.adapter || defaults.adapter;
 
+  // 从这里看出，默认的dispatchRequest会对结果进行一次处理，同时如果已经cancel，则将错误往后抛
   return adapter(config).then(function onAdapterResolution(response) {
     throwIfCancellationRequested(config);
 

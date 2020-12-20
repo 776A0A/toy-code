@@ -6,7 +6,8 @@
     "test": "test"
   },
   "scripts": {
-    "test": "nyc mocha"
+    "test": "nyc mocha",
+    "cz": "cz"
   },
   "repository": {
     "type": "git",
@@ -23,6 +24,7 @@
   },
   "homepage": "https://github.com/776A0A/toy-code#readme",
   "devDependencies": {
+    "commitizen": "^4.2.2",
     "mocha": "^8.1.3",
     "nyc": "^15.1.0",
     "typescript": "^4.0.3"

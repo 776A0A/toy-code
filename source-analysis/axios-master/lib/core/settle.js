@@ -11,6 +11,7 @@ var createError = require('./createError');
  */
 module.exports = function settle(resolve, reject, response) {
   var validateStatus = response.config.validateStatus;
+  // 如果validateStatus传入falsy值，那么所有status都会通过校验
   if (!response.status || !validateStatus || validateStatus(response.status)) {
     resolve(response);
   } else {

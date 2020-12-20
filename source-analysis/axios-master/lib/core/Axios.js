@@ -50,7 +50,7 @@ Axios.prototype.request = function request(config) {
   // 默认的chain中包含了dispatchRequest，但是没有包含errorRequestHandler
   var chain = [dispatchRequest, undefined]
   var promise = Promise.resolve(config) // 开始一个promise并传入config
-
+  // 该forEach是内部覆写的
   this.interceptors.request.forEach(function unshiftRequestInterceptors(interceptor) {
     // 先加入的requestInterceptor最后触发，最后加入的最先触发
     chain.unshift(interceptor.fulfilled, interceptor.rejected)
