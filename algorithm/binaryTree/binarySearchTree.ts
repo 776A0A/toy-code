@@ -101,12 +101,15 @@ export default class BinarySearchTree {
         } else if (this.compare(key, node.key) === Compare.GT) {
             node.right = this.removeNode(node.right, key)
             return node
-        } else {
+        }
+        // 相等的情况
+        else {
             // 叶子节点
             if (node.left === node.right === null) {
                 node = null
-                return node 
+                return node
             }
+            // 将子节点上移
             if (node.left === null) {
                 node = node.right
                 return node
@@ -114,8 +117,10 @@ export default class BinarySearchTree {
                 node = node.left
                 return node
             }
+            // 在右子树中找到最小的替换上来
             const aux = this.minNode(node.right)
             node.key = aux?.key!
+            // 要记住处理右子节以避免重复节点
             node.right = this.removeNode(node.right, aux?.key!)
             return node
         }
