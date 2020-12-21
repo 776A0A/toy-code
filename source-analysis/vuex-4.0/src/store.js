@@ -248,6 +248,7 @@ export class Store {
   }
 
   _withCommit (fn) {
+    // QUE 为什么要存下_committing的状态？
     const committing = this._committing
     this._committing = true
     fn()
@@ -417,6 +418,7 @@ function makeLocalContext (store, namespace, path) {
 
   // getters and state object must be gotten lazily
   // because they will be changed by state update
+  // getters和state必须惰性获取，因为它们会在state改变时改变
   Object.defineProperties(local, {
     getters: {
       get: noNamespace
@@ -459,6 +461,7 @@ function makeLocalGetters (store, namespace) {
 function registerMutation (store, type, handler, local) {
   const entry = store._mutations[type] || (store._mutations[type] = [])
   entry.push(function wrappedMutationHandler (payload) {
+    // 绑定上下文，传入state
     handler.call(store, local.state, payload)
   })
 }
@@ -512,11 +515,12 @@ function enableStrictMode (store) {
     }
   }, { deep: true, flush: 'sync' })
 }
-
+// 获取嵌套的属性值
 function getNestedState (state, path) {
   return path.reduce((state, key) => state[key], state)
 }
 
+// 统一化参数
 function unifyObjectStyle (type, payload, options) {
   if (isObject(type) && type.type) {
     options = payload

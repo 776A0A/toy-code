@@ -107,7 +107,7 @@ function createGetter(isReadonly = false, shallow = false) {
     if (
       isSymbol(key)
         ? builtInSymbols.has(key as symbol)
-        : key === `__proto__` || key === `__v_isRef`
+        : key === `__proto__` || key === `__v_isRef` /* 如果是ref会跳过 */
     ) {
       return res
     }
