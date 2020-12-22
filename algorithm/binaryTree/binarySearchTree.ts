@@ -1,20 +1,9 @@
-class Node {
-    left: NodeType = null
-    right: NodeType = null
-    constructor(public key: number) { }
-}
+import { NodeCb, NodeType, CompareFn, TraverseFn } from './types'
+import { Node, Compare, defaultCompareFn } from './shared'
 
-type CompareFn = (a: number, b: number) => Compare
-enum Compare {
-    GT = 1,
-    LT = -1
-}
-type NodeCb = (key: number) => void
-type TraverseFn = (node: NodeType, cb: NodeCb) => void
-type NodeType = Node | null
 
 export default class BinarySearchTree {
-    compare: CompareFn = (a, b) => a - b > 0 ? Compare.GT : Compare.LT
+    compare = defaultCompareFn
     root: NodeType = null
     insert (key: number) {
         if (this.root === null) this.root = new Node(key)
