@@ -26,13 +26,17 @@ export class Store {
     this._actionSubscribers = []
     this._mutations = Object.create(null)
     this._wrappedGetters = Object.create(null)
+    /**
+     * 在这里，传入 store 的 option 被当作根模块对待（rootModule），因为实际上模块和 option 大致的内容是一致的
+     * 这样在内部也可以使用递归来处理传入的模块
+     */
     this._modules = new ModuleCollection(options)
     this._modulesNamespaceMap = Object.create(null)
     this._subscribers = []
     this._makeLocalGettersCache = Object.create(null)
 
     // bind commit and dispatch to self
-    // 绑定上下文
+    // 利用闭包绑定上下文
     const store = this
     const { dispatch, commit } = this
     this.dispatch = function boundDispatch (type, payload) {
@@ -68,7 +72,7 @@ export class Store {
   install (app, injectKey) {
     // 使用provide注入store，这么做的好处是不会像之前在生命周期中全局注入，而只会在inject的地方注入
     app.provide(injectKey || storeKey/* 默认是store */, this)
-    // 保存在全局中
+    // 另外同样可以使用this.$store来拿到store
     app.config.globalProperties.$store = this
   }
 
@@ -295,7 +299,7 @@ function resetStoreState (store, state, hot) {
     // use computed to leverage its lazy-caching mechanism
     // direct inline function use will lead to closure preserving oldState.
     // using partial to return function with only arguments preserved in closure environment.
-    computedObj[key] = partial(fn, store)
+    computedObj[key] = partial(fn, store) // 这个fn是经过包装的，也就是wrappedGetter
     Object.defineProperty(store.getters, key, {
       // TODO: use `computed` when it's possible. at the moment we can't due to
       // https://github.com/vuejs/vuex/pull/1883
@@ -304,6 +308,7 @@ function resetStoreState (store, state, hot) {
     })
   })
 
+  // state中的都是响应式的
   store._state = reactive({
     data: state
   })
@@ -330,6 +335,7 @@ function installModule (store, rootState, path, module, hot) {
 
   // register in namespace map
   if (module.namespaced) {
+    // 重复的命名空间会报错
     if (store._modulesNamespaceMap[namespace] && __DEV__) {
       console.error(`[vuex] duplicate namespace ${namespace} for the namespaced module ${path.join('/')}`)
     }
@@ -381,7 +387,7 @@ function installModule (store, rootState, path, module, hot) {
  */
 function makeLocalContext (store, namespace, path) {
   const noNamespace = namespace === ''
-
+  // 如果带有命名空间，那么会对dispatch, commit做一层处理
   const local = {
     dispatch: noNamespace ? store.dispatch : (_type, _payload, _options) => {
       const args = unifyObjectStyle(_type, _payload, _options)
@@ -418,7 +424,7 @@ function makeLocalContext (store, namespace, path) {
 
   // getters and state object must be gotten lazily
   // because they will be changed by state update
-  // getters和state必须惰性获取，因为它们会在state改变时改变
+  // getters和state必须惰性获取，因为它们会在state改变而改变
   Object.defineProperties(local, {
     getters: {
       get: noNamespace
@@ -458,11 +464,10 @@ function makeLocalGetters (store, namespace) {
   return store._makeLocalGettersCache[namespace]
 }
 
-function registerMutation (store, type, handler, local) {
+function registerMutation (store, type, handler, local /* 模块上下文 */) {
   const entry = store._mutations[type] || (store._mutations[type] = [])
   entry.push(function wrappedMutationHandler (payload) {
-    // 绑定上下文，传入state
-    handler.call(store, local.state, payload)
+    handler.call(store, local.state, payload) // 绑定上下文，传入state
   })
 }
 
@@ -486,7 +491,7 @@ function registerAction (store, type, handler, local) {
         throw err
       })
     } else {
-      return res
+      return res // 返回一个promise
     }
   })
 }

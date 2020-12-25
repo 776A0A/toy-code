@@ -125,7 +125,7 @@ const objectAssert = {
 const assertTypes = {
   getters: functionAssert,
   mutations: functionAssert,
-  actions: objectAssert
+  actions: objectAssert // 在模块中，actions可以是对象或者函数
 }
 
 function assertRawModule (path, rawModule) {
