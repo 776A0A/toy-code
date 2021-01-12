@@ -19,6 +19,14 @@ export default class Emitter {
     fns.forEach(fn => fn(...args))
     return this
   }
+  once(type, cb) {
+    const fn = (...args) => {
+      cb(...args)
+      this.off(type, fn)
+    }
+    this.on(type, fn)
+    return this
+  }
 }
 
 let emitter

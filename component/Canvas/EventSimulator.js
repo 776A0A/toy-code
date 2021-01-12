@@ -8,7 +8,8 @@ export const EventType = {
   click: 'click',
   hover: 'hover',
   mouseenter: 'mouseenter',
-  mouseout: 'mouseout'
+  mouseout: 'mouseout',
+  drew: 'drew'
 }
 
 export default class EventSimulator {
