@@ -28,20 +28,22 @@ class Polyline extends Shape {
     )
   }
   draw(ctx, osCtx) {
-    const { points, fillStyle, lineJoin, lineCap } = this.props
-    const first = points.slice(0, 1)[0]
-    if (!first) return
-    utils.drawWithSave(
-      ctx,
-      ctx => this.drawPath(ctx, first),
-      ctx => {
-        ctx.lineJoin = lineJoin
-        ctx.lineCap = lineCap
-        ctx.fillStyle = fillStyle
-        ctx.fill()
-      }
-    )
-    osCtx && this.drawOs(osCtx)
+    super.draw(() => {
+      const { points, fillStyle, lineJoin, lineCap } = this.props
+      const first = points.slice(0, 1)[0]
+      if (!first) return
+      utils.drawWithSave(
+        ctx,
+        ctx => this.drawPath(ctx, first),
+        ctx => {
+          ctx.lineJoin = lineJoin
+          ctx.lineCap = lineCap
+          ctx.fillStyle = fillStyle
+          ctx.fill()
+        }
+      )
+      osCtx && this.drawOs(osCtx)
+    })
   }
   drawOs(ctx) {
     super.drawOs(ctx, () => {

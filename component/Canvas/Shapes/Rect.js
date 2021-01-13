@@ -19,21 +19,23 @@ class Rect extends Shape {
     )
   }
   draw(ctx, osCtx) {
-    const { x, y, width, height, alpha, fillStyle, shadowBlur, shadowColor } = this.props
-    utils.drawWithSave(
-      ctx,
-      () => {
-        ctx.rect(x, y, width, height)
-      },
-      () => {
-        ctx.globalAlpha = alpha
-        ctx.shadowBlur = shadowBlur
-        ctx.shadowColor = shadowColor
-        ctx.fillStyle = fillStyle
-        ctx.fill()
-      }
-    )
-    osCtx && this.drawOs(osCtx)
+    super.draw(() => {
+      const { x, y, width, height, alpha, fillStyle, shadowBlur, shadowColor } = this.props
+      utils.drawWithSave(
+        ctx,
+        () => {
+          ctx.rect(x, y, width, height)
+        },
+        () => {
+          ctx.globalAlpha = alpha
+          ctx.shadowBlur = shadowBlur
+          ctx.shadowColor = shadowColor
+          ctx.fillStyle = fillStyle
+          ctx.fill()
+        }
+      )
+      osCtx && this.drawOs(osCtx)
+    })
   }
   drawOs(ctx) {
     super.drawOs(ctx, () => {

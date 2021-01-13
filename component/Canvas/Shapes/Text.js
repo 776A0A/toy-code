@@ -7,50 +7,59 @@ class Text extends Shape {
     super(Object.assign({ text: '文本', x: 0, y: 0, fillStyle: 'black', background: null }, props))
   }
   draw(ctx, osCtx) {
-    const { text, x, y, fillStyle, background } = this.props
+    super.draw(() => {
+      const { text, x, y, fillStyle, background } = this.props
 
-    utils
-      .drawWithSave(ctx, ctx => {
-        if (background) this.drawBackground(ctx)
-      })
-      .drawWithSave(ctx, ctx => {
-        ctx.font = '14px/1 serif'
-        ctx.fillStyle = fillStyle
-        ctx.textAlign = 'center'
-        ctx.fillText(text, x, y)
-      })
+      utils
+        .drawWithSave(ctx, ctx => {
+          if (background) this.drawBackground(ctx)
+        })
+        .drawWithSave(ctx, ctx => {
+          ctx.font = '14px/1 serif'
+          ctx.fillStyle = fillStyle
+          ctx.textAlign = 'center'
+          ctx.fillText(text, x, y)
+        })
 
-    osCtx && this.drawOs(osCtx)
+      osCtx && this.drawOs(osCtx)
+    })
   }
   drawOs(ctx) {
     super.drawOs(ctx, () => {
-      const { text, x, y, width, background = {} } = this.props
-      let { x: bX, y: bY, paddingX = 16, paddingY = 4 } = background
-
-      const rectWidth = Math.ceil(parseFloat(ctx.measureText(text).width)) + paddingX * 2
-
-      bX = bX || x - (rectWidth - width) / 2
-      bY = bY || y - 15
-
-      ctx.rect(bX, bY, rectWidth, 14 + paddingY * 2)
+      const { x, y, width, height } = this.getBackgroundInfo(ctx)
+      ctx.rect(x, y, width, height)
     })
   }
   drawBackground(ctx) {
-    const {
-      text,
-      background: { x, y, paddingX, paddingY, shadowBlur, shadowColor, color }
-    } = this.props
+    const { shadowBlur, shadowColor, color } = this.props.background
 
     const rect = new Rect({
-      x,
-      y,
-      width: Math.ceil(parseFloat(ctx.measureText(text).width)) + paddingX * 2,
-      height: 14 + paddingY * 2,
+      ...this.getBackgroundInfo(ctx),
       fillStyle: color,
       shadowBlur,
       shadowColor
     })
     rect.draw(ctx)
+  }
+  getTextSize(ctx) {
+    const { width, fontBoundingBoxAscent, fontBoundingBoxDescent } = ctx.measureText(
+      this.props.text
+    )
+    return { width, height: fontBoundingBoxAscent + fontBoundingBoxDescent }
+  }
+  getBackgroundInfo(ctx) {
+    const {
+      x,
+      y,
+      background: { paddingX, paddingY }
+    } = this.props
+    const { width, height } = this.getTextSize(ctx)
+    return {
+      x: x - paddingX - width / 2,
+      y: y - paddingY - height / 2 - 4,
+      width: width + paddingX * 2,
+      height: 14 + paddingY * 2
+    }
   }
 }
 

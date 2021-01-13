@@ -6,11 +6,11 @@ import Emitter from './Emitter'
 let uid = 0
 
 export default class Stage extends Emitter {
-  constructor(canvas, parent) {
+  constructor(canvas, from) {
     super()
     setSize(canvas)
     this.id = uid++
-    this.parent = parent
+    this.from = from
     this.shapes = []
     this.canvas = canvas
     this.ctx = canvas.getContext('2d')
@@ -117,10 +117,10 @@ export default class Stage extends Emitter {
   }
   top() {
     let current = this
-    let parent = current.parent
-    while (parent) {
-      current = parent
-      parent = parent.parent
+    let from = current.from
+    while (from) {
+      current = from
+      from = from.from
     }
     return current
   }

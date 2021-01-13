@@ -2,16 +2,20 @@ import Emitter from '../Emitter'
 import utils from '../utils'
 import { EventType } from '../EventSimulator'
 
+// x，y可传入百分比，如 10%
 class Shape extends Emitter {
   constructor(props = {}) {
     super()
     this.id = utils.unique.createId()
     this.data = props.data // 存放一些数据
     this.props = Object.assign(Object.create(null), { alpha: 1 }, props)
+    this.stage = null
+    this.normalized = false
     this.init()
   }
-  draw(ctx, osCtx, draw) {
-    throw Error('Must write draw method.')
+  draw(draw) {
+    !this.normalized && this.normalizeXY()
+    return draw()
   }
   drawOs(ctx, draw) {
     utils.drawWithSave(ctx, draw, () => {
@@ -49,6 +53,29 @@ class Shape extends Emitter {
       })
     }
   }
+  // 规范化x，y的值
+  normalizeXY() {
+    if (!this.stage) return
+
+    this.normalized = true
+
+    const {
+      props: { x, y },
+      stage: {
+        canvas: { width, height }
+      }
+    } = this
+
+    setConcertedValue.call(this, 'x', x, width)
+    setConcertedValue.call(this, 'y', y, height)
+  }
 }
 
 export default Shape
+
+function setConcertedValue(valueName, value, base) {
+  if (String(value).includes('%')) {
+    const percent = parseFloat(value) / 100
+    this.set(valueName, percent * base)
+  }
+}

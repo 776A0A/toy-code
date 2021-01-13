@@ -6,33 +6,35 @@ class Circle extends Shape {
     super(Object.assign({ center: [100, 100], r: 100, lineWidth: 1 }, props))
   }
   draw(ctx, osCtx) {
-    const {
-      center: [x, y],
-      r,
-      fillStyle,
-      strokeStyle,
-      lineWidth
-    } = this.props
+    super.draw(() => {
+      const {
+        center: [x, y],
+        r,
+        fillStyle,
+        strokeStyle,
+        lineWidth
+      } = this.props
 
-    utils.drawWithSave(
-      ctx,
-      ctx => {
-        ctx.arc(x, y, r, 0, Math.PI * 2)
-      },
-      ctx => {
-        ctx.lineWidth = lineWidth
+      utils.drawWithSave(
+        ctx,
+        ctx => {
+          ctx.arc(x, y, r, 0, Math.PI * 2)
+        },
+        ctx => {
+          ctx.lineWidth = lineWidth
 
-        if (fillStyle) {
-          ctx.fillStyle = fillStyle
-          ctx.fill()
+          if (fillStyle) {
+            ctx.fillStyle = fillStyle
+            ctx.fill()
+          }
+          if (strokeStyle) {
+            ctx.strokeStyle = strokeStyle
+            ctx.stroke()
+          }
         }
-        if (strokeStyle) {
-          ctx.strokeStyle = strokeStyle
-          ctx.stroke()
-        }
-      }
-    )
-    osCtx && this.drawOs(osCtx)
+      )
+      osCtx && this.drawOs(osCtx)
+    })
   }
   drawOs(ctx) {
     const {

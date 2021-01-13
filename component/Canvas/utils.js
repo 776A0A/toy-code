@@ -2,7 +2,7 @@ import unique from './unique'
 import { noop, calculateCenter } from 'utils'
 
 function setDpr(canvas) {
-  const dpr = window.devicePixelRatio
+  const dpr = (window.devicePixelRatio, 1)
   canvas.width = canvas.width * dpr
   canvas.height = canvas.height * dpr
   canvas.getContext('2d').scale(dpr, dpr)
