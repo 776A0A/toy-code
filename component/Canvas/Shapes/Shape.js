@@ -18,15 +18,16 @@ class Shape extends Emitter {
     this.stage = null
     this.normalized = false
     this.init()
-    this.callHook(lifecycle.created)
+
+    callHook.call(this, lifecycle.created)
   }
   draw(draw) {
-    this.callHook(lifecycle.beforeDraw)
+    callHook.call(this, lifecycle.beforeDraw)
 
     !this.normalized && this.normalizeXY()
     const res = draw()
 
-    this.callHook(lifecycle.afterDraw)
+    callHook.call(this, lifecycle.afterDraw)
 
     return res
   }
@@ -90,18 +91,6 @@ class Shape extends Emitter {
     setConcertedValue.call(this, 'x', x, width)
     setConcertedValue.call(this, 'y', y, height)
   }
-  callHook(type) {
-    this.emit(
-      type,
-      utils.createEvent({
-        type,
-        origin: null,
-        current: this,
-        stage: this.stage ?? null,
-        id: this.id
-      })
-    )
-  }
 }
 
 export default Shape
@@ -111,4 +100,17 @@ function setConcertedValue(valueName, value, base) {
     const percent = parseFloat(value) / 100
     this.set(valueName, percent * base)
   }
+}
+
+function callHook(type) {
+  this.emit(
+    type,
+    utils.createEvent({
+      type,
+      origin: null,
+      current: this,
+      stage: this.stage ?? null,
+      id: this.id
+    })
+  )
 }

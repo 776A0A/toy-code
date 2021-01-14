@@ -5,6 +5,12 @@ import Emitter from './Emitter'
 
 let uid = 0
 
+const lifecycle = {
+  created: 'created',
+  beforeDraw: 'beforeDraw',
+  afterDraw: 'afterDraw'
+}
+
 export default class Stage extends Emitter {
   constructor(canvas, from) {
     super()
@@ -18,6 +24,8 @@ export default class Stage extends Emitter {
     this.eventSimulator = new EventSimulator(this)
     this.osCanvas = new OsCanvas(canvas.width, canvas.height)
     this.copyCache = new Map()
+
+    callHook.call(this, lifecycle.created)
   }
   add(...shapes) {
     shapes.forEach(s => {
@@ -42,6 +50,8 @@ export default class Stage extends Emitter {
     return this
   }
   async draw(queue) {
+    callHook.call(this, lifecycle.beforeDraw)
+
     queue = queue || this.shapes
     const {
       ctx,
@@ -52,6 +62,8 @@ export default class Stage extends Emitter {
       if (Array.isArray(item) /* 递归调用draw方法 */) await this.draw(item)
       else await item.draw(ctx, osCtx)
     }
+
+    callHook.call(this, lifecycle.afterDraw)
     return this
   }
   clear() {
@@ -73,7 +85,7 @@ export default class Stage extends Emitter {
     const shape = find(this.shapes)
 
     shape?.emit(type, utils.createEvent({ type, origin: evt, current: shape, stage: this, id }))
-    super.emit(type, utils.createEvent({ type, origin: evt, current: null, stage: this, id }))
+    super.emit(type, utils.createEvent({ type, origin: evt, current: this, stage: this, id }))
   }
   copy(idx) {
     if (idx == null) {
@@ -110,4 +122,11 @@ function setSize(canvas) {
   const { width, height } = window.getComputedStyle(canvas)
   canvas.width = parseFloat(width)
   canvas.height = parseFloat(height)
+}
+
+function callHook(type) {
+  this.emit(
+    type,
+    utils.createEvent({ type, origin: null, current: this, stage: this, id: this.id })
+  )
 }
