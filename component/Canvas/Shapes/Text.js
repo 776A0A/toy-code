@@ -4,18 +4,23 @@ import Rect from './Rect'
 
 class Text extends Shape {
   constructor(props) {
-    super(Object.assign({ text: '文本', x: 0, y: 0, fillStyle: 'black', background: null }, props))
+    super(
+      Object.assign(
+        { text: '文本', x: 0, y: 0, fillStyle: 'black', font: '14px/1 serif', background: null },
+        props
+      )
+    )
   }
   draw(ctx, osCtx) {
     super.draw(() => {
-      const { text, x, y, fillStyle, background } = this.props
+      const { text, x, y, fillStyle, background, font } = this.props
 
       utils
         .drawWithSave(ctx, ctx => {
           if (background) this.drawBackground(ctx)
         })
         .drawWithSave(ctx, ctx => {
-          ctx.font = '14px/1 serif'
+          ctx.font = font
           ctx.fillStyle = fillStyle
           ctx.textAlign = 'center'
           ctx.fillText(text, x, y)
@@ -58,7 +63,7 @@ class Text extends Shape {
       x: x - paddingX - width / 2,
       y: y - paddingY - height / 2 - 4,
       width: width + paddingX * 2,
-      height: 14 + paddingY * 2
+      height: height + paddingY * 2
     }
   }
 }

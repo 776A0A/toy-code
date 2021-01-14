@@ -2,20 +2,33 @@ import Emitter from '../Emitter'
 import utils from '../utils'
 import { EventType } from '../EventSimulator'
 
+const lifecycle = {
+  created: 'created',
+  beforeDraw: 'beforeDraw',
+  afterDraw: 'afterDraw'
+}
+
 // x，y可传入百分比，如 10%
 class Shape extends Emitter {
   constructor(props = {}) {
     super()
     this.id = utils.unique.createId()
     this.data = props.data // 存放一些数据
-    this.props = Object.assign(Object.create(null), { alpha: 1 }, props)
+    this.props = Object.assign(Object.create(null), { alpha: 1, clickable: false }, props)
     this.stage = null
     this.normalized = false
     this.init()
+    this.callHook(lifecycle.created)
   }
   draw(draw) {
+    this.callHook(lifecycle.beforeDraw)
+
     !this.normalized && this.normalizeXY()
-    return draw()
+    const res = draw()
+
+    this.callHook(lifecycle.afterDraw)
+
+    return res
   }
   drawOs(ctx, draw) {
     utils.drawWithSave(ctx, draw, () => {
@@ -36,7 +49,15 @@ class Shape extends Emitter {
   animate() {}
   // 删除自身，暂时只能从绘制队列中删除
   remove() {
-    this.stage.remove(this)
+    if (this.stage) {
+      this.stage.remove(this)
+      return true
+    } else {
+      return false
+    }
+  }
+  extend(stage) {
+    this.stage = stage
   }
   init() {
     const { clickable } = this.props
@@ -68,6 +89,18 @@ class Shape extends Emitter {
 
     setConcertedValue.call(this, 'x', x, width)
     setConcertedValue.call(this, 'y', y, height)
+  }
+  callHook(type) {
+    this.emit(
+      type,
+      utils.createEvent({
+        type,
+        origin: null,
+        current: this,
+        stage: this.stage ?? null,
+        id: this.id
+      })
+    )
   }
 }
 

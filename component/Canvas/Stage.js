@@ -21,8 +21,8 @@ export default class Stage extends Emitter {
   }
   add(...shapes) {
     shapes.forEach(s => {
-      if (Array.isArray(s)) s.forEach(s => (s.stage = this))
-      else s.stage = this
+      if (Array.isArray(s)) s.forEach(s => s.extend(this))
+      else s.extend(this)
       !this.has(s) && this.shapes.push(s)
     })
     return this
@@ -49,22 +49,8 @@ export default class Stage extends Emitter {
     } = this
     for (let i = 0; i < queue.length; i++) {
       const item = queue[i]
-      if (Array.isArray(item)) await this.draw(item)
-      // 递归调用draw方法
-      else {
-        await item.draw(ctx, osCtx)
-        item.emit(
-          EventType.drew,
-          createEvent({
-            type: EventType.drew,
-            origin: null,
-            ctx,
-            current: item,
-            stage: this,
-            id: item.id
-          })
-        ) // 默认会在绘制完毕时触发drew事件
-      }
+      if (Array.isArray(item) /* 递归调用draw方法 */) await this.draw(item)
+      else await item.draw(ctx, osCtx)
     }
     return this
   }
@@ -86,14 +72,8 @@ export default class Stage extends Emitter {
     }
     const shape = find(this.shapes)
 
-    shape?.emit(
-      type,
-      createEvent({ type, origin: evt, ctx: this.ctx, current: shape, stage: this, id })
-    )
-    super.emit(
-      type,
-      createEvent({ type, origin: evt, ctx: this.ctx, current: null, stage: this, id })
-    )
+    shape?.emit(type, utils.createEvent({ type, origin: evt, current: shape, stage: this, id }))
+    super.emit(type, utils.createEvent({ type, origin: evt, current: null, stage: this, id }))
   }
   copy(idx) {
     if (idx == null) {
@@ -130,9 +110,4 @@ function setSize(canvas) {
   const { width, height } = window.getComputedStyle(canvas)
   canvas.width = parseFloat(width)
   canvas.height = parseFloat(height)
-}
-
-// 格式化事件，方便后续改动
-function createEvent({ type, origin, ctx, current, stage, id }) {
-  return { type, origin, ctx, current, stage, id }
 }

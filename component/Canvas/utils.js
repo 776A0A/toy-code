@@ -22,6 +22,11 @@ function drawWithSave(ctx, pathCb = noop, cb) {
   ctx.restore()
 }
 
+// 格式化事件，方便后续改动
+function createEvent({ type, origin, current, stage, id }) {
+  return { type, origin, current, stage, id }
+}
+
 const utils = {
   setDpr,
   drawWithSave(...args) {
@@ -29,7 +34,8 @@ const utils = {
     return this
   },
   unique,
-  calculateCenter
+  calculateCenter,
+  createEvent
 }
 
 export default utils

@@ -42,7 +42,7 @@ export default class EventSimulator {
   listen(type) {
     this.ctx.canvas.addEventListener(type, evt => {
       const { offsetX, offsetY } = evt
-      let shapeId = this.ctx.osCanvas.currentId(offsetX, offsetY)
+      const shapeId = this.ctx.osCanvas.getShapeId(offsetX, offsetY)
       this.trigger(shapeId, type, evt)
     })
   }

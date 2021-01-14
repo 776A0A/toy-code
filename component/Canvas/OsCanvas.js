@@ -9,7 +9,7 @@ export default class OsCanvas {
     this.ctx = this.canvas.getContext('2d')
     this.dpr = utils.setDpr(this.canvas)
   }
-  currentId(x, y) {
+  getShapeId(x, y) {
     const dpr = this.dpr
     const rgba = Array.from(this.ctx.getImageData(x * dpr, y * dpr, 1, 1).data)
     return unique.rgbaToId(rgba)
