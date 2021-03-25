@@ -20,10 +20,10 @@ export function provide<T>(key: InjectionKey<T> | string, value: T) {
     const parentProvides =
       currentInstance.parent && currentInstance.parent.provides
     if (parentProvides === provides) {
-      provides = currentInstance.provides = Object.create(parentProvides)
+      provides = currentInstance.provides = Object.create(parentProvides) // 以父组件的provides为原型，这样就能访问到父组件的provides
     }
     // TS doesn't allow symbol as index type
-    provides[key as string] = value
+    provides[key as string] = value // 添加自身的provides
   }
 }
 
