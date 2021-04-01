@@ -156,13 +156,18 @@ function doWatch(
 
   let getter: () => any
   let forceTrigger = false
+  // 直接传ref
   if (isRef(source)) {
     getter = () => (source as Ref).value
     forceTrigger = !!(source as Ref)._shallow
-  } else if (isReactive(source)) {
+  } 
+  // 如果是reactive，会自动包装为函数
+  else if (isReactive(source)) {
     getter = () => source
     deep = true
-  } else if (isArray(source)) {
+  } 
+   // 数组的形式
+  else if (isArray(source)) {
     getter = () =>
       source.map(s => {
         if (isRef(s)) {
@@ -175,7 +180,9 @@ function doWatch(
           __DEV__ && warnInvalidSource(s)
         }
       })
-  } else if (isFunction(source)) {
+  } 
+  // 本身就是函数
+  else if (isFunction(source)) {
     if (cb) {
       // getter with cb
       getter = () =>
@@ -216,6 +223,7 @@ function doWatch(
 
   // in SSR there is no need to setup an actual effect, and it should be noop
   // unless it's eager
+  // SSR环境
   if (__NODE_JS__ && isInSSRComponentSetup) {
     if (!cb) {
       getter()

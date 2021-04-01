@@ -83,6 +83,7 @@ export function callWithAsyncErrorHandling(
   if (isFunction(fn)) {
     const res = callWithErrorHandling(fn, instance, type, args)
     if (res && isPromise(res)) {
+      // 添加了一个catch
       res.catch(err => {
         handleError(err, instance, type)
       })
@@ -97,6 +98,7 @@ export function callWithAsyncErrorHandling(
   return values
 }
 
+// 调用每个组件以及全局的错误处理钩子函数
 export function handleError(
   err: unknown,
   instance: ComponentInternalInstance | null,
