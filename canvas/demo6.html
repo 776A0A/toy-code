@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+        <style>
+            button {
+                padding: 5px 10px;
+            }
+            .active {
+                color: darkcyan;
+            }
+            #container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            #buttonGroup {
+                margin-top: 10px;
+                user-select: none;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="container">
+            <canvas id="canvas" style="border: 1px solid"></canvas>
+            <div id="buttonGroup">
+                <button id="drawRectButton" class="active">矩形</button>
+                <button id="drawPointButton">描点</button>
+                <button id="editButton">编辑</button>
+                <input type="text" id="boxName" />
+            </div>
+        </div>
+        <script type="module">
+            import { Stage } from './DrawingBoard/index.js'
+            const size = 500
+            const canvas = document.getElementById('canvas')
+            canvas.width = canvas.height = size
+
+            const stage = new Stage(canvas)
+            stage.setMode('adder').setShape('polygon')
+
+            drawRectButton.onclick = (evt) => {
+                stage.setMode('adder').setShape('rect')
+                switchActiveButton(evt)
+            }
+            drawPointButton.onclick = (evt) => {
+                stage.setMode('adder').setShape('polygon')
+                switchActiveButton(evt)
+            }
+            editButton.onclick = (evt) => {
+                stage.setMode('editor')
+                switchActiveButton(evt)
+            }
+
+            function switchActiveButton(evt) {
+                ;[...buttonGroup.children].forEach((b) =>
+                    b.classList.remove('active')
+                )
+                evt.target.classList.add('active')
+            }
+        </script>
+    </body>
+</html>

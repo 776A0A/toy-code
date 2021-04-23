@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>JS Bin</title>
+        <style>
+            button {
+                padding: 5px 10px;
+            }
+            .active {
+                color: darkcyan;
+            }
+            #container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            #buttonGroup {
+                margin-top: 10px;
+                user-select: none;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="container">
+            <canvas id="canvas" style="border: 1px solid"></canvas>
+            <div id="buttonGroup">
+                <button id="drawButton" class="active">矩形</button>
+                <button id="drawPointButton">描点</button>
+                <button id="editButton">编辑</button>
+                <input type="text" id="boxName" />
+            </div>
+        </div>
+        <script type="module">
+            import { Rect, Circle, Text, Point, Polygon } from './shapes.js'
+
+            function drawRects() {
+                rects.forEach((r) => r.draw())
+            }
+
+            function clearCanvas() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height)
+            }
+
+            function findTopRect(evt) {
+                let topRectIndex // 最上面的一个rect
+
+                rects.forEach((rect, idx) => {
+                    ctx.beginPath()
+                    ctx.rect(rect.x, rect.y, rect.w, rect.h)
+                    ctx.closePath()
+                    if (ctx.isPointInPath(evt.offsetX, evt.offsetY)) {
+                        topRectIndex = idx
+                    }
+                })
+
+                if (topRectIndex !== undefined) {
+                    return topRectIndex
+                }
+            }
+
+            function handlePickNoting() {
+                if (editingRectIndex === undefined) return
+                rects[editingRectIndex].set({ color: '#f00' })
+                isEditing = false
+                editingRectIndex = undefined
+                clearCanvas()
+                clearControlPoints()
+                drawRects()
+            }
+
+            function handlePicked(topRectIndex) {
+                if (topRectIndex !== editingRectIndex) {
+                    rects[editingRectIndex]?.set({ color: '#f00' })
+                    editingRectIndex = topRectIndex
+                    rects[topRectIndex].set({ color: '#0f0' })
+                    update()
+                }
+                isEditing = true
+            }
+
+            function addControlPoints() {
+                if (editingRectIndex === undefined) return
+                const rect = rects[editingRectIndex]
+                controlPoints.push(
+                    new Circle(ctx, rect.x, rect.y),
+                    new Circle(ctx, rect.x + rect.w, rect.y),
+                    new Circle(ctx, rect.x + rect.w, rect.y + rect.h),
+                    new Circle(ctx, rect.x, rect.y + rect.h)
+                )
+            }
+
+            function clearControlPoints() {
+                controlPoints.length = 0
+            }
+
+            function drawControlPoints() {
+                if (!controlPoints.length) return
+                controlPoints.forEach((c) => c.draw())
+            }
+
+            let handler
+
+            function pick(evt) {
+                if (!rects.length) return
+
+                if (isEditing && isPickPoint(evt)) switchToResize()
+                else {
+                    let topRectIndex = findTopRect(evt) ?? undefined
+
+                    if (topRectIndex !== undefined) {
+                        handlePicked(topRectIndex)
+                        if (isPickPoint(evt)) switchToResize()
+                        else {
+                            dragDiff.x = evt.offsetX - rects[topRectIndex].x
+                            dragDiff.y = evt.offsetY - rects[topRectIndex].y
+                            switchToDrag()
+                        }
+                    } else {
+                        handlePickNoting()
+                    }
+                }
+                update()
+            }
+            function edit(evt) {
+                handler(evt)
+            }
+            function switchToResize() {
+                handler = resize
+                isResizing = true
+            }
+            function switchToDrag() {
+                handler = drag
+                isDragging = true
+            }
+            function resize(evt) {
+                if (!isResizing || editingRectIndex === undefined) return
+                const rect = rects[editingRectIndex]
+                rect.set({ w: evt.offsetX - rect.x, h: evt.offsetY - rect.y })
+                update()
+            }
+            function drag(evt) {
+                if (!isDragging || editingRectIndex === undefined) return
+                const rect = rects[editingRectIndex]
+                rect.set({
+                    x: evt.offsetX - dragDiff.x,
+                    y: evt.offsetY - dragDiff.y,
+                })
+                update()
+            }
+
+            function update() {
+                clearCanvas()
+                clearControlPoints()
+                addControlPoints()
+                drawRects()
+                drawPoints()
+                drawControlPoints()
+            }
+            function isPickPoint(evt) {
+                if (editingRectIndex === undefined) return
+                const rect = rects[editingRectIndex]
+                let is = false
+                for (let idx = 0; idx < controlPoints.length; idx++) {
+                    const point = controlPoints[idx]
+                    if (
+                        Math.sqrt(
+                            (evt.offsetX - point.x) ** 2 +
+                                (evt.offsetY - point.y) ** 2
+                        ) < point.r
+                    ) {
+                        const diagonalPoint =
+                            controlPoints[(idx + 2) % controlPoints.length]
+                        rect.set({ x: diagonalPoint.x, y: diagonalPoint.y }) // 更新为对角线的点坐标
+                        is = true
+                        break
+                    }
+                }
+                return is
+            }
+            function switchActiveButton(evt) {
+                ;[...buttonGroup.children].forEach((b) =>
+                    b.classList.remove('active')
+                )
+                evt.target.classList.add('active')
+            }
+            function drawText(text) {
+                addText(text)
+                update()
+            }
+            function addText(text) {
+                if (editingRectIndex === undefined) return
+                const rect = rects[editingRectIndex]
+                rect.clearChildren()
+                rect.appendChild(
+                    new Text(
+                        ctx,
+                        text,
+                        rect.x + rect.w / 2,
+                        rect.y + rect.h / 2
+                    )
+                )
+            }
+            function pointIt(evt) {
+                const point = new Point(ctx, evt.offsetX, evt.offsetY)
+                points.push(point)
+            }
+            function previewPoints(evt) {
+                if (!points.length) return
+
+                update()
+
+                const [first, ...rest] = points
+
+                ctx.save()
+                ctx.beginPath()
+                ctx.moveTo(first.x, first.y)
+                rest.forEach((point) => point.draw())
+                ctx.lineTo(evt.offsetX, evt.offsetY)
+                ctx.closePath()
+                ctx.stroke()
+                ctx.restore()
+            }
+            function drawPoints() {
+                if (!polygons.length) return
+                polygons.forEach((polygon) => polygon.draw())
+            }
+            function confirmPoints() {
+                polygons.push(new Polygon(ctx, [...points]))
+                clearPoints()
+            }
+            function clearPoints() {
+                points.length = 0
+            }
+            const size = 500
+            const canvas = document.getElementById('canvas')
+            canvas.width = canvas.height = size
+            const ctx = canvas.getContext('2d')
+            const rects = []
+            let isDrawRectMode = false
+            let isEditMode = false
+            let isDrawPointMode = false
+            let isEditing = false
+            let isResizing = false
+            let isDragging = false
+            let editingRectIndex
+            const controlPoints = []
+            const dragDiff = { x: 0, y: 0 }
+            const points = []
+            const polygons = []
+
+            const start = (evt) => {
+                if (isEditMode) return pick(evt)
+                if (isDrawPointMode) return pointIt(evt)
+                isDrawRectMode = true
+                const rect = new Rect(ctx, evt.offsetX, evt.offsetY, 0, 0)
+                rects.push(rect)
+            }
+            const moving = (evt) => {
+                if (isEditMode && isEditing) return edit(evt)
+                if (isDrawPointMode) return previewPoints(evt)
+                if (!isDrawRectMode) return
+                const rect = rects[rects.length - 1]
+                rect.set({ w: evt.offsetX - rect.x, h: evt.offsetY - rect.y })
+                clearCanvas()
+                update()
+            }
+            const end = () => {
+                isDrawRectMode = isResizing = isDragging = false
+                dragDiff.x = dragDiff.y = 0
+            }
+            const confirm = (evt) => {
+                isDrawPointMode = false
+                confirmPoints()
+            }
+
+            canvas.addEventListener('mousedown', start)
+            canvas.addEventListener('dblclick', confirm)
+            canvas.addEventListener('mousemove', moving)
+            canvas.addEventListener('mouseup', end)
+            canvas.addEventListener('mouseleave', end)
+            drawButton.addEventListener('click', (evt) => {
+                isEditMode = false
+                switchActiveButton(evt)
+            })
+            drawPointButton.addEventListener('click', (evt) => {
+                isDrawPointMode = true
+                switchActiveButton(evt)
+            })
+            editButton.addEventListener('click', (evt) => {
+                isEditMode = true
+                switchActiveButton(evt)
+            })
+            boxName.addEventListener('input', (evt) => {
+                if (!isEditing) return (boxName.value = '')
+                drawText(boxName.value)
+            })
+        </script>
+    </body>
+</html>

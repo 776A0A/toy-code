@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+            }
+            body {
+                height: 100vh;
+                width: 100vh;
+            }
+            .canvas-group {
+                margin: auto;
+                margin-top: 100px;
+                position: relative;
+                width: 500px;
+            }
+            canvas {
+                border: 1px solid;
+                display: block;
+                position: absolute;
+                top: 0;
+                left: 0;
+            }
+            .button-group {
+                position: absolute;
+                right: 0;
+                top: 100px;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="canvas-group">
+            <canvas id="canvas" width="1000" height="1000"></canvas>
+            <canvas
+                id="editingCanvas"
+                width="1000"
+                height="1000"
+                style="display: none"
+            ></canvas>
+        </div>
+        <div class="button-group">
+            <button id="drawButton">点击绘图</button>
+            <button id="editButton">编辑</button>
+            <button id="saveButton">保存</button>
+        </div>
+        <script>
+            const W = 1000
+            const ctx = canvas.getContext('2d')
+            let currentDrawingRect = null
+            let currentEditingRect = null
+            let editingRectIndex
+            const rects = []
+            let drawing = false
+            let isEditing = false
+            const circles = []
+
+            drawButton.onclick = () => {
+                drawing = !drawing
+                drawButton.innerText = drawing ? '绘图模式' : '点击绘图'
+            }
+            editButton.onclick = () => {
+                isEditing = true
+            }
+            saveButton.onclick = () => {
+                isEditing = false
+                currentEditingRect.ctx = ctx
+                currentEditingRect.color = 'red'
+                currentEditingRect.draw()
+                rects[editingRectIndex] = currentEditingRect
+                editingRectIndex = undefined
+                currentEditingRect = null
+                editingCanvas.getContext('2d').clearRect(0, 0, W, W)
+                editingCanvas.style.display = 'none'
+                circles.length = 0
+            }
+
+            canvas.onmousedown = (evt) => {
+                if (drawing) {
+                    currentDrawingRect = new Rect(
+                        ctx,
+                        evt.offsetX,
+                        evt.offsetY,
+                        0,
+                        0
+                    )
+                }
+            }
+            canvas.onmousemove = (evt) => {
+                if (!drawing || !currentDrawingRect) return
+
+                ctx.clearRect(0, 0, W, W)
+                rects.forEach((r) => r.draw())
+                currentDrawingRect.width = evt.offsetX - currentDrawingRect.x
+                currentDrawingRect.height = evt.offsetY - currentDrawingRect.y
+                currentDrawingRect.draw()
+            }
+            canvas.onmouseup = (evt) => {
+                if (drawing || currentDrawingRect) {
+                    currentDrawingRect && rects.push(currentDrawingRect)
+                    currentDrawingRect = null
+                } else {
+                    if (isEditing) detect(evt.offsetX, evt.offsetY)
+                }
+            }
+            canvas.onmouseleave = () => {
+                drawing = false
+                currentDrawingRect && rects.push(currentDrawingRect)
+                currentDrawingRect = null
+                drawButton.innerText = '点击绘图'
+            }
+
+            class Rect {
+                constructor(
+                    ctx,
+                    x,
+                    y,
+                    width,
+                    height,
+                    lineWidth = 1,
+                    color = '#f00'
+                ) {
+                    this.ctx = ctx
+                    this.x = x
+                    this.y = y
+                    this.width = width
+                    this.height = height
+                    this.lineWidth = lineWidth
+                    this.color = color
+                }
+                draw() {
+                    if (this.skip) return
+                    const { ctx, x, y, width, height, lineWidth, color } = this
+                    ctx.save()
+                    ctx.beginPath()
+                    ctx.lineWidth = lineWidth
+                    ctx.strokeStyle = color
+                    ctx.rect(x, y, width, height)
+                    // ctx.moveTo(x, y)
+                    // ctx.lineTo(x + width, y)
+                    // ctx.lineTo(x + width, y + height)
+                    // ctx.lineTo(x, y + height)
+                    ctx.closePath()
+                    ctx.stroke()
+                    ctx.restore()
+                }
+            }
+
+            class Circle {
+                constructor(ctx, x, y, r = 5, color = 'green') {
+                    this.ctx = ctx
+                    this.x = x
+                    this.y = y
+                    this.r = r
+                    this.color = color
+                }
+                fill() {
+                    const { ctx, x, y, r, color } = this
+                    ctx.save()
+                    ctx.beginPath()
+                    ctx.fillStyle = color
+                    ctx.arc(x, y, r, 0, 2 * Math.PI)
+                    ctx.fill()
+                    ctx.closePath()
+                    ctx.restore()
+                }
+                stroke() {}
+            }
+
+            function detect(x, y) {
+                if (drawing || currentDrawingRect) return
+
+                let topRectIndex
+
+                rects.forEach((r, index) => {
+                    ctx.save()
+                    ctx.beginPath()
+                    ctx.rect(r.x, r.y, r.width, r.height)
+                    ctx.closePath()
+                    r.color = 'red' // 重置为红色
+                    if (ctx.isPointInPath(x, y)) {
+                        topRectIndex = index
+                    }
+                    ctx.restore()
+                })
+
+                if (topRectIndex !== undefined) {
+                    const topRect = rects[topRectIndex]
+                    topRect.skip = true
+                    editingRectIndex = topRectIndex
+                    editingCanvas.style.display = 'block'
+                    currentEditingRect = new Rect(
+                        editingCanvas.getContext('2d'),
+                        topRect.x,
+                        topRect.y,
+                        topRect.width,
+                        topRect.height,
+                        topRect.lineWidth,
+                        'blue'
+                    )
+                    currentEditingRect.draw()
+                    startEditing()
+                } else {
+                    editingRectIndex = undefined
+                }
+
+                ctx.clearRect(0, 0, W, W)
+                rects.forEach((r) => r.draw())
+            }
+
+            function startEditing() {
+                const ctx = editingCanvas.getContext('2d')
+                const { x, y, width, height } = currentEditingRect
+                let draggingCircle = null
+
+                const getCircle = (x, y) => new Circle(ctx, x, y)
+
+                circles.push(
+                    getCircle(x, y),
+                    getCircle(x + width, y),
+                    getCircle(x + width, y + height),
+                    getCircle(x, y + height)
+                )
+                circles.forEach((c) => c.fill())
+
+                editingCanvas.onmousedown = (evt) => {
+                    let draggingIndex
+                    for (let i = 0; i < circles.length; i++) {
+                        const c = circles[i]
+                        ctx.save()
+                        ctx.beginPath()
+                        ctx.arc(c.x, c.y, c.r, 0, 2 * Math.PI)
+                        ctx.closePath()
+                        if (ctx.isPointInPath(evt.offsetX, evt.offsetY)) {
+                            editingCanvas.style.cursor = 'move'
+                            draggingCircle = c
+                            draggingIndex = i
+                            break
+                        }
+                        ctx.restore()
+                    }
+
+                    if (editingCanvas.style.cursor !== 'move') {
+                        draggingCircle = null
+                        draggingIndex = undefined
+                    } else {
+                        const x = circles[(draggingIndex + 2) % circles.length]
+                        currentEditingRect.x = x.x
+                        currentEditingRect.y = x.y
+                    }
+                }
+                editingCanvas.onmousemove = (evt) => {
+                    if (editingCanvas.style.cursor !== 'move') return
+
+                    ctx.clearRect(0, 0, W, W)
+
+                    currentEditingRect.width =
+                        evt.offsetX - currentEditingRect.x
+                    currentEditingRect.height =
+                        evt.offsetY - currentEditingRect.y
+                    circles[0].x = currentEditingRect.x
+                    circles[0].y = currentEditingRect.y
+                    circles[1].x =
+                        currentEditingRect.x + currentEditingRect.width
+                    circles[1].y = currentEditingRect.y
+                    circles[2].x =
+                        currentEditingRect.x + currentEditingRect.width
+                    circles[2].y =
+                        currentEditingRect.y + currentEditingRect.height
+                    circles[3].x = currentEditingRect.x
+                    circles[3].y =
+                        currentEditingRect.y + currentEditingRect.height
+                    circles.forEach((c) => c.fill())
+                    currentEditingRect.draw()
+                }
+
+                editingCanvas.onmouseup = (evt) => {
+                    draggingCircle = null
+                    editingCanvas.style.cursor = 'default'
+                }
+                editingCanvas.onmouseleave = () => {
+                    draggingCircle = null
+                    editingCanvas.style.cursor = 'default'
+                }
+            }
+        </script>
+    </body>
+</html>

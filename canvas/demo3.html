@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>JS Bin</title>
+        <style>
+            canvas {
+                border: 1px solid;
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id="canvas" width="500" height="500"></canvas>
+        <script src="https://unpkg.com/dayjs@1.8.21/dayjs.min.js"></script>
+        <script>
+            const canvas = document.getElementById('canvas')
+            const ctx = canvas.getContext('2d')
+            let timer
+
+            const rect = {
+                x: Math.floor(Math.random() * canvas.width),
+                y: Math.floor(Math.random() * canvas.height),
+                width: 5,
+                height: 5,
+                vx: 1,
+                vy: 5,
+                color: 'blue',
+                draw: drawRect,
+            }
+
+            const board = {
+                x: 150,
+                y: 400,
+                width: 200,
+                height: 5,
+                vx: 10,
+                vy: 0,
+                color: 'red',
+                draw: drawRect,
+            }
+
+            let bricks = createBricks()
+
+            function draw() {
+                ctx.fillStyle = `rgba(255, 255, 255, .3)`
+                ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+                if (
+                    rect.x + rect.vx + rect.width > canvas.width ||
+                    rect.x + rect.vx < 0
+                ) {
+                    rect.vx = -rect.vx
+                }
+                if (
+                    rect.y + rect.vy + rect.height > canvas.height ||
+                    rect.y + rect.vy < 0
+                ) {
+                    rect.vy = -rect.vy
+                }
+
+                if (isIntersectedWithBoard()) {
+                    rect.vy = -rect.vy
+                }
+
+                for (let index = bricks.length - 1; index >= 0; index--) {
+                    const brick = bricks[index]
+                    if (isIntersectedWithBrick(brick)) {
+                        rect.vy = -rect.vy
+                        bricks.splice(index, 1)
+                        break
+                    }
+                }
+
+                rect.x += rect.vx
+                rect.y += rect.vy
+
+                rect.draw()
+                board.draw()
+                bricks.forEach((brick) => brick.draw())
+
+                timer = requestAnimationFrame(draw)
+            }
+
+            timer = requestAnimationFrame(draw)
+
+            window.onkeydown = (evt) => {
+                evt.preventDefault()
+
+                cancelAnimationFrame(timer)
+
+                if (evt.code === 'ArrowLeft') {
+                    if (board.x <= 0) board.x = 0
+                    else board.x -= board.vx
+                } else if (evt.code === 'ArrowRight') {
+                    if (board.x + board.width >= canvas.width)
+                        board.x = canvas.width - board.width
+                    else board.x += board.vx
+                }
+                timer = requestAnimationFrame(draw)
+            }
+
+            function isIntersectedWithBoard() {
+                return (
+                    rect.vy > 0 &&
+                    rect.y + rect.height >= board.y - rect.height &&
+                    rect.y + rect.height <= board.y + board.height &&
+                    rect.x > board.x &&
+                    rect.x + rect.width < board.x + board.width
+                )
+            }
+
+            function isIntersectedWithBrick(brick) {
+                return (
+                    rect.vy < 0 &&
+                    (rect.y + rect.vy <= brick.y + brick.height ||
+                        rect.y < brick.y + brick.height) &&
+                    rect.x + rect.vx >= brick.x &&
+                    rect.x + rect.vx + rect.width <= brick.x + brick.width
+                )
+            }
+
+            function drawBricks() {
+                ctx.save()
+                ctx.beginPath()
+                ctx.fillRect(50, 0, 400, 50)
+                ctx.closePath()
+                ctx.restore()
+            }
+
+            function createBricks() {
+                const bricks = []
+                for (let i = 0; i < 10; i++) {
+                    for (let j = 0; j < 80; j++) {
+                        const size = 5
+                        bricks.push({
+                            x: j * size + 50,
+                            y: i * size,
+                            width: size,
+                            height: size,
+                            color: 'green',
+                            draw() {
+                                ctx.save()
+                                ctx.fillStyle = this.color
+                                ctx.fillRect(
+                                    this.x,
+                                    this.y,
+                                    this.width,
+                                    this.height
+                                )
+                                ctx.restore()
+                            },
+                        })
+                    }
+                }
+
+                return bricks
+            }
+
+            function drawRect() {
+                ctx.save()
+                ctx.fillStyle = this.color
+                ctx.fillRect(this.x, this.y, this.width, this.height)
+                ctx.restore()
+            }
+        </script>
+    </body>
+</html>

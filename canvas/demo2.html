@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>JS Bin</title>
+        <style>
+            button {
+                transition: outline 0.3s linear;
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id="canvas"></canvas>
+        <div id="buttonGroup">
+            <button style="outline: 3px solid">black</button>
+            <button>red</button>
+            <button>blue</button>
+            <button>yellow</button>
+            <button>green</button>
+            <button>pink</button>
+        </div>
+        <script>
+            canvas.width = canvas.height = 500
+            const ctx = canvas.getContext('2d')
+            ctx.lineCap = ctx.lineJoin = 'round' // 注意衔接
+            let isDrawing = false
+            const lastPosition = { x: 0, y: 0 }
+            let lastTime = 0
+            let lastLineWidth = 0
+
+            drawGrid()
+
+            buttonGroup.onclick = (evt) => {
+                ctx.strokeStyle = evt.target.innerText
+                ;[...buttonGroup.children].forEach(
+                    (button) =>
+                        (button.style.outline = `0px solid ${button.innerText}`)
+                )
+                evt.target.style.outline = `3px solid ${evt.target.innerText}`
+            }
+
+            canvas.onmousedown = start
+            canvas.onmouseup = canvas.onmouseleave = canvas.ontouchend = end
+            canvas.onmousemove = move
+
+            canvas.ontouchstart = (evt) => {
+                evt.preventDefault()
+                const touch = evt.touches[0]
+                touch.offsetX =
+                    touch.clientX - canvas.getBoundingClientRect().left
+                touch.offsetY =
+                    touch.clientY - canvas.getBoundingClientRect().top
+                start(touch)
+            }
+            canvas.ontouchmove = (evt) => {
+                evt.preventDefault()
+                if (!isDrawing) return
+
+                const touch = evt.changedTouches[0]
+
+                touch.offsetX =
+                    touch.clientX - canvas.getBoundingClientRect().left
+                touch.offsetY =
+                    touch.clientY - canvas.getBoundingClientRect().top
+
+                move(touch)
+            }
+
+            function start(evt) {
+                isDrawing = true
+                lastPosition.x = evt.offsetX
+                lastPosition.y = evt.offsetY
+                lastTime = Date.now()
+            }
+
+            function move(evt) {
+                if (!isDrawing) return
+
+                const currentTime = Date.now()
+
+                ctx.save()
+
+                ctx.beginPath()
+                ctx.moveTo(lastPosition.x, lastPosition.y)
+                ctx.lineTo(evt.offsetX, evt.offsetY)
+                ctx.closePath()
+
+                ctx.lineWidth = calcLineWidth(
+                    calcDistance(
+                        { x: evt.offsetX, y: evt.offsetY },
+                        lastPosition
+                    ),
+                    currentTime - lastTime
+                )
+
+                ctx.stroke()
+                ctx.restore()
+
+                lastPosition.x = evt.offsetX
+                lastPosition.y = evt.offsetY
+
+                lastTime = currentTime
+            }
+
+            function end(evt) {
+                evt.preventDefault()
+                isDrawing = false
+            }
+
+            function calcLineWidth(d, t) {
+                const v = d / t
+
+                const maxWidth = 15
+                const minWidth = 5
+                const maxV = 100
+                const minV = 20
+
+                let width = 0
+
+                if (v <= minV) width = maxWidth
+                else if (v >= maxV) width = minWidth
+                else width = ((maxWidth - minWidth) * v) / (maxV - minV)
+
+                width =
+                    lastLineWidth === 0
+                        ? width
+                        : (lastLineWidth * 2) / 3 + (width * 1) / 3
+
+                lastLineWidth = width
+
+                return width
+            }
+
+            function calcDistance(p1, p2) {
+                return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y + p2.y) ** 2)
+            }
+
+            function drawGrid() {
+                ctx.save()
+                ctx.lineWidth = 5
+                ctx.strokeRect(0, 0, 500, 500)
+                ctx.restore()
+
+                ctx.save()
+                ctx.beginPath()
+
+                ctx.setLineDash([6, 6])
+
+                ctx.lineWidth = 2
+
+                ctx.moveTo(0, 0)
+                ctx.lineTo(500, 500)
+
+                ctx.moveTo(500, 0)
+                ctx.lineTo(0, 500)
+
+                ctx.lineWidth = 1
+
+                ctx.moveTo(0, 250)
+                ctx.lineTo(500, 250)
+
+                ctx.moveTo(250, 0)
+                ctx.lineTo(250, 500)
+
+                ctx.closePath()
+
+                ctx.stroke()
+                ctx.restore()
+            }
+        </script>
+    </body>
+</html>
