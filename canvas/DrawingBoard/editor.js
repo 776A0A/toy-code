@@ -44,21 +44,19 @@ export class Editor {
             // 没有选中过，什么都不做
             if (top === undefined && this.topGraphIndex === undefined) return
 
-            if (top !== undefined) {
-                graphs[this.topGraphIndex]?.set({ color: '#f00' }) // 还原上一个图形的颜色
-                this.controlPoint?.clearPoints()
+            graphs[this.topGraphIndex]?.set({ color: '#f00' }) // 重置颜色
+            this.controlPoint?.clearPoints()
 
+            if (top !== undefined) {
                 graphs[top].set({ color: '#0f0' })
                 this.isEditing = true
                 this.topGraphIndex = top
-                this.recordDragPosition(position) // 记录拖拽鼠标位置
                 this.controlPoint = new ControlPoint(graphs[top])
+                this.recordDragPosition(position) // 记录拖拽鼠标位置
                 this.switchTo.drag()
             } else {
-                graphs[this.topGraphIndex]?.set({ color: '#f00' }) // 重置颜色
-                this.topGraphIndex = undefined
                 this.isEditing = false
-                this.controlPoint.clearPoints()
+                this.topGraphIndex = undefined
                 this.controlPoint = null
             }
 

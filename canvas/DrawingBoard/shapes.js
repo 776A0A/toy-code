@@ -133,6 +133,12 @@ export class Polygon extends Graph {
         this.points = points
         this.color = color
     }
+    get x() {
+        return this.points[0]?.x
+    }
+    get y() {
+        return this.points[0]?.y
+    }
     draw() {
         const { ctx, color } = this
         ctx.save()
@@ -145,10 +151,10 @@ export class Polygon extends Graph {
     drawPath() {
         const {
             ctx,
-            points: [first, ...points],
+            points: [_, ...points],
         } = this
         ctx.beginPath()
-        ctx.moveTo(first.x, first.y)
+        ctx.moveTo(this.x, this.y)
         points.forEach((point) => point.draw())
         ctx.closePath()
     }
