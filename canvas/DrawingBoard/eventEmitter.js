@@ -19,5 +19,6 @@ export class EventEmitter {
         if (listeners) {
             ;[...listeners].forEach((cb) => cb(...args))
         }
+        return this
     }
 }

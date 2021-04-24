@@ -9,7 +9,7 @@ export class Stage {
     constructor(canvas) {
         this.canvas = canvas
         this.emitter = new EventEmitter()
-        this.switcher = new Switcher()
+        this.switcher = new Switcher(this)
         this.drawer = new Drawer(this)
         this.shapeBox = new ShapeBox(this)
         this.adder = new Adder(this)
@@ -21,13 +21,16 @@ export class Stage {
         this.addListener()
     }
     addListener() {
-        this.emitter.listen('add-shape', (shape) => {
-            this.shapeBox.add(shape)
-        })
-
-        this.emitter.listen('update-screen', () => {
-            this.drawer.update(this.shapeBox.shapes)
-        })
+        this.emitter
+            .listen('add-shape', (shape) => {
+                this.shapeBox.add(shape)
+            })
+            .listen('update-screen', () => {
+                this.drawer.update(this.shapeBox.shapes)
+            })
+            .listen('end-edit', () => {
+                this.editor.finish(this.shapeBox.shapes)
+            })
     }
     addNativeListener() {
         const handleMouseDown = (evt) => {
@@ -43,7 +46,7 @@ export class Stage {
             if (this.switcher.mode === modes.adder) {
                 this.adder.update(position)
             } else if (this.switcher.mode === modes.editor) {
-                this.editor.edit(position)
+                this.editor.edit(position, this.shapeBox.shapes)
             }
         }
 
@@ -52,7 +55,7 @@ export class Stage {
             if (this.switcher.mode === modes.adder) {
                 this.adder.stop()
             } else if (this.switcher.mode === modes.editor) {
-                this.editor.finish()
+                this.editor.stop()
             }
         }
 

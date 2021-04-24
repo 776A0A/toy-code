@@ -20,6 +20,7 @@ class Shape {
 export class Rect extends Shape {
     constructor(ctx, x, y, width, height, lineWidth = 1, color = '#f00') {
         super()
+        this.name = 'rect'
         this.ctx = ctx
         this.x = x
         this.y = y
@@ -49,6 +50,7 @@ export class Rect extends Shape {
 export class Circle extends Shape {
     constructor(ctx, x, y, r = 5, color = '#00f') {
         super()
+        this.name = 'circle'
         this.ctx = ctx
         this.x = x
         this.y = y
@@ -69,6 +71,7 @@ export class Circle extends Shape {
 export class Text extends Shape {
     constructor(ctx, text, x, y, font = '20px sarif', color = '#000') {
         super()
+        this.name = 'text'
         this.ctx = ctx
         this.text = text
         this.x = x
@@ -92,6 +95,7 @@ export class Text extends Shape {
 export class Point extends Shape {
     constructor(ctx, x, y) {
         super()
+        this.name = 'point'
         this.ctx = ctx
         this.x = x
         this.y = y
@@ -107,6 +111,7 @@ export class Point extends Shape {
 export class Polygon extends Shape {
     constructor(ctx, points = [], color = '#f00') {
         super()
+        this.name = 'polygon'
         this.ctx = ctx
         this.points = points
         this.color = color

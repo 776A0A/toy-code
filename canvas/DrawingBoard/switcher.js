@@ -1,17 +1,19 @@
 export const modes = {
     adder: Symbol('ADD_MODE'),
-    drawer: Symbol('DRAW_MODE'),
     editor: Symbol('EDIT_MODE'),
 }
 
 export class Switcher {
-    constructor() {
+    constructor(stage) {
+        this.stage = stage
         this.mode = modes.adder
     }
     get switchTo() {
         return {
-            drawer: () => (this.mode = modes.drawer),
-            adder: () => (this.mode = modes.adder),
+            adder: () => {
+                this.mode = modes.adder
+                this.stage.emitter.emit('end-edit')
+            },
             editor: () => (this.mode = modes.editor),
         }
     }
