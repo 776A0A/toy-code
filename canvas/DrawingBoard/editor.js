@@ -1,3 +1,5 @@
+import { Circle } from './shapes.js'
+
 export class Editor {
     constructor(stage) {
         this.stage = stage
@@ -7,6 +9,7 @@ export class Editor {
         this.dragPosition = { x: 0, y: 0 }
         this.isDragging = false
         this.isResizing = false
+        this.controlPoint = null
     }
     get switchTo() {
         return {
@@ -42,16 +45,21 @@ export class Editor {
             if (top === undefined && this.topGraphIndex === undefined) return
 
             if (top !== undefined) {
+                graphs[this.topGraphIndex]?.set({ color: '#f00' }) // 还原上一个图形的颜色
+                this.controlPoint?.clearPoints()
+
+                graphs[top].set({ color: '#0f0' })
                 this.isEditing = true
-                this.handleIfChangedShape(top, graphs)
                 this.topGraphIndex = top
                 this.recordDragPosition(position) // 记录拖拽鼠标位置
+                this.controlPoint = new ControlPoint(graphs[top])
                 this.switchTo.drag()
             } else {
-                // TODO 转移到stop中
-                graphs[this.topGraphIndex]?.set({ color: '#f00' })
+                graphs[this.topGraphIndex]?.set({ color: '#f00' }) // 重置颜色
                 this.topGraphIndex = undefined
                 this.isEditing = false
+                this.controlPoint.clearPoints()
+                this.controlPoint = null
             }
 
             this.stage.emitter.emit('update-screen')
@@ -60,7 +68,7 @@ export class Editor {
     stop() {
         this.isDragging = this.isResizing = false
     }
-    finish(graphs) {
+    end(graphs) {
         if (this.topGraphIndex !== undefined) {
             graphs[this.topGraphIndex].set({ color: '#f00' })
             this.stage.emitter.emit('update-screen')
@@ -81,11 +89,6 @@ export class Editor {
         return top
     }
     isPickControlPoint({ x, y }) {}
-    handleIfChangedShape(top, graphs) {
-        if (top === this.topGraphIndex) return // 点选的同一个图形，直接返回
-        graphs[this.topGraphIndex]?.set({ color: '#f00' })
-        graphs[top].set({ color: '#0f0' })
-    }
     handleResize({ x, y }, graphs) {
         if (!this.isResizing) return
     }
@@ -119,5 +122,40 @@ export class Editor {
         this.dragPosition = { x, y }
 
         this.stage.emitter.emit('update-screen')
+    }
+}
+
+class ControlPoint {
+    constructor(graph) {
+        this.graph = graph
+        this.controller = null
+        this.r = 5
+        this.addPoints()
+    }
+    addPoints() {
+        if (this.graph.name === 'rect') {
+            const { x, y, width, height } = this.graph
+            this.controller = this.createController([
+                [x, y],
+                [x + width, y],
+                [x + width, y + height],
+                [x, y + height],
+            ])
+        } else if (this.graph.name === 'polygon') {
+            const points = this.graph.points
+            this.controller = this.createController(
+                points.map((point) => [point.x, point.y])
+            )
+        }
+        this.graph.appendChild(...this.controller)
+    }
+    clearPoints() {
+        this.graph.removeChild(...this.controller)
+    }
+    pointFactory(...props) {
+        return new Circle(this.graph.ctx, ...props, this.r)
+    }
+    createController(points = []) {
+        return points.map(([x, y]) => this.pointFactory(x, y))
     }
 }

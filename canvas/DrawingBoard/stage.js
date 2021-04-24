@@ -5,6 +5,9 @@ import { EventEmitter } from './eventEmitter.js'
 import { ShapeBox } from './shapeBox.js'
 import { Switcher, modes } from './switcher.js'
 
+// TODO 变形
+// TODO 旋转
+// TODO 右键点击撤销
 export class Stage {
     constructor(canvas) {
         this.canvas = canvas
@@ -29,7 +32,7 @@ export class Stage {
                 this.drawer.update(this.shapeBox.shapes)
             })
             .listen('end-edit', () => {
-                this.editor.finish(this.shapeBox.shapes)
+                this.editor.end(this.shapeBox.shapes)
             })
     }
     addNativeListener() {

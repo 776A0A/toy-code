@@ -1,25 +1,36 @@
-class Shape {
-    constructor() {
+class Graph {
+    constructor(props = []) {
+        this.name = 'graph'
+        this.props = props
         this.children = []
     }
     set(attrs) {
         Object.entries(attrs).forEach(([k, v]) => (this[k] = v))
     }
-    appendChild(shape) {
-        this.children.push(shape)
+    appendChild(...graphs) {
+        this.children.push(...graphs)
     }
-    removeChild(shape) {
-        this.children = this.children.filter((s) => s !== shape)
+    removeChild(...graphs) {
+        this.children = this.children.filter((g) => !graphs.includes(g))
     }
     clearChildren() {
         this.children = []
     }
     draw() {}
+    drawChildren() {
+        if (this.children.length) {
+            this.children.forEach((child) => child.draw(this))
+        }
+    }
     drawPath() {}
+    clone() {
+        return new this.constructor(...this.props)
+    }
 }
-export class Rect extends Shape {
-    constructor(ctx, x, y, width, height, lineWidth = 1, color = '#f00') {
-        super()
+export class Rect extends Graph {
+    constructor(...props) {
+        super(props)
+        const [ctx, x, y, width, height, lineWidth = 1, color = '#f00'] = props
         this.name = 'rect'
         this.ctx = ctx
         this.x = x
@@ -36,9 +47,7 @@ export class Rect extends Shape {
         ctx.strokeStyle = color
         ctx.strokeRect(x, y, width, height)
         ctx.restore()
-        if (this.children.length) {
-            this.children.forEach((child) => child.draw(this))
-        }
+        this.drawChildren()
     }
     drawPath() {
         const { ctx, x, y, width, height } = this
@@ -47,9 +56,10 @@ export class Rect extends Shape {
         ctx.closePath()
     }
 }
-export class Circle extends Shape {
-    constructor(ctx, x, y, r = 5, color = '#00f') {
-        super()
+export class Circle extends Graph {
+    constructor(...props) {
+        super(props)
+        const [ctx, x, y, r = 5, color = '#00f'] = props
         this.name = 'circle'
         this.ctx = ctx
         this.x = x
@@ -58,19 +68,24 @@ export class Circle extends Shape {
         this.color = color
     }
     draw() {
-        const { ctx, x, y, r, color } = this
+        const { ctx, color } = this
         ctx.save()
-        ctx.beginPath()
-        ctx.arc(x, y, r, 0, 2 * Math.PI)
-        ctx.closePath()
+        this.drawPath()
         ctx.fillStyle = color
         ctx.fill()
         ctx.restore()
     }
+    drawPath() {
+        const { ctx, x, y, r } = this
+        ctx.beginPath()
+        ctx.arc(x, y, r, 0, 2 * Math.PI)
+        ctx.closePath()
+    }
 }
-export class Text extends Shape {
-    constructor(ctx, text, x, y, font = '20px sarif', color = '#000') {
-        super()
+export class Text extends Graph {
+    constructor(...props) {
+        super(props)
+        const [ctx, text, x, y, font = '20px sarif', color = '#000'] = props
         this.name = 'text'
         this.ctx = ctx
         this.text = text
@@ -92,9 +107,10 @@ export class Text extends Shape {
         ctx.restore()
     }
 }
-export class Point extends Shape {
-    constructor(ctx, x, y) {
-        super()
+export class Point extends Graph {
+    constructor(...props) {
+        super(props)
+        const [ctx, x, y] = props
         this.name = 'point'
         this.ctx = ctx
         this.x = x
@@ -108,9 +124,10 @@ export class Point extends Shape {
         ctx.lineTo(x, y)
     }
 }
-export class Polygon extends Shape {
-    constructor(ctx, points = [], color = '#f00') {
-        super()
+export class Polygon extends Graph {
+    constructor(...props) {
+        super(props)
+        const [ctx, points = [], color = '#f00'] = props
         this.name = 'polygon'
         this.ctx = ctx
         this.points = points
@@ -123,6 +140,7 @@ export class Polygon extends Shape {
         ctx.strokeStyle = color
         ctx.stroke()
         ctx.restore()
+        this.drawChildren()
     }
     drawPath() {
         const {
