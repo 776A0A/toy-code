@@ -12,7 +12,7 @@ export class Switcher {
         return {
             drawer: () => (this.mode = modes.drawer),
             adder: () => (this.mode = modes.adder),
-            editor: () => (this.mode = modes.editMode),
+            editor: () => (this.mode = modes.editor),
         }
     }
 }

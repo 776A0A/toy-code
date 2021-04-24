@@ -97,27 +97,36 @@ export class Point extends Shape {
         this.y = y
     }
     draw() {
+        this.drawPath()
+    }
+    drawPath() {
         const { ctx, x, y } = this
         ctx.lineTo(x, y)
     }
 }
 export class Polygon extends Shape {
-    constructor(ctx, points = []) {
+    constructor(ctx, points = [], color = '#f00') {
         super()
         this.ctx = ctx
         this.points = points
+        this.color = color
     }
     draw() {
+        const { ctx, color } = this
+        ctx.save()
+        this.drawPath()
+        ctx.strokeStyle = color
+        ctx.stroke()
+        ctx.restore()
+    }
+    drawPath() {
         const {
             ctx,
             points: [first, ...points],
         } = this
-        ctx.save()
         ctx.beginPath()
         ctx.moveTo(first.x, first.y)
         points.forEach((point) => point.draw())
         ctx.closePath()
-        ctx.stroke()
-        ctx.restore()
     }
 }
