@@ -18,31 +18,31 @@ class Shape {
     drawPath() {}
 }
 export class Rect extends Shape {
-    constructor(ctx, x, y, w, h, lineWidth = 1, color = '#f00') {
+    constructor(ctx, x, y, width, height, lineWidth = 1, color = '#f00') {
         super()
         this.ctx = ctx
         this.x = x
         this.y = y
-        this.w = w
-        this.h = h
+        this.width = width
+        this.height = height
         this.lineWidth = lineWidth
         this.color = color
     }
     draw() {
-        const { ctx, x, y, w, h, lineWidth, color } = this
+        const { ctx, x, y, width, height, lineWidth, color } = this
         ctx.save()
         ctx.lineWidth = lineWidth
         ctx.strokeStyle = color
-        ctx.strokeRect(x, y, w, h)
+        ctx.strokeRect(x, y, width, height)
         ctx.restore()
         if (this.children.length) {
             this.children.forEach((child) => child.draw(this))
         }
     }
     drawPath() {
-        const { ctx, x, y, w, h } = this
+        const { ctx, x, y, width, height } = this
         ctx.beginPath()
-        ctx.rect(x, y, w, h)
+        ctx.rect(x, y, width, height)
         ctx.closePath()
     }
 }
@@ -108,13 +108,14 @@ export class Polygon extends Shape {
         this.points = points
     }
     draw() {
-        const { ctx, points: _ } = this
-        const points = [..._]
-        const first = points[0]
+        const {
+            ctx,
+            points: [first, ...points],
+        } = this
         ctx.save()
         ctx.beginPath()
         ctx.moveTo(first.x, first.y)
-        points.slice(1).forEach((point) => point.draw())
+        points.forEach((point) => point.draw())
         ctx.closePath()
         ctx.stroke()
         ctx.restore()

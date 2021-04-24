@@ -1,6 +1,9 @@
 export class ShapeBox {
-    constructor() {
+    constructor(stage) {
+        this.stage = stage
         this._shapes = new Set()
+
+        this.stage.emitter.listen('add-shape', (shape) => this.add(shape))
     }
     add(shape) {
         this._shapes.add(shape)

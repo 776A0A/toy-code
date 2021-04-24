@@ -6,6 +6,8 @@ export class EventEmitter {
         if (elem instanceof Element) {
             elem.addEventListener(type, cb)
         } else {
+            cb = type
+            type = elem
             const listeners =
                 this.listeners[type] ?? (this.listeners[type] = new Set())
             listeners.add(cb)
