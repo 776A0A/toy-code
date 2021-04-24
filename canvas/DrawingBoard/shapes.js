@@ -3,11 +3,18 @@ class Graph {
         this.name = 'graph'
         this.props = props
         this.children = []
+        this.parent = null
+        this.withParentDiff = { x: 0, y: 0 }
     }
     set(attrs) {
         Object.entries(attrs).forEach(([k, v]) => (this[k] = v))
     }
     appendChild(...graphs) {
+        if (this.name === 'point') throw Error(`点作为基础绘制图形不会有子图形`)
+        graphs.forEach((graph) => {
+            graph.parent = this
+            graph.withParentDiff = { x: graph.x - this.x, y: graph.y - this.y }
+        })
         this.children.push(...graphs)
     }
     removeChild(...graphs) {
@@ -19,12 +26,25 @@ class Graph {
     draw() {}
     drawChildren() {
         if (this.children.length) {
-            this.children.forEach((child) => child.draw(this))
+            this.children.forEach((child) => child.draw())
         }
     }
     drawPath() {}
     clone() {
         return new this.constructor(...this.props)
+    }
+    getTranslate() {
+        const { x, y } = this
+
+        const currentWidthParentDiff = {
+            x: this.parent ? x - this.parent.x : 0,
+            y: this.parent ? y - this.parent.y : 0,
+        }
+        // BUG
+        return [
+            x + this.withParentDiff.x - currentWidthParentDiff.x,
+            y + this.withParentDiff.y - currentWidthParentDiff.y,
+        ]
     }
 }
 export class Rect extends Graph {
@@ -41,18 +61,20 @@ export class Rect extends Graph {
         this.color = color
     }
     draw() {
-        const { ctx, x, y, width, height, lineWidth, color } = this
+        const { ctx, lineWidth, color } = this
         ctx.save()
         ctx.lineWidth = lineWidth
         ctx.strokeStyle = color
-        ctx.strokeRect(x, y, width, height)
+        this.drawPath()
+        ctx.stroke()
         ctx.restore()
         this.drawChildren()
     }
     drawPath() {
         const { ctx, x, y, width, height } = this
+        ctx.translate(x + this.withParentDiff.x, y + this.withParentDiff.y)
         ctx.beginPath()
-        ctx.rect(x, y, width, height)
+        ctx.rect(0, 0, width, height)
         ctx.closePath()
     }
 }
@@ -74,11 +96,13 @@ export class Circle extends Graph {
         ctx.fillStyle = color
         ctx.fill()
         ctx.restore()
+        this.drawChildren()
     }
     drawPath() {
-        const { ctx, x, y, r } = this
+        const { ctx, r } = this
+        ctx.translate(...this.getTranslate())
         ctx.beginPath()
-        ctx.arc(x, y, r, 0, 2 * Math.PI)
+        ctx.arc(0, 0, r, 0, 2 * Math.PI)
         ctx.closePath()
     }
 }
@@ -134,10 +158,10 @@ export class Polygon extends Graph {
         this.color = color
     }
     get x() {
-        return this.points[0]?.x
+        return this.points[0].x
     }
     get y() {
-        return this.points[0]?.y
+        return this.points[0].y
     }
     draw() {
         const { ctx, color } = this
@@ -153,8 +177,9 @@ export class Polygon extends Graph {
             ctx,
             points: [_, ...points],
         } = this
+        ctx.translate(...this.getTranslate())
         ctx.beginPath()
-        ctx.moveTo(this.x, this.y)
+        ctx.moveTo(0, 0)
         points.forEach((point) => point.draw())
         ctx.closePath()
     }

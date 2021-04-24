@@ -80,7 +80,9 @@ export class Editor {
         const { ctx } = this
 
         ;[...graphs].forEach((shape, idx) => {
+            ctx.save()
             shape.drawPath()
+            ctx.restore()
             if (ctx.isPointInPath(x, y)) top = idx
         })
 
