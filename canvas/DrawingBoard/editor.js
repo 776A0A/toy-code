@@ -105,6 +105,7 @@ export class Editor {
             ctx.save()
             shape.drawPath()
             ctx.restore()
+            // TODO 因为文字的原因，还需要增加判断是否在stroke上，可以在editor中增加方法抹平判断
             if (ctx.isPointInPath(x, y)) top = idx
         })
 
@@ -122,6 +123,7 @@ export class Editor {
         const graph = graphs[this.topGraphIndex]
         if (graph.name === 'rect') {
             graph.set({ width: x - graph.x, height: y - graph.y })
+
             this.controlPoint.updatePoints()
         } else if (graph.name === 'polygon') {
             // TODO 只要更新了自身的坐标，就要运行updatePointsDiff和updateChildrenDiff
@@ -134,7 +136,7 @@ export class Editor {
             }
             this.controlPoint.updatePoints({ x, y })
         }
-
+        graph.emitter.emit('size-changed')
         this.stage.emitter.emit('update-screen')
     }
     recordDragPosition({ x, y }) {

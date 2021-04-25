@@ -1,13 +1,33 @@
+import { EventEmitter } from './eventEmitter.js'
+
+// TODO 使用proxy重构，监听x，y的变化
 class Graph {
     constructor(props = []) {
+        this.emitter = new EventEmitter()
         this.name = 'graph'
         this.props = props
         this.children = []
         this.parent = null
         this.withParentDiff = { x: 0, y: 0 }
+        this.parentListeners = []
+
+        this.init()
+    }
+    init() {
+        this.emitter.listen('removed-from-parent', () => {
+            this.parentListeners.forEach(([type, cb]) => {
+                this.parent.emitter.remove(type, cb)
+            })
+        })
+    }
+    listenParent(type, cb) {
+        if (!this.parent) return
+        this.parent.emitter.listen(type, cb)
+        this.parentListeners.push([type, cb])
     }
     set(attrs = {}) {
         Object.entries(attrs).forEach(([k, v]) => (this[k] = v))
+        // TODO 需不需要做事件派发？通知属性改变
         return this
     }
     appendChild(...graphs) {
@@ -31,7 +51,13 @@ class Graph {
         return this
     }
     removeChild(...graphs) {
-        this.children = this.children.filter((g) => !graphs.includes(g))
+        this.children = this.children.filter((g) => {
+            const includes = graphs.includes(g)
+            if (includes) {
+                g.emitter.emit('removed-from-parent')
+                return false
+            } else return true
+        })
     }
     clearChildren() {
         this.children = []
@@ -136,14 +162,15 @@ export class Text extends Graph {
         this.color = color
     }
     draw() {
-        const { ctx, text, x, y, font, color } = this
+        const { ctx, text, font, color } = this
         ctx.save()
+        ctx.translate(...this.getTranslate())
         ctx.textAlign = 'center'
         ctx.textBaseline = 'middle'
         ctx.font = font
         ctx.fillStyle = color
         ctx.beginPath()
-        ctx.fillText(text, x, y)
+        ctx.fillText(text, 0, 0)
         ctx.closePath()
         ctx.restore()
     }
