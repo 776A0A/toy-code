@@ -1,5 +1,5 @@
 import { Adder } from './adder.js'
-import { Drawer } from './Drawer.js'
+import { Drawer } from './drawer.js'
 import { Editor } from './editor.js'
 import { EventEmitter } from './eventEmitter.js'
 import { ShapeBox } from './shapeBox.js'
@@ -91,8 +91,16 @@ export class Stage {
                     userSelect: 'none',
                 })
                 const content = `
-                <ul>
-                    <li id="deleteGraphButton" role="button">删除</li>
+                <ul style="padding: 0; list-style: none;">
+                    <li id="deleteGraphButton" role="button"
+                    style="
+                    border: 1px solid #aaa;
+                    padding: 0px 12px;
+                    cursor: pointer;
+                    background: #fff;
+                    ">
+                    删除
+                    </li>
                 </ul>
                 `
                 const handleClick = (evt) => {
