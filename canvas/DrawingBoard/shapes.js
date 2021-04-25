@@ -1,5 +1,8 @@
 import { EventEmitter } from './eventEmitter.js'
 
+export const DEFAULT_COLOR = '#1890ff'
+export const DEFAULT_FILL_COLOR = '#a0c5e8'
+
 // TODO 使用proxy重构，监听x，y的变化
 class Graph {
     constructor(props = {}) {
@@ -112,7 +115,7 @@ export class Rect extends Graph {
             width,
             height,
             lineWidth = 1,
-            color = '#f00',
+            color = DEFAULT_COLOR,
         } = props
         this.name = 'rect'
         this.ctx = ctx
@@ -145,7 +148,7 @@ export class Rect extends Graph {
 export class Circle extends Graph {
     constructor(props) {
         super(props)
-        const { ctx, x, y, r = 5, color = '#00f' } = props
+        const { ctx, x, y, r = 5, color = DEFAULT_COLOR } = props
         this.name = 'circle'
         this.ctx = ctx
         this.x = x
@@ -222,7 +225,7 @@ export class Point extends Graph {
 export class Polygon extends Graph {
     constructor(props) {
         super(props)
-        const { ctx, points = [], color = '#f00' } = props
+        const { ctx, points = [], color = DEFAULT_COLOR } = props
         this.name = 'polygon'
         this.ctx = ctx
         this.points = points

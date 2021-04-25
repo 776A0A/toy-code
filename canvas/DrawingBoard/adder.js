@@ -1,4 +1,4 @@
-import { Point, Polygon, Rect } from './shapes.js'
+import { Point, Polygon, Rect, DEFAULT_FILL_COLOR } from './shapes.js'
 
 export class Adder {
     constructor(stage) {
@@ -47,7 +47,7 @@ export class Adder {
             y,
             width: 0,
             height: 0,
-            fillColor: 'pink',
+            fillColor: DEFAULT_FILL_COLOR,
         })
         this.stage.emitter.emit('add-shape', this.currentUpdatingShape)
     }
@@ -60,7 +60,7 @@ export class Adder {
             this.currentUpdatingShape = new Polygon({
                 ctx: this.ctx,
                 points: [point],
-                fillColor: 'pink',
+                fillColor: DEFAULT_FILL_COLOR,
             })
         }
 

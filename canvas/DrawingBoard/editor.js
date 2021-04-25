@@ -1,4 +1,4 @@
-import { Circle } from './shapes.js'
+import { Circle, DEFAULT_COLOR } from './shapes.js'
 
 export class Editor {
     constructor(stage) {
@@ -54,6 +54,7 @@ export class Editor {
         let pickedControlPointIndex
         if (
             this.isEditing &&
+            this.controlPoint &&
             ((pickedControlPointIndex = this.controlPoint.pickedControlPointIndex = this.isPickControlPoint(
                 position
             )),
@@ -76,11 +77,9 @@ export class Editor {
             // 没有选中过，什么都不做
             if (top === undefined && this.topGraphIndex === undefined) return
 
-            graphs[this.topGraphIndex]?.set({ color: '#f00' }) // 重置颜色
             this.controlPoint?.clearPoints()
 
             if (top !== undefined) {
-                graphs[top].set({ color: '#0f0' })
                 this.isEditing = true
                 this.topGraphIndex = top
                 this.controlPoint = new ControlPoint(graphs[top])
@@ -101,9 +100,9 @@ export class Editor {
     }
     end() {
         if (this.topGraphIndex !== undefined) {
-            this.graphs[this.topGraphIndex]
-                .set({ color: '#f00' })
-                .removeChild(...this.controlPoint.controller)
+            this.graphs[this.topGraphIndex].removeChild(
+                ...this.controlPoint.controller
+            )
             this.stage.emitter.emit('update-screen')
         }
         this.isEditing = this.isDragging = this.isResizing = false
@@ -232,7 +231,7 @@ class ControlPoint {
             x,
             y,
             r: this.r,
-            fillColor: 'pink',
+            fillColor: DEFAULT_COLOR,
         })
     }
     createController(points = []) {
