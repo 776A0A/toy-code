@@ -21,24 +21,49 @@
                 margin-top: 10px;
                 user-select: none;
             }
+            #canvas-wrapper {
+                position: relative;
+                height: 500px;
+                width: 500px;
+            }
+            #canvas-wrapper > canvas {
+                position: absolute;
+                top: 0;
+                left: 0;
+            }
         </style>
     </head>
     <body>
         <div id="container">
-            <canvas id="canvas" style="border: 1px solid"></canvas>
+            <div id="canvas-wrapper">
+                <canvas id="bgCanvas" style="border: 1px solid"></canvas>
+                <canvas id="canvas" style="border: 1px solid"></canvas>
+            </div>
             <div id="buttonGroup">
                 <button id="drawRectButton" class="active">矩形</button>
                 <button id="drawPointButton">描点</button>
                 <button id="editButton">编辑</button>
                 <input type="text" id="boxName" />
                 <button id="addText">添加盒子名称</button>
+                <button id="exportGraphsButton">导出</button>
             </div>
         </div>
         <script type="module">
             import { Stage, Text } from './DrawingBoard/index.js'
             const size = 500
             const canvas = document.getElementById('canvas')
-            canvas.width = canvas.height = size
+            canvas.width = canvas.height = bgCanvas.width = bgCanvas.height = size
+
+            drawGgImage()
+
+            function drawGgImage() {
+                const ctx = bgCanvas.getContext('2d')
+                const image = new Image()
+                image.src = './图片4.png'
+                image.onload = () => {
+                    ctx.drawImage(image, 0, 0, size, size)
+                }
+            }
 
             const stage = new Stage(canvas)
 
@@ -68,6 +93,9 @@
                     text.set({ x, y }).updateParentAndDiff()
                 })
                 stage.emitter.emit('update-screen')
+            }
+            exportGraphsButton.onclick = () => {
+                console.log(stage.export())
             }
 
             function switchActiveButton(evt) {

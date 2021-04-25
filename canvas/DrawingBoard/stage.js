@@ -160,6 +160,24 @@ export class Stage {
         menu.removeEventListener('click', menu.handleClick)
         menu.remove()
     }
+    import(graphs) {}
+    export() {
+        const graphs = this.shapeBox.shapes
+        const shakenGraphs = shake(graphs)
+        return shakenGraphs
+
+        function shake(graphs) {
+            return graphs.map((graph) => {
+                const { ctx, ...props } = graph.props
+                const { name, children, withParentDiff } = graph
+                const obj = { props, name, children, withParentDiff }
+                if (children.length) {
+                    obj.children = shake(obj.children)
+                }
+                return obj
+            })
+        }
+    }
 }
 
 function calculateCenter(points) {
