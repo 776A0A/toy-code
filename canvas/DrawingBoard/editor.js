@@ -5,7 +5,7 @@ export class Editor {
         this.stage = stage
         this.topGraphIndex = undefined
         this.isEditing = false // 点选到了某一个图形即为true
-        this.editMode = 'drag'
+        this.editMode = 'wait'
         this.dragPosition = { x: 0, y: 0 }
         this.isDragging = false
         this.isResizing = false
@@ -13,6 +13,9 @@ export class Editor {
     }
     get switchTo() {
         return {
+            wait: () => {
+                this.editMode = 'wait'
+            },
             resize: () => {
                 this.editMode = 'resize'
                 this.isResizing = true
@@ -27,7 +30,7 @@ export class Editor {
         return this.stage.canvas.getContext('2d')
     }
     edit(position, graphs) {
-        if (!(this.isEditing && (this.isResizing || this.isDragging))) return
+        if (!this.isEditing || this.editMode === 'wait') return
 
         if (this.editMode === 'resize') this.handleResize(position, graphs)
         else if (this.editMode === 'drag') this.handleDrag(position, graphs)
@@ -36,16 +39,17 @@ export class Editor {
     pick(position, graphs) {
         if (!graphs.length) return
 
-        let pickedPointIndex
+        let pickedControlPointIndex
         if (
             this.isEditing &&
-            ((pickedPointIndex = this.isPickControlPoint(position)),
-            pickedPointIndex !== -1)
+            ((pickedControlPointIndex = this.isPickControlPoint(position)),
+            pickedControlPointIndex !== -1)
         ) {
             const graph = graphs[this.topGraphIndex]
             if (graph.name === 'rect') {
                 const diagonalPoint = this.controlPoint.controller[
-                    (pickedPointIndex + 2) % this.controlPoint.controller.length
+                    (pickedControlPointIndex + 2) %
+                        this.controlPoint.controller.length
                 ]
                 graph.set({ x: diagonalPoint.x, y: diagonalPoint.y })
             } else if (graph.name === 'polygon') {
@@ -77,6 +81,7 @@ export class Editor {
         }
     }
     stop() {
+        this.switchTo.wait()
         this.isDragging = this.isResizing = false
     }
     end(graphs) {
