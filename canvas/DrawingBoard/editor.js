@@ -46,29 +46,25 @@ export class Editor {
         this.controlPoint = null
         this.stop()
     }
-    // BUG 修复误触引起的体验问题
     pick(position, graphs) {
         this.graphs = graphs
         if (!graphs.length) return
 
-        let pickedControlPointIndex
+        const pickedControlPointIndex = this.findPickControlPoint(position)
         if (
             this.isEditing &&
-            this.controlPoint &&
-            ((pickedControlPointIndex = this.controlPoint.pickedControlPointIndex = this.isPickControlPoint(
-                position
-            )),
-            pickedControlPointIndex !== -1)
+            this.topGraphIndex !== undefined &&
+            pickedControlPointIndex !== -1
         ) {
+            this.controlPoint.pickedControlPointIndex = pickedControlPointIndex
             const graph = graphs[this.topGraphIndex]
             if (graph.name === 'rect') {
                 const diagonalPoint = this.controlPoint.controller[
                     (pickedControlPointIndex + 2) %
                         this.controlPoint.controller.length
                 ]
-                graph
-                    .set({ x: diagonalPoint.x, y: diagonalPoint.y })
-                    .updateChildrenDiff()
+                const [x, y] = diagonalPoint.getTranslate()
+                graph.set({ x, y }).updateChildrenDiff()
             }
             this.switchTo.resize()
         } else {
@@ -77,17 +73,19 @@ export class Editor {
             // 没有选中过，什么都不做
             if (top === undefined && this.topGraphIndex === undefined) return
 
-            this.controlPoint?.clearPoints()
-
             if (top !== undefined) {
+                if (top !== this.topGraphIndex) {
+                    this.controlPoint?.clearPoints()
+                    this.controlPoint = new ControlPoint(graphs[top])
+                }
                 this.isEditing = true
                 this.topGraphIndex = top
-                this.controlPoint = new ControlPoint(graphs[top])
                 this.recordDragPosition(position) // 记录拖拽鼠标位置
                 this.switchTo.drag()
             } else {
                 this.isEditing = false
                 this.topGraphIndex = undefined
+                this.controlPoint?.clearPoints()
                 this.controlPoint = null
             }
 
@@ -125,11 +123,15 @@ export class Editor {
 
         return top
     }
-    isPickControlPoint({ x, y }) {
-        if (!this.controlPoint) return
+    findPickControlPoint({ x, y }) {
+        if (!this.controlPoint) return -1
 
         return this.controlPoint.controller.findIndex((circle) => {
-            return getDistance({ x, y }, circle) <= circle.r
+            const translate = circle.getTranslate()
+            return (
+                getDistance({ x: translate[0], y: translate[1] }, { x, y }) <=
+                circle.r
+            )
         })
     }
     handleResize({ x, y }, graphs) {
@@ -137,7 +139,6 @@ export class Editor {
         const graph = graphs[this.topGraphIndex]
         if (graph.name === 'rect') {
             graph.set({ width: x - graph.x, height: y - graph.y })
-
             this.controlPoint.updatePoints()
         } else if (graph.name === 'polygon') {
             // TODO 只要更新了自身的坐标，就要运行updatePointsDiff和updateChildrenDiff
@@ -183,6 +184,7 @@ export class Editor {
 
         this.dragPosition = { x, y }
 
+        this.controlPoint.updatePoints()
         this.stage.emitter.emit('update-screen')
     }
 }
