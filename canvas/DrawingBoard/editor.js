@@ -4,7 +4,7 @@ export class Editor {
     constructor(stage) {
         this.stage = stage
         this.topGraphIndex = undefined
-        this.isEditing = false
+        this.isEditing = false // 点选到了某一个图形即为true
         this.editMode = 'drag'
         this.dragPosition = { x: 0, y: 0 }
         this.isDragging = false
@@ -27,7 +27,7 @@ export class Editor {
         return this.stage.canvas.getContext('2d')
     }
     edit(position, graphs) {
-        if (!this.isEditing) return
+        if (!(this.isEditing && (this.isResizing || this.isDragging))) return
 
         if (this.editMode === 'resize') this.handleResize(position, graphs)
         else if (this.editMode === 'drag') this.handleDrag(position, graphs)
@@ -36,7 +36,20 @@ export class Editor {
     pick(position, graphs) {
         if (!graphs.length) return
 
-        if (this.isEditing && this.isPickControlPoint(position)) {
+        let pickedPointIndex
+        if (
+            this.isEditing &&
+            ((pickedPointIndex = this.isPickControlPoint(position)),
+            pickedPointIndex !== -1)
+        ) {
+            const graph = graphs[this.topGraphIndex]
+            if (graph.name === 'rect') {
+                const diagonalPoint = this.controlPoint.controller[
+                    (pickedPointIndex + 2) % this.controlPoint.controller.length
+                ]
+                graph.set({ x: diagonalPoint.x, y: diagonalPoint.y })
+            } else if (graph.name === 'polygon') {
+            }
             this.switchTo.resize()
         } else {
             const top = this.findTop(position, graphs)
@@ -88,9 +101,23 @@ export class Editor {
 
         return top
     }
-    isPickControlPoint({ x, y }) {}
+    isPickControlPoint({ x, y }) {
+        if (!this.controlPoint) return
+
+        return this.controlPoint.controller.findIndex((circle) => {
+            return getDistance({ x, y }, circle) <= circle.r
+        })
+    }
     handleResize({ x, y }, graphs) {
         if (!this.isResizing) return
+        const graph = graphs[this.topGraphIndex]
+        if (graph.name === 'rect') {
+            graph.set({ width: x - graph.x, height: y - graph.y })
+            this.controlPoint.updatePoints()
+        } else if (graph.name === 'polygon') {
+        }
+
+        this.stage.emitter.emit('update-screen')
     }
     recordDragPosition({ x, y }) {
         this.dragPosition = { x, y }
@@ -130,7 +157,7 @@ class ControlPoint {
     constructor(graph) {
         this.graph = graph
         this.controller = null
-        this.r = 5
+        this.r = 10
         this.addPoints()
     }
     addPoints() {
@@ -153,10 +180,18 @@ class ControlPoint {
     clearPoints() {
         this.graph.removeChild(...this.controller)
     }
+    updatePoints() {
+        this.clearPoints()
+        this.addPoints()
+    }
     pointFactory(...props) {
         return new Circle(this.graph.ctx, ...props, this.r)
     }
     createController(points = []) {
         return points.map(([x, y]) => this.pointFactory(x, y))
     }
+}
+
+function getDistance(p1, p2) {
+    return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2)
 }
