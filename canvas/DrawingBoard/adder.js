@@ -48,7 +48,7 @@ export class Adder {
         const point = new Point(this.ctx, x, y)
 
         if (this.currentUpdatingShape) {
-            this.currentUpdatingShape.points.push(point)
+            this.currentUpdatingShape.addPoint(point)
         } else {
             this.currentUpdatingShape = new Polygon(this.ctx, [point])
         }
@@ -65,7 +65,7 @@ export class Adder {
         } else {
             point = new Point(this.ctx, x, y)
             point.isPreviewPoint = true
-            points.push(point)
+            polygon.addPoint(point)
         }
         point.set({ x, y })
         this.stage.emitter.emit('update-screen')
@@ -74,7 +74,7 @@ export class Adder {
         const polygon = this.currentUpdatingShape
         if (!polygon) return
         polygon.points = polygon.points.filter((point) => !point.isPreviewPoint) // 删除所有预览点
-        polygon.points.pop() // 因为dblclick也会触发mousedown事件，所有实际在mousedown时已经添加了两个点
+        polygon.popPoint() // 因为dblclick也会触发mousedown事件，所有实际在mousedown时已经添加了两个点
         this.isDrawing = false
         this.currentUpdatingShape = null
     }

@@ -11,11 +11,12 @@ class Graph {
     }
     appendChild(...graphs) {
         if (this.name === 'point') throw Error(`点作为基础绘制图形不会有子图形`)
-        graphs.forEach((graph) => {
-            graph.parent = this
-            graph.withParentDiff = { x: graph.x - this.x, y: graph.y - this.y }
-        })
+        graphs.forEach((graph) => this.setParentAndDiff(graph, this))
         this.children.push(...graphs)
+    }
+    setParentAndDiff(graph, parent) {
+        graph.parent = parent
+        graph.withParentDiff = { x: graph.x - parent.x, y: graph.y - parent.y }
     }
     removeChild(...graphs) {
         this.children = this.children.filter((g) => !graphs.includes(g))
@@ -33,6 +34,10 @@ class Graph {
     clone() {
         return new this.constructor(...this.props)
     }
+    /**
+     * 每一个图形的位移都是相对于整个画布的，通过记录最初和初始点的位移（该位移是不变的，除非拖拽了点），
+     * 就可以在图形移动时根据这个最初位移和当前x，y的数值计算出正确的位移
+     */
     getTranslate() {
         const { x, y } = this
 
@@ -40,7 +45,7 @@ class Graph {
             x: this.parent ? x - this.parent.x : 0,
             y: this.parent ? y - this.parent.y : 0,
         }
-        // BUG
+
         return [
             x + this.withParentDiff.x - currentWidthParentDiff.x,
             y + this.withParentDiff.y - currentWidthParentDiff.y,
@@ -71,8 +76,8 @@ export class Rect extends Graph {
         this.drawChildren()
     }
     drawPath() {
-        const { ctx, x, y, width, height } = this
-        ctx.translate(x + this.withParentDiff.x, y + this.withParentDiff.y)
+        const { ctx, width, height } = this
+        ctx.translate(...this.getTranslate())
         ctx.beginPath()
         ctx.rect(0, 0, width, height)
         ctx.closePath()
@@ -141,11 +146,16 @@ export class Point extends Graph {
         this.y = y
     }
     draw() {
+        const { ctx } = this
+        ctx.save()
         this.drawPath()
+        ctx.restore()
     }
     drawPath() {
-        const { ctx, x, y } = this
-        ctx.lineTo(x, y)
+        const { ctx } = this
+        ctx.resetTransform()
+        ctx.translate(...this.getTranslate())
+        ctx.lineTo(0, 0)
     }
 }
 export class Polygon extends Graph {
@@ -156,12 +166,31 @@ export class Polygon extends Graph {
         this.ctx = ctx
         this.points = points
         this.color = color
+
+        this.injectParentToPoints()
     }
     get x() {
         return this.points[0].x
     }
     get y() {
         return this.points[0].y
+    }
+    /**
+     * 因为多边形的点无法根据初始点x，y推算出来，所以每个点都需要记录和初始点x，y之间的位移。
+     * 而点作为多边形的一部分不能和children重叠，如果重叠，那么clearChildren时就会无法分辨。
+     * 所以添加一层injectParentToPoints和addPoint，对每个点进行处理（要跳过预览点）。
+     */
+    injectParentToPoints() {
+        this.points.forEach((point) => this.setParentAndDiff(point, this))
+    }
+    addPoint(point) {
+        if (!point.isPreviewPoint) {
+            this.setParentAndDiff(point, this)
+        }
+        this.points.push(point)
+    }
+    popPoint() {
+        return this.points.pop()
     }
     draw() {
         const { ctx, color } = this

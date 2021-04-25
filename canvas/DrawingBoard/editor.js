@@ -111,6 +111,7 @@ export class Editor {
                 y: graph.y + diff.y,
             })
         } else if (graph.name === 'polygon') {
+            // TODO 建立point的x，y和polygon的x，y之间的关系，使得不用更新每一个point的属性，也就是说point的坐标可以通过计算得出
             graph.points.forEach((point) => {
                 point.set({
                     x: point.x + diff.x,
