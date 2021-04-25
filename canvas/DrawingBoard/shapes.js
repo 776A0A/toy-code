@@ -6,8 +6,9 @@ class Graph {
         this.parent = null
         this.withParentDiff = { x: 0, y: 0 }
     }
-    set(attrs) {
+    set(attrs = {}) {
         Object.entries(attrs).forEach(([k, v]) => (this[k] = v))
+        return this
     }
     appendChild(...graphs) {
         if (this.name === 'point') throw Error(`点作为基础绘制图形不会有子图形`)
@@ -17,6 +18,17 @@ class Graph {
     setParentAndDiff(graph, parent) {
         graph.parent = parent
         graph.withParentDiff = { x: graph.x - parent.x, y: graph.y - parent.y }
+        return this
+    }
+    // 更新与父图形的diff，通常发生在改变了自身的x，y时
+    updateParentAndDiff() {
+        this.setParentAndDiff(this, this.parent)
+        return this
+    }
+    // 更新所有子图形的diff，通常发生在改变了自身的x，y时
+    updateChildrenDiff() {
+        this.children.forEach((graph) => graph.setParentAndDiff(graph, this))
+        return this
     }
     removeChild(...graphs) {
         this.children = this.children.filter((g) => !graphs.includes(g))
@@ -172,8 +184,14 @@ export class Polygon extends Graph {
     get x() {
         return this.points[0].x
     }
+    set x(x) {
+        this.points[0].x = x
+    }
     get y() {
         return this.points[0].y
+    }
+    set y(y) {
+        this.points[0].y = y
     }
     /**
      * 因为多边形的点无法根据初始点x，y推算出来，所以每个点都需要记录和初始点x，y之间的位移。
@@ -188,6 +206,10 @@ export class Polygon extends Graph {
             this.setParentAndDiff(point, this)
         }
         this.points.push(point)
+    }
+    updatePointsDiff() {
+        this.injectParentToPoints()
+        return this
     }
     popPoint() {
         return this.points.pop()

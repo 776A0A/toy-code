@@ -37,12 +37,15 @@ export class Editor {
         else throw Error(`没有这个编辑模式：${this.editMode}`)
     }
     pick(position, graphs) {
+        // BUG 修复误触引起的体验问题
         if (!graphs.length) return
 
         let pickedControlPointIndex
         if (
             this.isEditing &&
-            ((pickedControlPointIndex = this.isPickControlPoint(position)),
+            ((pickedControlPointIndex = this.controlPoint.pickedControlPointIndex = this.isPickControlPoint(
+                position
+            )),
             pickedControlPointIndex !== -1)
         ) {
             const graph = graphs[this.topGraphIndex]
@@ -51,8 +54,9 @@ export class Editor {
                     (pickedControlPointIndex + 2) %
                         this.controlPoint.controller.length
                 ]
-                graph.set({ x: diagonalPoint.x, y: diagonalPoint.y })
-            } else if (graph.name === 'polygon') {
+                graph
+                    .set({ x: diagonalPoint.x, y: diagonalPoint.y })
+                    .updateChildrenDiff()
             }
             this.switchTo.resize()
         } else {
@@ -120,6 +124,15 @@ export class Editor {
             graph.set({ width: x - graph.x, height: y - graph.y })
             this.controlPoint.updatePoints()
         } else if (graph.name === 'polygon') {
+            // TODO 只要更新了自身的坐标，就要运行updatePointsDiff和updateChildrenDiff
+            if (this.controlPoint.pickedControlPointIndex === 0) {
+                graph.set({ x, y }).updatePointsDiff().updateChildrenDiff()
+            } else {
+                graph.points[this.controlPoint.pickedControlPointIndex]
+                    ?.set({ x, y })
+                    .updateParentAndDiff()
+            }
+            this.controlPoint.updatePoints({ x, y })
         }
 
         this.stage.emitter.emit('update-screen')
@@ -162,6 +175,7 @@ class ControlPoint {
     constructor(graph) {
         this.graph = graph
         this.controller = null
+        this.pickedControlPointIndex = -1
         this.r = 10
         this.addPoints()
     }
@@ -185,9 +199,15 @@ class ControlPoint {
     clearPoints() {
         this.graph.removeChild(...this.controller)
     }
-    updatePoints() {
-        this.clearPoints()
-        this.addPoints()
+    updatePoints(position) {
+        if (position) {
+            const pickedPoint = this.controller[this.pickedControlPointIndex]
+            if (!pickedPoint) return
+            pickedPoint.set(position).updateParentAndDiff()
+        } else {
+            this.clearPoints()
+            this.addPoints()
+        }
     }
     pointFactory(...props) {
         return new Circle(this.graph.ctx, ...props, this.r)
