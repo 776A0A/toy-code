@@ -32,11 +32,13 @@ export class Stage {
                 this.drawer.update(this.shapeBox.shapes)
             })
             .listen('end-edit', () => {
-                this.editor.end(this.shapeBox.shapes)
+                this.editor.end()
             })
     }
     addNativeListener() {
         const handleMouseDown = (evt) => {
+            if (evt.button !== 0) return
+            this.removeMenuIfHas()
             const position = { x: evt.offsetX, y: evt.offsetY }
             if (this.switcher.mode === modes.adder) {
                 this.adder.add(position)
@@ -72,12 +74,50 @@ export class Stage {
             }
         }
 
+        const handleContextMenu = (evt) => {
+            if (this.switcher.mode === modes.editor) {
+                evt.preventDefault()
+                const graph = this.getEditingGraph()
+                if (!graph) return
+
+                const { clientX, clientY } = evt
+
+                const menu = document.createElement('div')
+                menu.id = 'canvas-editor-menu'
+                Object.assign(menu.style, {
+                    position: 'fixed',
+                    left: clientX + 'px',
+                    top: clientY + 'px',
+                    userSelect: 'none',
+                })
+                const content = `
+                <ul>
+                    <li id="deleteGraphButton" role="button">删除</li>
+                </ul>
+                `
+                const handleClick = (evt) => {
+                    if (evt.target.id === 'deleteGraphButton') {
+                        this.shapeBox.remove(this.getEditingGraph())
+                        this.editor.delete()
+                        this.emitter.emit('update-screen')
+                        menu.removeEventListener('click', handleClick)
+                        menu.remove()
+                    }
+                }
+                menu.handleClick = handleClick
+                menu.addEventListener('click', handleClick)
+                menu.innerHTML = content
+                document.body.append(menu)
+            }
+        }
+
         this.emitter
             .listen(this.canvas, 'mousedown', handleMouseDown)
             .listen(this.canvas, 'mousemove', handleMouseMove)
             .listen(this.canvas, 'mouseup', handleMouseUp)
             .listen(this.canvas, 'mouseleave', handleMouseLeave)
             .listen(this.canvas, 'dblclick', handleDblClick)
+            .listen(this.canvas, 'contextmenu', handleContextMenu)
     }
     addShape(shape) {
         this.emitter.emit('add-shape', shape)
@@ -106,6 +146,12 @@ export class Stage {
             )
             return center
         }
+    }
+    removeMenuIfHas() {
+        const menu = document.getElementById('canvas-editor-menu')
+        if (!menu) return
+        menu.removeEventListener('click', menu.handleClick)
+        menu.remove()
     }
 }
 

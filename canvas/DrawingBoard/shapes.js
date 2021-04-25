@@ -59,6 +59,11 @@ class Graph {
             } else return true
         })
     }
+    destroy() {
+        if (this.parent) {
+            this.parent.removeChild(this)
+        }
+    }
     clearChildren() {
         this.children = []
     }

@@ -10,6 +10,7 @@ export class Editor {
         this.isDragging = false
         this.isResizing = false
         this.controlPoint = null
+        this.graphs = []
     }
     get switchTo() {
         return {
@@ -30,14 +31,24 @@ export class Editor {
         return this.stage.canvas.getContext('2d')
     }
     edit(position, graphs) {
+        this.graphs = graphs
+
         if (!this.isEditing || this.editMode === 'wait') return
 
         if (this.editMode === 'resize') this.handleResize(position, graphs)
         else if (this.editMode === 'drag') this.handleDrag(position, graphs)
         else throw Error(`没有这个编辑模式：${this.editMode}`)
     }
+    delete() {
+        const graph = this.graphs[this.topGraphIndex]
+        if (!graph) return
+        this.topGraphIndex = undefined
+        this.controlPoint = null
+        this.stop()
+    }
+    // BUG 修复误触引起的体验问题
     pick(position, graphs) {
-        // BUG 修复误触引起的体验问题
+        this.graphs = graphs
         if (!graphs.length) return
 
         let pickedControlPointIndex
@@ -88,14 +99,18 @@ export class Editor {
         this.switchTo.wait()
         this.isDragging = this.isResizing = false
     }
-    end(graphs) {
+    end() {
         if (this.topGraphIndex !== undefined) {
-            graphs[this.topGraphIndex].set({ color: '#f00' })
+            this.graphs[this.topGraphIndex]
+                .set({ color: '#f00' })
+                .removeChild(...this.controlPoint.controller)
             this.stage.emitter.emit('update-screen')
         }
         this.isEditing = this.isDragging = this.isResizing = false
         this.topGraphIndex = undefined
         this.dragPosition = { x: 0, y: 0 }
+        this.graphs = []
+        this.controlPoint = null
     }
     findTop({ x, y }, graphs = []) {
         let top
