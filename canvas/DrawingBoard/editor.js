@@ -211,8 +211,14 @@ class ControlPoint {
             this.addPoints()
         }
     }
-    pointFactory(...props) {
-        return new Circle(this.graph.ctx, ...props, this.r)
+    pointFactory(x, y) {
+        return new Circle({
+            ctx: this.graph.ctx,
+            x,
+            y,
+            r: this.r,
+            fillColor: 'pink',
+        })
     }
     createController(points = []) {
         return points.map(([x, y]) => this.pointFactory(x, y))

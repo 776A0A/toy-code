@@ -60,8 +60,8 @@
                 if (text) {
                     graph.removeChild(text)
                 }
-                const graphCenter = stage.getGraphCenter(graph)
-                text = new Text(graph.ctx, boxName.value, ...graphCenter)
+                const [x, y] = stage.getGraphCenter(graph)
+                text = new Text({ ctx: graph.ctx, text: boxName.value, x, y })
                 graph.appendChild(text)
                 text.listenParent('size-changed', () => {
                     const [x, y] = stage.getGraphCenter(text.parent)

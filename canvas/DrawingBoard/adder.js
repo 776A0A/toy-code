@@ -41,16 +41,27 @@ export class Adder {
         this.stage.emitter.emit('update-screen')
     }
     addRect({ x, y }) {
-        this.currentUpdatingShape = new Rect(this.ctx, x, y, 0, 0)
+        this.currentUpdatingShape = new Rect({
+            ctx: this.ctx,
+            x,
+            y,
+            width: 0,
+            height: 0,
+            fillColor: 'pink',
+        })
         this.stage.emitter.emit('add-shape', this.currentUpdatingShape)
     }
     addPolygon({ x, y }) {
-        const point = new Point(this.ctx, x, y)
+        const point = new Point({ ctx: this.ctx, x, y })
 
         if (this.currentUpdatingShape) {
             this.currentUpdatingShape.addPoint(point)
         } else {
-            this.currentUpdatingShape = new Polygon(this.ctx, [point])
+            this.currentUpdatingShape = new Polygon({
+                ctx: this.ctx,
+                points: [point],
+                fillColor: 'pink',
+            })
         }
 
         this.stage.emitter.emit('add-shape', this.currentUpdatingShape)
@@ -63,7 +74,7 @@ export class Adder {
         if (points[points.length - 1].isPreviewPoint) {
             point = points[points.length - 1]
         } else {
-            point = new Point(this.ctx, x, y)
+            point = new Point({ ctx: this.ctx, x, y })
             point.isPreviewPoint = true
             polygon.addPoint(point)
         }

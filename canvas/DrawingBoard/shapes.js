@@ -2,7 +2,7 @@ import { EventEmitter } from './eventEmitter.js'
 
 // TODO 使用proxy重构，监听x，y的变化
 class Graph {
-    constructor(props = []) {
+    constructor(props = {}) {
         this.emitter = new EventEmitter()
         this.name = 'graph'
         this.props = props
@@ -70,7 +70,7 @@ class Graph {
     }
     drawPath() {}
     clone() {
-        return new this.constructor(...this.props)
+        return new this.constructor(this.props)
     }
     /**
      * 每一个图形的位移都是相对于整个画布的，通过记录最初和初始点的位移（该位移是不变的，除非拖拽了点），
@@ -89,11 +89,26 @@ class Graph {
             y + this.withParentDiff.y - currentWidthParentDiff.y,
         ]
     }
+    fillIfNeeded() {
+        const { ctx, fillColor } = this.props
+        if (!fillColor) return
+        ctx.fillStyle = fillColor
+        ctx.fill()
+    }
 }
 export class Rect extends Graph {
-    constructor(...props) {
+    constructor(props) {
         super(props)
-        const [ctx, x, y, width, height, lineWidth = 1, color = '#f00'] = props
+        // TODO 将this.xx改为this.props.xx
+        const {
+            ctx,
+            x,
+            y,
+            width,
+            height,
+            lineWidth = 1,
+            color = '#f00',
+        } = props
         this.name = 'rect'
         this.ctx = ctx
         this.x = x
@@ -109,6 +124,7 @@ export class Rect extends Graph {
         ctx.lineWidth = lineWidth
         ctx.strokeStyle = color
         this.drawPath()
+        this.fillIfNeeded()
         ctx.stroke()
         ctx.restore()
         this.drawChildren()
@@ -122,9 +138,9 @@ export class Rect extends Graph {
     }
 }
 export class Circle extends Graph {
-    constructor(...props) {
+    constructor(props) {
         super(props)
-        const [ctx, x, y, r = 5, color = '#00f'] = props
+        const { ctx, x, y, r = 5, color = '#00f' } = props
         this.name = 'circle'
         this.ctx = ctx
         this.x = x
@@ -136,8 +152,9 @@ export class Circle extends Graph {
         const { ctx, color } = this
         ctx.save()
         this.drawPath()
-        ctx.fillStyle = color
-        ctx.fill()
+        ctx.strokeStyle = color
+        this.fillIfNeeded()
+        ctx.stroke()
         ctx.restore()
         this.drawChildren()
     }
@@ -150,9 +167,9 @@ export class Circle extends Graph {
     }
 }
 export class Text extends Graph {
-    constructor(...props) {
+    constructor(props) {
         super(props)
-        const [ctx, text, x, y, font = '20px sarif', color = '#000'] = props
+        const { ctx, text, x, y, font = '20px sarif', color = '#000' } = props
         this.name = 'text'
         this.ctx = ctx
         this.text = text
@@ -176,9 +193,9 @@ export class Text extends Graph {
     }
 }
 export class Point extends Graph {
-    constructor(...props) {
+    constructor(props) {
         super(props)
-        const [ctx, x, y] = props
+        const { ctx, x, y } = props
         this.name = 'point'
         this.ctx = ctx
         this.x = x
@@ -198,9 +215,9 @@ export class Point extends Graph {
     }
 }
 export class Polygon extends Graph {
-    constructor(...props) {
+    constructor(props) {
         super(props)
-        const [ctx, points = [], color = '#f00'] = props
+        const { ctx, points = [], color = '#f00' } = props
         this.name = 'polygon'
         this.ctx = ctx
         this.points = points
@@ -246,6 +263,7 @@ export class Polygon extends Graph {
         ctx.save()
         this.drawPath()
         ctx.strokeStyle = color
+        this.fillIfNeeded()
         ctx.stroke()
         ctx.restore()
         this.drawChildren()

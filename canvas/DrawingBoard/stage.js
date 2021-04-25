@@ -5,8 +5,9 @@ import { EventEmitter } from './eventEmitter.js'
 import { ShapeBox } from './shapeBox.js'
 import { Switcher, modes } from './switcher.js'
 
+// TODO 右键二级菜单显示删除
+// TODO 撤销和重做
 // TODO 旋转
-// TODO 右键点击撤销
 export class Stage {
     constructor(canvas) {
         this.canvas = canvas
