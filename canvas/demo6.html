@@ -31,10 +31,11 @@
                 <button id="drawPointButton">描点</button>
                 <button id="editButton">编辑</button>
                 <input type="text" id="boxName" />
+                <button id="addText">添加盒子名称</button>
             </div>
         </div>
         <script type="module">
-            import { Stage } from './DrawingBoard/index.js'
+            import { Stage, Text } from './DrawingBoard/index.js'
             const size = 500
             const canvas = document.getElementById('canvas')
             canvas.width = canvas.height = size
@@ -52,6 +53,21 @@
             editButton.onclick = (evt) => {
                 stage.setMode('editor')
                 switchActiveButton(evt)
+            }
+            let text
+            addText.onclick = (evt) => {
+                const graph = stage.getEditingGraph()
+                if (text) {
+                    graph.removeChild(text)
+                }
+                const graphCenter = stage.getGraphCenter(graph)
+                text = new Text(graph.ctx, boxName.value, ...graphCenter)
+                graph.appendChild(text)
+                text.listenParent('size-changed', () => {
+                    const [x, y] = stage.getGraphCenter(text.parent)
+                    text.set({ x, y }).updateParentAndDiff()
+                })
+                stage.emitter.emit('update-screen')
             }
 
             function switchActiveButton(evt) {
