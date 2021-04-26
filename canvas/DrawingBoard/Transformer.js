@@ -1,13 +1,16 @@
 import * as events from './events.js'
+import { Circle, DEFAULT_COLOR } from './Graph.js'
 
 class Transformer {
-    constructor(graph) {
+    constructor(graph, dragPosition) {
         this.graph = graph
-        this.dragPosition = { x: 0, y: 0 }
+        this.controller = new ControlPoint(graph)
+        this.dragPosition = dragPosition // 记录拖拽鼠标位置
     }
     start() {}
     resize() {}
     drag() {}
+    delete() {}
     end() {
         this.controller.clearPoints()
     }
@@ -21,9 +24,8 @@ class Transformer {
 }
 
 class RectTransformer extends Transformer {
-    constructor(graph) {
-        super(graph)
-        this.controller = new ControlPoint(graph)
+    constructor(...props) {
+        super(...props)
     }
     start() {
         if (this.controller.pickedIndex === -1) return
@@ -36,7 +38,6 @@ class RectTransformer extends Transformer {
 
         this.graph.attr({ x, y }).updateChildrenDiff()
     }
-    reset(position, pickedIndex) {}
     resize({ x, y }) {
         this.graph.attr({ width: x - this.graph.x, height: y - this.graph.y })
         this.controller.updatePoints()
@@ -58,14 +59,17 @@ class RectTransformer extends Transformer {
 }
 
 class PolygonTransformer extends Transformer {
-    constructor(graph) {
-        super(graph)
+    constructor(...props) {
+        super(...props)
     }
     resize(position, pickedIndex) {
-        if (pickedIndex === 0) {
+        // TODO 只要更新了自身的坐标，就要运行updatePointsDiff和updateChildrenDiff
+        if (this.controller.pickedIndex === 0) {
             this.graph.attr(position).updatePointsDiff().updateChildrenDiff()
         } else {
-            this.graph.points[pickedIndex]?.attr(position).updateParentAndDiff()
+            this.graph.points[this.controller.pickedIndex]
+                ?.attr(position)
+                .updateParentAndDiff()
         }
         this.controller.updatePoints(position)
         this.graph.emit(events.SIZE_CHANGED)
@@ -76,6 +80,7 @@ class PolygonTransformer extends Transformer {
             y: y - this.dragPosition.y,
         }
 
+        // TODO 建立point的x，y和polygon的x，y之间的关系，使得不用更新每一个point的属性，也就是说point的坐标可以通过计算得出
         this.graph.points.forEach((point) =>
             point.attr({ x: point.x + diff.x, y: point.y + diff.y })
         )
@@ -142,6 +147,6 @@ function getDistance(p1, p2) {
 }
 
 export const transformerGenerator = {
-    rect: { generate: (rect) => new RectTransformer(rect) },
-    polygon: { generate: (polygon) => new PolygonTransformer(polygon) },
+    rect: { generate: (...props) => new RectTransformer(...props) },
+    polygon: { generate: (...props) => new PolygonTransformer(...props) },
 }
