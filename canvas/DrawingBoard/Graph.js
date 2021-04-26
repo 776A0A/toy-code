@@ -113,8 +113,8 @@ export class Rect extends Graph {
             ctx,
             x,
             y,
-            width,
-            height,
+            width = 0,
+            height = 0,
             lineWidth = 1,
             color = DEFAULT_COLOR,
         } = attrs

@@ -4,8 +4,6 @@ export class GraphManager {
     constructor(stage) {
         this.stage = stage
         this._graphs = new Set()
-
-        this.stage.emitter.on(events.ADD_GRAPH, (graph) => this.add(graph))
     }
     add(graph) {
         this._graphs.add(graph)

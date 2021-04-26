@@ -1,12 +1,13 @@
 import { Point, Polygon, Rect, DEFAULT_FILL_COLOR } from './Graph.js'
 import * as events from './events.js'
+import { DrawerGenerator } from './Drawer.js'
 
 export class Adder {
     constructor(stage) {
         this.stage = stage
         this.canvas = stage.canvas
         this.graphMode = 'rect'
-        this.currentUpdatingGraph = null
+        this.currentDrawer = null
         this.isDrawing = false
     }
     get switchTo() {
@@ -18,85 +19,53 @@ export class Adder {
     get ctx() {
         return this.canvas.getContext('2d')
     }
-    add(position) {
-        if (this.graphMode === 'rect') this.addRect(position)
-        else if (this.graphMode === 'polygon') this.addPolygon(position)
-        else {
+    add(offset) {
+        if (this.graphMode === 'rect') {
+            this.currentDrawer = DrawerGenerator.rect.generate({
+                ctx: this.ctx,
+                x: offset.x,
+                y: offset.y,
+                fillColor: DEFAULT_FILL_COLOR,
+            })
+        } else if (this.graphMode === 'polygon') {
+            const point = new Point({
+                ctx: this.ctx,
+                x: offset.x,
+                y: offset.y,
+            })
+            if (this.currentDrawer) {
+                this.currentDrawer.addPoint(point)
+            } else {
+                this.currentDrawer = DrawerGenerator.polygon.generate({
+                    ctx: this.ctx,
+                    points: [point],
+                    fillColor: DEFAULT_FILL_COLOR,
+                })
+            }
+        } else {
             throw Error(`没有这个图形：${this.graphMode}`)
         }
 
         this.isDrawing = true
+        this.stage.emitter.emit(events.ADD_GRAPH, this.currentDrawer.graph)
     }
     refresh(position) {
-        if (!this.isDrawing) return
-        if (this.graphMode === 'rect') this.updateRect(position)
-        else if (this.graphMode === 'polygon') this.updatePolygon(position)
-    }
-    updateRect({ x, y }) {
-        const rect = this.currentUpdatingGraph
-        if (!rect) return
-        rect.attr({
-            width: x - rect.x,
-            height: y - rect.y,
-        })
+        if (!this.isDrawing || !this.currentDrawer) return
+
+        this.currentDrawer.update(position)
+
         this.stage.emitter.emit(events.REFRESH_SCREEN)
     }
-    addRect({ x, y }) {
-        this.currentUpdatingGraph = new Rect({
-            ctx: this.ctx,
-            x,
-            y,
-            width: 0,
-            height: 0,
-            fillColor: DEFAULT_FILL_COLOR,
-        })
-        this.stage.emitter.emit(events.ADD_GRAPH, this.currentUpdatingGraph)
-    }
-    addPolygon({ x, y }) {
-        const point = new Point({ ctx: this.ctx, x, y })
-
-        if (this.currentUpdatingGraph) {
-            this.currentUpdatingGraph.addPoint(point)
-        } else {
-            this.currentUpdatingGraph = new Polygon({
-                ctx: this.ctx,
-                points: [point],
-                fillColor: DEFAULT_FILL_COLOR,
-            })
-        }
-
-        this.stage.emitter.emit(events.ADD_GRAPH, this.currentUpdatingGraph)
-    }
-    updatePolygon({ x, y }) {
-        const polygon = this.currentUpdatingGraph
-        if (!polygon) return
-        const points = polygon.points
-        let point
-        if (points[points.length - 1].isPreviewPoint) {
-            point = points[points.length - 1]
-        } else {
-            point = new Point({ ctx: this.ctx, x, y })
-            point.isPreviewPoint = true
-            polygon.addPoint(point)
-        }
-        point.attr({ x, y })
-        this.stage.emitter.emit(events.REFRESH_SCREEN)
-    }
-    commitPolygon({ x, y }) {
-        const polygon = this.currentUpdatingGraph
-        if (!polygon) return
-        polygon.points = polygon.points.filter((point) => !point.isPreviewPoint) // 删除所有预览点
-        polygon.popPoint() // 因为dblclick也会触发mousedown事件，所有实际在mousedown时已经添加了两个点
-        this.isDrawing = false
-        this.currentUpdatingGraph = null
-    }
-    stop(type, position) {
+    commit(type) {
         if (this.graphMode === 'polygon') {
-            if (type === 'dblclick' && position) {
-                return this.commitPolygon(position)
-            } else return
+            if (type !== 'dblclick') return
+            this.currentDrawer?.commit()
+            this.isDrawing = false
+            this.currentDrawer = null
+            return
         }
+        this.currentDrawer?.commit()
         this.isDrawing = false
-        this.currentUpdatingGraph = null
+        this.currentDrawer = null
     }
 }
