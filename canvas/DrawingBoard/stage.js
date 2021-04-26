@@ -33,7 +33,6 @@ export class Stage extends EventEmitter {
         this.switcher = new Switcher(this)
         this.display = new Display(canvas)
         this.graphManager = new GraphManager(this)
-        this.editor = new Editor(this)
         this.plugins = new Set()
         this.init()
     }
@@ -45,17 +44,14 @@ export class Stage extends EventEmitter {
         if (this.plugins.has(plugin)) return
         this.plugins.add(plugin)
         plugin.install(this)
+        return this
     }
     addListener() {
         this.on(events.ADD_GRAPH, (graph) => {
             this.graphManager.add(graph)
+        }).on(events.REFRESH_SCREEN, () => {
+            this.display.refresh(this.graphManager.graphs)
         })
-            .on(events.REFRESH_SCREEN, () => {
-                this.display.refresh(this.graphManager.graphs)
-            })
-            .on(events.END_EDIT, () => {
-                this.editor.end()
-            })
     }
     addNativeListener() {
         const handleMouseDown = (evt) => {
@@ -70,10 +66,6 @@ export class Stage extends EventEmitter {
             }
 
             this.emit('mousedown', params)
-            // if (this.switcher.mode === modes.adder) {
-            // } else if (this.switcher.mode === modes.editor) {
-            //     this.editor.pick(params, this.graphManager.graphs)
-            // }
         }
         const handleMouseMove = (evt) => {
             const params = {
@@ -83,38 +75,20 @@ export class Stage extends EventEmitter {
                 type: evt.type,
             }
             this.emit('mousemove', params)
-            // if (this.switcher.mode === modes.adder) {
-            //     this.adder.update(params)
-            // } else if (this.switcher.mode === modes.editor) {
-            //     this.editor.edit(params, this.graphManager.graphs)
-            // }
         }
 
         const handleMouseUp = (evt) => {
             const params = { type: evt.type }
             this.emit('mouseup', params)
-            // if (this.switcher.mode === modes.adder) {
-            //     this.adder.commit()
-            // } else if (this.switcher.mode === modes.editor) {
-            //     this.editor.stop()
-            // }
         }
         const handleMouseLeave = (evt) => {
             const params = { type: evt.type }
             this.emit('mouseleave', params)
-            // if (this.switcher.mode === modes.adder) {
-            //     this.adder.commit()
-            // } else if (this.switcher.mode === modes.editor) {
-            //     this.editor.stop()
-            // }
         }
 
         const handleDblClick = (evt) => {
             const params = { type: evt.type }
             this.emit('dblclick', params)
-            // if (this.switcher.mode === modes.adder) {
-            //     this.adder.commit(evt.type)
-            // }
         }
 
         const handleContextMenu = (evt) => {

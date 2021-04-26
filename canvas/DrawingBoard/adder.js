@@ -61,7 +61,6 @@ export class Adder extends Plugin {
     }
     install(stage) {
         this.stage = stage
-        check = check.bind(this)
 
         stage
             .on('mousedown', ({ x, y }) => check() && this.add({ x, y }))
@@ -71,7 +70,7 @@ export class Adder extends Plugin {
             .on('dblclick', ({ type }) => check() && this.commit(type))
 
         function check() {
-            return this.stage.switcher.mode === 'adder'
+            return stage.switcher.mode === 'adder'
         }
     }
 }

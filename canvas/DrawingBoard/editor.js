@@ -1,9 +1,11 @@
 import { Circle, DEFAULT_COLOR } from './Graph.js'
 import * as events from './events.js'
+import { Plugin } from './Plugin.js'
 
-export class Editor {
-    constructor(stage) {
-        this.stage = stage
+export class Editor extends Plugin {
+    constructor() {
+        super()
+        this.stage = null
         this.topGraphIndex = undefined
         this.isEditing = false // 点选到了某一个图形即为true
         this.editMode = 'wait'
@@ -187,6 +189,26 @@ export class Editor {
 
         this.controlPoint.updatePoints()
         this.stage.emit(events.REFRESH_SCREEN)
+    }
+    install(stage) {
+        this.stage = stage
+
+        stage
+            .on(
+                'mousedown',
+                ({ x, y, graphs }) => check() && this.pick({ x, y }, graphs)
+            )
+            .on(
+                'mousemove',
+                ({ x, y, graphs }) => check() && this.edit({ x, y }, graphs)
+            )
+            .on('mouseup', () => check() && this.stop())
+            .on('mouseleave', () => check() && this.stop())
+            .on(events.END_EDIT, () => this.end())
+
+        function check() {
+            return stage.switcher.mode === 'editor'
+        }
     }
 }
 
