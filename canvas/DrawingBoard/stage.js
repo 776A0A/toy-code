@@ -5,6 +5,9 @@ import { EventEmitter } from './eventEmitter.js'
 import { ShapeBox } from './shapeBox.js'
 import { Switcher, modes } from './switcher.js'
 
+// TODO scheduler
+// TODO import功能
+// TODO 适配问题
 // TODO 撤销和重做
 // TODO 旋转
 export class Stage {
@@ -23,6 +26,7 @@ export class Stage {
         this.addListener()
     }
     addListener() {
+        TODO
         this.emitter
             .listen('add-shape', (shape) => {
                 this.shapeBox.add(shape)
