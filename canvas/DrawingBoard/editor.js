@@ -1,4 +1,4 @@
-import { Circle, DEFAULT_COLOR } from './shapes.js'
+import { Circle, DEFAULT_COLOR } from './Graph.js'
 
 export class Editor {
     constructor(stage) {
@@ -64,7 +64,7 @@ export class Editor {
                         this.controlPoint.controller.length
                 ]
                 const [x, y] = diagonalPoint.getTranslate()
-                graph.attrs({ x, y }).updateChildrenDiff()
+                graph.attr({ x, y }).updateChildrenDiff()
             }
             this.switchTo.resize()
         } else {
@@ -113,9 +113,9 @@ export class Editor {
         let top
         const { ctx } = this
 
-        ;[...graphs].forEach((shape, idx) => {
+        ;[...graphs].forEach((graph, idx) => {
             ctx.save()
-            shape.drawPath()
+            graph.drawPath()
             ctx.restore()
             // TODO 因为文字的原因，还需要增加判断是否在stroke上，可以在editor中增加方法抹平判断
             if (ctx.isPointInPath(x, y)) top = idx
@@ -138,15 +138,15 @@ export class Editor {
         if (!this.isResizing) return
         const graph = graphs[this.topGraphIndex]
         if (graph.name === 'rect') {
-            graph.attrs({ width: x - graph.x, height: y - graph.y })
+            graph.attr({ width: x - graph.x, height: y - graph.y })
             this.controlPoint.updatePoints()
         } else if (graph.name === 'polygon') {
             // TODO 只要更新了自身的坐标，就要运行updatePointsDiff和updateChildrenDiff
             if (this.controlPoint.pickedControlPointIndex === 0) {
-                graph.attrs({ x, y }).updatePointsDiff().updateChildrenDiff()
+                graph.attr({ x, y }).updatePointsDiff().updateChildrenDiff()
             } else {
                 graph.points[this.controlPoint.pickedControlPointIndex]
-                    ?.attrs({ x, y })
+                    ?.attr({ x, y })
                     .updateParentAndDiff()
             }
             this.controlPoint.updatePoints({ x, y })
@@ -168,14 +168,14 @@ export class Editor {
         }
 
         if (graph.name === 'rect') {
-            graph.attrs({
+            graph.attr({
                 x: graph.x + diff.x,
                 y: graph.y + diff.y,
             })
         } else if (graph.name === 'polygon') {
             // TODO 建立point的x，y和polygon的x，y之间的关系，使得不用更新每一个point的属性，也就是说point的坐标可以通过计算得出
             graph.points.forEach((point) => {
-                point.attrs({
+                point.attr({
                     x: point.x + diff.x,
                     y: point.y + diff.y,
                 })
@@ -221,7 +221,7 @@ class ControlPoint {
         if (position) {
             const pickedPoint = this.controller[this.pickedControlPointIndex]
             if (!pickedPoint) return
-            pickedPoint.attrs(position).updateParentAndDiff()
+            pickedPoint.attr(position).updateParentAndDiff()
         } else {
             this.clearPoints()
             this.addPoints()

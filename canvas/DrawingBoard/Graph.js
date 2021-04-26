@@ -28,7 +28,7 @@ class Graph {
         this.parent.emitter.listen(type, cb)
         this.parentListeners.push([type, cb])
     }
-    attrs(attrs = {}) {
+    attr(attrs = {}) {
         Object.entries(attrs).forEach(([k, v]) => (this[k] = v))
         // TODO 需不需要做事件派发？通知属性改变
         return this

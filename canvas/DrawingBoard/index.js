@@ -1,2 +1,2 @@
 export * from './stage.js'
-export * from './shapes.js'
+export * from './Graph.js'

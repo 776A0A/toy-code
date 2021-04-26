@@ -1,8 +1,8 @@
 import { Adder } from './adder.js'
-import { Drawer } from './drawer.js'
+import { Display } from './Display.js'
 import { Editor } from './editor.js'
 import { EventEmitter } from './eventEmitter.js'
-import { ShapeBox } from './shapeBox.js'
+import { GraphManager } from './GraphManager.js'
 import { Switcher, modes } from './switcher.js'
 
 // TODO scheduler
@@ -23,8 +23,8 @@ export class Stage {
         this.canvas = canvas
         this.emitter = new EventEmitter()
         this.switcher = new Switcher(this)
-        this.drawer = new Drawer(this)
-        this.shapeBox = new ShapeBox(this)
+        this.display = new Display(this)
+        this.graphManager = new GraphManager(this)
         this.adder = new Adder(this)
         this.editor = new Editor(this)
         this.init()
@@ -35,11 +35,11 @@ export class Stage {
     }
     addListener() {
         this.emitter
-            .listen('add-shape', (shape) => {
-                this.shapeBox.add(shape)
+            .listen('add-graph', (graph) => {
+                this.graphManager.add(graph)
             })
             .listen('update-screen', () => {
-                this.drawer.update(this.shapeBox.shapes)
+                this.display.update(this.graphManager.graphs)
             })
             .listen('end-edit', () => {
                 this.editor.end()
@@ -53,7 +53,7 @@ export class Stage {
             if (this.switcher.mode === modes.adder) {
                 this.adder.add(position)
             } else if (this.switcher.mode === modes.editor) {
-                this.editor.pick(position, this.shapeBox.shapes)
+                this.editor.pick(position, this.graphManager.graphs)
             }
         }
         const handleMouseMove = (evt) => {
@@ -61,7 +61,7 @@ export class Stage {
             if (this.switcher.mode === modes.adder) {
                 this.adder.update(position)
             } else if (this.switcher.mode === modes.editor) {
-                this.editor.edit(position, this.shapeBox.shapes)
+                this.editor.edit(position, this.graphManager.graphs)
             }
         }
 
@@ -78,7 +78,7 @@ export class Stage {
             const position = { x: evt.offsetX, y: evt.offsetY }
             if (
                 this.switcher.mode === modes.adder &&
-                this.adder.shapeMode === 'polygon'
+                this.adder.graphMode === 'polygon'
             ) {
                 this.adder.stop('dblclick', position)
             }
@@ -115,7 +115,7 @@ export class Stage {
                 `
                 const handleClick = (evt) => {
                     if (evt.target.id === 'deleteGraphButton') {
-                        this.shapeBox.remove(this.getEditingGraph())
+                        this.graphManager.remove(this.getEditingGraph())
                         this.editor.delete()
                         this.emitter.emit('update-screen')
                         menu.removeEventListener('click', handleClick)
@@ -137,22 +137,22 @@ export class Stage {
             .listen(this.canvas, 'dblclick', handleDblClick)
             .listen(this.canvas, 'contextmenu', handleContextMenu)
     }
-    addShape(shape) {
-        this.emitter.emit('add-shape', shape)
+    addGraph(graph) {
+        this.emitter.emit('add-graph', graph)
         return this
     }
     setMode(mode) {
         this.switcher.switchTo[mode]()
         return this
     }
-    setShape(shape) {
+    setGraph(graph) {
         if (this.switcher.mode !== modes.adder) {
             throw Error('非绘制（adder）模式')
         }
-        this.adder.switchTo[shape]()
+        this.adder.switchTo[graph]()
     }
     getEditingGraph() {
-        return this.shapeBox.shapes[this.editor.topGraphIndex]
+        return this.graphManager.graphs[this.editor.topGraphIndex]
     }
     getGraphCenter(graph) {
         if (graph.name === 'rect') {
@@ -173,7 +173,7 @@ export class Stage {
     }
     import(graphs) {}
     export() {
-        const graphs = this.shapeBox.shapes
+        const graphs = this.graphManager.graphs
         const shakenGraphs = shake(graphs)
         return shakenGraphs
 

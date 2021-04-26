@@ -68,11 +68,11 @@
             const stage = new Stage(canvas)
 
             drawRectButton.onclick = (evt) => {
-                stage.setMode('adder').setShape('rect')
+                stage.setMode('adder').setGraph('rect')
                 switchActiveButton(evt)
             }
             drawPointButton.onclick = (evt) => {
-                stage.setMode('adder').setShape('polygon')
+                stage.setMode('adder').setGraph('polygon')
                 switchActiveButton(evt)
             }
             editButton.onclick = (evt) => {
@@ -90,7 +90,7 @@
                 graph.appendChild(text)
                 text.listenParent('size-changed', () => {
                     const [x, y] = stage.getGraphCenter(text.parent)
-                    text.attrs({ x, y }).updateParentAndDiff()
+                    text.attr({ x, y }).updateParentAndDiff()
                 })
                 stage.emitter.emit('update-screen')
             }
