@@ -1,6 +1,7 @@
 import { Circle, DEFAULT_COLOR } from './Graph.js'
 import * as events from './events.js'
 import { Plugin } from './Plugin.js'
+import { transformerGenerator } from './Transformer.js'
 
 export class Editor extends Plugin {
     constructor() {
@@ -14,6 +15,7 @@ export class Editor extends Plugin {
         this.isResizing = false
         this.controlPoint = null
         this.graphs = []
+        this.transformer = null
     }
     get switchTo() {
         return {

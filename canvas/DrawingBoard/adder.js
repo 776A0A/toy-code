@@ -1,6 +1,6 @@
 import { Point } from './Graph.js'
 import * as events from './events.js'
-import { DrawerGenerator } from './Drawer.js'
+import { drawerGenerator } from './Drawer.js'
 import { Plugin } from './Plugin.js'
 
 export class Adder extends Plugin {
@@ -18,7 +18,7 @@ export class Adder extends Plugin {
         const ctx = this.stage.canvas.getContext('2d')
         const baseAttrs = { ctx, x, y }
         if (this.graphMode === 'rect') {
-            this.drawer = DrawerGenerator.rect.generate({
+            this.drawer = drawerGenerator.rect.generate({
                 ...baseAttrs,
                 fillColor: true,
             })
@@ -27,7 +27,7 @@ export class Adder extends Plugin {
             if (this.drawer) {
                 this.drawer.addPoint(point)
             } else {
-                this.drawer = DrawerGenerator.polygon.generate({
+                this.drawer = drawerGenerator.polygon.generate({
                     ctx,
                     points: [point],
                     fillColor: true,
@@ -40,10 +40,10 @@ export class Adder extends Plugin {
         this.isDrawing = true
         this.stage.emit(events.ADD_GRAPH, this.drawer.graph)
     }
-    update(offset) {
+    update(position) {
         if (!this.isDrawing || !this.drawer) return
 
-        this.drawer.update(offset)
+        this.drawer.update(position)
 
         this.stage.emit(events.REFRESH_SCREEN)
     }

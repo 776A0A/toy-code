@@ -1,3 +1,4 @@
+// 显示，负责刷新页面
 export class Display {
     constructor(canvas) {
         this.canvas = canvas

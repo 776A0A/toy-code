@@ -1,5 +1,6 @@
 import { Point, Polygon, Rect } from './Graph.js'
 
+// 绘制器，用于添加图形
 class Drawer {
     graph = null
     // 更新显示
@@ -13,13 +14,13 @@ class RectDrawer extends Drawer {
         super()
         this.graph = new Rect(attrs)
     }
-    update(offset) {
+    update({ x, y }) {
         const rect = this.graph
         if (!rect) return
 
         rect.attr({
-            width: offset.x - rect.x,
-            height: offset.y - rect.y,
+            width: x - rect.x,
+            height: y - rect.y,
         })
     }
 }
@@ -29,7 +30,7 @@ class PolygonDrawer extends Drawer {
         super()
         this.graph = new Polygon(attrs)
     }
-    update(offset) {
+    update(position) {
         const polygon = this.graph
         if (!polygon) return
 
@@ -38,12 +39,12 @@ class PolygonDrawer extends Drawer {
 
         if (polygonPoints[polygonPoints.length - 1].isPreviewPoint) {
             point = polygonPoints[polygonPoints.length - 1]
-            point.attr(offset)
+            point.attr(position)
         } else {
             point = new Point({
                 ctx: polygon.ctx,
-                x: offset.x,
-                y: offset.y,
+                x: position.x,
+                y: position.y,
             })
             point.isPreviewPoint = true
             polygon.addPoint(point)
@@ -62,7 +63,7 @@ class PolygonDrawer extends Drawer {
     }
 }
 
-export const DrawerGenerator = {
+export const drawerGenerator = {
     rect: { generate: (attrs) => new RectDrawer(attrs) },
     polygon: { generate: (attrs) => new PolygonDrawer(attrs) },
 }
