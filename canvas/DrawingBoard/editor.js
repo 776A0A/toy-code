@@ -89,7 +89,7 @@ export class Editor {
                 this.controlPoint = null
             }
 
-            this.stage.emitter.emit('update-screen')
+            this.stage.emitter.emit('refresh-screen')
         }
     }
     stop() {
@@ -101,7 +101,7 @@ export class Editor {
             this.graphs[this.topGraphIndex].removeChild(
                 ...this.controlPoint.controller
             )
-            this.stage.emitter.emit('update-screen')
+            this.stage.emitter.emit('refresh-screen')
         }
         this.isEditing = this.isDragging = this.isResizing = false
         this.topGraphIndex = undefined
@@ -152,7 +152,7 @@ export class Editor {
             this.controlPoint.updatePoints({ x, y })
         }
         graph.emitter.emit('size-changed')
-        this.stage.emitter.emit('update-screen')
+        this.stage.emitter.emit('refresh-screen')
     }
     recordDragPosition({ x, y }) {
         this.dragPosition = { x, y }
@@ -185,7 +185,7 @@ export class Editor {
         this.dragPosition = { x, y }
 
         this.controlPoint.updatePoints()
-        this.stage.emitter.emit('update-screen')
+        this.stage.emitter.emit('refresh-screen')
     }
 }
 

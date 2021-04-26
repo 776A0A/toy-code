@@ -1,7 +1,7 @@
-import { Adder } from './adder.js'
+import { Adder } from './Adder.js'
 import { Display } from './Display.js'
-import { Editor } from './editor.js'
-import { EventEmitter } from './eventEmitter.js'
+import { Editor } from './Editor.js'
+import { EventEmitter } from './EventEmitter.js'
 import { GraphManager } from './GraphManager.js'
 import { Switcher, modes } from './switcher.js'
 
@@ -23,7 +23,7 @@ export class Stage {
         this.canvas = canvas
         this.emitter = new EventEmitter()
         this.switcher = new Switcher(this)
-        this.display = new Display(this)
+        this.display = new Display(canvas)
         this.graphManager = new GraphManager(this)
         this.adder = new Adder(this)
         this.editor = new Editor(this)
@@ -35,13 +35,13 @@ export class Stage {
     }
     addListener() {
         this.emitter
-            .listen('add-graph', (graph) => {
+            .on('add-graph', (graph) => {
                 this.graphManager.add(graph)
             })
-            .listen('update-screen', () => {
-                this.display.update(this.graphManager.graphs)
+            .on('refresh-screen', () => {
+                this.display.refresh(this.graphManager.graphs)
             })
-            .listen('end-edit', () => {
+            .on('end-edit', () => {
                 this.editor.end()
             })
     }
@@ -59,7 +59,7 @@ export class Stage {
         const handleMouseMove = (evt) => {
             const position = { x: evt.offsetX, y: evt.offsetY }
             if (this.switcher.mode === modes.adder) {
-                this.adder.update(position)
+                this.adder.refresh(position)
             } else if (this.switcher.mode === modes.editor) {
                 this.editor.edit(position, this.graphManager.graphs)
             }
@@ -117,7 +117,7 @@ export class Stage {
                     if (evt.target.id === 'deleteGraphButton') {
                         this.graphManager.remove(this.getEditingGraph())
                         this.editor.delete()
-                        this.emitter.emit('update-screen')
+                        this.emitter.emit('refresh-screen')
                         menu.removeEventListener('click', handleClick)
                         menu.remove()
                     }
@@ -130,12 +130,12 @@ export class Stage {
         }
 
         this.emitter
-            .listen(this.canvas, 'mousedown', handleMouseDown)
-            .listen(this.canvas, 'mousemove', handleMouseMove)
-            .listen(this.canvas, 'mouseup', handleMouseUp)
-            .listen(this.canvas, 'mouseleave', handleMouseLeave)
-            .listen(this.canvas, 'dblclick', handleDblClick)
-            .listen(this.canvas, 'contextmenu', handleContextMenu)
+            .on(this.canvas, 'mousedown', handleMouseDown)
+            .on(this.canvas, 'mousemove', handleMouseMove)
+            .on(this.canvas, 'mouseup', handleMouseUp)
+            .on(this.canvas, 'mouseleave', handleMouseLeave)
+            .on(this.canvas, 'dblclick', handleDblClick)
+            .on(this.canvas, 'contextmenu', handleContextMenu)
     }
     addGraph(graph) {
         this.emitter.emit('add-graph', graph)

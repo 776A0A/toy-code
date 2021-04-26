@@ -3,7 +3,7 @@ export class GraphManager {
         this.stage = stage
         this._graphs = new Set()
 
-        this.stage.emitter.listen('add-graph', (graph) => this.add(graph))
+        this.stage.emitter.on('add-graph', (graph) => this.add(graph))
     }
     add(graph) {
         this._graphs.add(graph)

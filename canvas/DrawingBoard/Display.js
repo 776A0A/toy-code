@@ -1,18 +1,17 @@
 export class Display {
-    constructor(stage) {
-        this.stage = stage
-        this.canvas = stage.canvas
+    constructor(canvas) {
+        this.canvas = canvas
     }
     draw(graphs) {
         graphs.forEach((graph) => graph.draw())
     }
-    clear() {
+    clean() {
         this.canvas
             .getContext('2d')
             .clearRect(0, 0, this.canvas.width, this.canvas.height)
     }
-    update(graphs) {
-        this.clear()
+    refresh(graphs) {
+        this.clean()
         this.draw(graphs)
     }
 }

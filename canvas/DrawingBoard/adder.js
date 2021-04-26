@@ -26,7 +26,7 @@ export class Adder {
 
         this.isDrawing = true
     }
-    update(position) {
+    refresh(position) {
         if (!this.isDrawing) return
         if (this.graphMode === 'rect') this.updateRect(position)
         else if (this.graphMode === 'polygon') this.updatePolygon(position)
@@ -38,7 +38,7 @@ export class Adder {
             width: x - rect.x,
             height: y - rect.y,
         })
-        this.stage.emitter.emit('update-screen')
+        this.stage.emitter.emit('refresh-screen')
     }
     addRect({ x, y }) {
         this.currentUpdatingGraph = new Rect({
@@ -79,7 +79,7 @@ export class Adder {
             polygon.addPoint(point)
         }
         point.attr({ x, y })
-        this.stage.emitter.emit('update-screen')
+        this.stage.emitter.emit('refresh-screen')
     }
     commitPolygon({ x, y }) {
         const polygon = this.currentUpdatingGraph
