@@ -1,45 +1,36 @@
-import { Point, DEFAULT_FILL_COLOR } from './Graph.js'
+import { Point } from './Graph.js'
 import * as events from './events.js'
 import { DrawerGenerator } from './Drawer.js'
+import { Plugin } from './Plugin.js'
 
-export class Adder {
-    constructor(stage) {
-        this.stage = stage
-        this.canvas = stage.canvas
+export class Adder extends Plugin {
+    constructor() {
+        super()
+        this.stage = null
         this.graphMode = 'rect'
         this.drawer = null
         this.isDrawing = false
     }
-    get switchTo() {
-        return {
-            rect: () => (this.graphMode = 'rect'),
-            polygon: () => (this.graphMode = 'polygon'),
-        }
+    setMode(mode) {
+        this.graphMode = mode
     }
-    get ctx() {
-        return this.canvas.getContext('2d')
-    }
-    add(offset) {
+    add({ x, y }) {
+        const ctx = this.stage.canvas.getContext('2d')
+        const baseAttrs = { ctx, x, y }
         if (this.graphMode === 'rect') {
             this.drawer = DrawerGenerator.rect.generate({
-                ctx: this.ctx,
-                x: offset.x,
-                y: offset.y,
-                fillColor: DEFAULT_FILL_COLOR,
+                ...baseAttrs,
+                fillColor: true,
             })
         } else if (this.graphMode === 'polygon') {
-            const point = new Point({
-                ctx: this.ctx,
-                x: offset.x,
-                y: offset.y,
-            })
+            const point = new Point({ ...baseAttrs })
             if (this.drawer) {
                 this.drawer.addPoint(point)
             } else {
                 this.drawer = DrawerGenerator.polygon.generate({
-                    ctx: this.ctx,
+                    ctx,
                     points: [point],
-                    fillColor: DEFAULT_FILL_COLOR,
+                    fillColor: true,
                 })
             }
         } else {
@@ -49,10 +40,10 @@ export class Adder {
         this.isDrawing = true
         this.stage.emit(events.ADD_GRAPH, this.drawer.graph)
     }
-    update(position) {
+    update(offset) {
         if (!this.isDrawing || !this.drawer) return
 
-        this.drawer.update(position)
+        this.drawer.update(offset)
 
         this.stage.emit(events.REFRESH_SCREEN)
     }
@@ -67,5 +58,20 @@ export class Adder {
         this.drawer?.commit()
         this.isDrawing = false
         this.drawer = null
+    }
+    install(stage) {
+        this.stage = stage
+        check = check.bind(this)
+
+        stage
+            .on('mousedown', ({ x, y }) => check() && this.add({ x, y }))
+            .on('mousemove', ({ x, y }) => check() && this.update({ x, y }))
+            .on('mouseup', () => check() && this.commit())
+            .on('mouseleave', () => check() && this.commit())
+            .on('dblclick', ({ type }) => check() && this.commit(type))
+
+        function check() {
+            return this.stage.switcher.mode === 'adder'
+        }
     }
 }

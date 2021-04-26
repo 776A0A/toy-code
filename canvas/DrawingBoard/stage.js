@@ -9,6 +9,7 @@ import * as events from './events.js'
 import * as utils from './utils.js'
 
 // TODO scheduler
+// TODO cursor
 // TODO import功能
 // TODO 适配问题
 // TODO resize问题
@@ -21,6 +22,8 @@ const canvasDefaultConfig = {
     fillColor: '#a0c5e8',
 }
 
+const LEFT_MOUSE_DOWN = 0
+
 export class Stage extends EventEmitter {
     constructor(canvas, config = {}) {
         super()
@@ -30,13 +33,18 @@ export class Stage extends EventEmitter {
         this.switcher = new Switcher(this)
         this.display = new Display(canvas)
         this.graphManager = new GraphManager(this)
-        this.adder = new Adder(this)
         this.editor = new Editor(this)
+        this.plugins = new Set()
         this.init()
     }
     init() {
         this.addNativeListener()
         this.addListener()
+    }
+    use(plugin) {
+        if (this.plugins.has(plugin)) return
+        this.plugins.add(plugin)
+        plugin.install(this)
     }
     addListener() {
         this.on(events.ADD_GRAPH, (graph) => {
@@ -51,37 +59,62 @@ export class Stage extends EventEmitter {
     }
     addNativeListener() {
         const handleMouseDown = (evt) => {
-            if (evt.button !== 0) return
+            if (evt.button !== LEFT_MOUSE_DOWN) return
             this.removeMenuIfHas()
-            const position = { x: evt.offsetX, y: evt.offsetY }
-            if (this.switcher.mode === modes.adder) {
-                this.adder.add(position)
-            } else if (this.switcher.mode === modes.editor) {
-                this.editor.pick(position, this.graphManager.graphs)
+
+            const params = {
+                x: evt.offsetX,
+                y: evt.offsetY,
+                graphs: this.graphManager.graphs,
+                type: evt.type,
             }
+
+            this.emit('mousedown', params)
+            // if (this.switcher.mode === modes.adder) {
+            // } else if (this.switcher.mode === modes.editor) {
+            //     this.editor.pick(params, this.graphManager.graphs)
+            // }
         }
         const handleMouseMove = (evt) => {
-            const position = { x: evt.offsetX, y: evt.offsetY }
-            if (this.switcher.mode === modes.adder) {
-                this.adder.update(position)
-            } else if (this.switcher.mode === modes.editor) {
-                this.editor.edit(position, this.graphManager.graphs)
+            const params = {
+                x: evt.offsetX,
+                y: evt.offsetY,
+                graphs: this.graphManager.graphs,
+                type: evt.type,
             }
+            this.emit('mousemove', params)
+            // if (this.switcher.mode === modes.adder) {
+            //     this.adder.update(params)
+            // } else if (this.switcher.mode === modes.editor) {
+            //     this.editor.edit(params, this.graphManager.graphs)
+            // }
         }
 
-        let handleMouseUp, handleMouseLeave
-        handleMouseUp = handleMouseLeave = (evt) => {
-            if (this.switcher.mode === modes.adder) {
-                this.adder.commit()
-            } else if (this.switcher.mode === modes.editor) {
-                this.editor.stop()
-            }
+        const handleMouseUp = (evt) => {
+            const params = { type: evt.type }
+            this.emit('mouseup', params)
+            // if (this.switcher.mode === modes.adder) {
+            //     this.adder.commit()
+            // } else if (this.switcher.mode === modes.editor) {
+            //     this.editor.stop()
+            // }
+        }
+        const handleMouseLeave = (evt) => {
+            const params = { type: evt.type }
+            this.emit('mouseleave', params)
+            // if (this.switcher.mode === modes.adder) {
+            //     this.adder.commit()
+            // } else if (this.switcher.mode === modes.editor) {
+            //     this.editor.stop()
+            // }
         }
 
         const handleDblClick = (evt) => {
-            if (this.switcher.mode === modes.adder) {
-                this.adder.commit(evt.type)
-            }
+            const params = { type: evt.type }
+            this.emit('dblclick', params)
+            // if (this.switcher.mode === modes.adder) {
+            //     this.adder.commit(evt.type)
+            // }
         }
 
         const handleContextMenu = (evt) => {
@@ -115,7 +148,7 @@ export class Stage extends EventEmitter {
                 `
                 const handleClick = (evt) => {
                     if (evt.target.id === 'deleteGraphButton') {
-                        this.graphManager.remove(this.getEditingGraph())
+                        this.graphManager.delete(this.getEditingGraph())
                         this.editor.delete()
                         this.emit(events.REFRESH_SCREEN)
                         menu.removeEventListener('click', handleClick)
@@ -148,7 +181,7 @@ export class Stage extends EventEmitter {
         if (this.switcher.mode !== modes.adder) {
             throw Error('非绘制（adder）模式')
         }
-        this.adder.switchTo[graph]()
+        this.adder.setMode(graph)
     }
     getEditingGraph() {
         return this.graphManager.graphs[this.editor.topGraphIndex]

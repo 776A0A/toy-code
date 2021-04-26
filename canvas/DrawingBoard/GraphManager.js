@@ -1,14 +1,11 @@
-import * as events from './events.js'
-
 export class GraphManager {
-    constructor(stage) {
-        this.stage = stage
+    constructor() {
         this._graphs = new Set()
     }
     add(graph) {
         this._graphs.add(graph)
     }
-    remove(graph) {
+    delete(graph) {
         this._graphs.delete(graph)
     }
     clear() {

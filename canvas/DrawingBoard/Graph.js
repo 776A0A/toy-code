@@ -101,7 +101,7 @@ class Graph extends EventEmitter {
     fillIfNeeded() {
         const { ctx, fillColor } = this.attrs
         if (!fillColor) return
-        ctx.fillStyle = fillColor
+        ctx.fillStyle = fillColor === true ? DEFAULT_FILL_COLOR : fillColor
         ctx.fill()
     }
 }

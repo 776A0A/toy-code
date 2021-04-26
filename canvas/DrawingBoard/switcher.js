@@ -1,8 +1,8 @@
 import * as events from './events.js'
 
 export const modes = {
-    adder: Symbol('ADD_MODE'),
-    editor: Symbol('EDIT_MODE'),
+    adder: 'adder',
+    editor: 'editor',
 }
 
 export class Switcher {
