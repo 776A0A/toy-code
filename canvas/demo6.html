@@ -49,7 +49,7 @@
             </div>
         </div>
         <script type="module">
-            import { Stage, Text } from './DrawingBoard/index.js'
+            import { Stage, Text, events } from './DrawingBoard/index.js'
             const size = 500
             const canvas = document.getElementById('canvas')
             canvas.width = canvas.height = bgCanvas.width = bgCanvas.height = size
@@ -88,11 +88,11 @@
                 const [x, y] = stage.getGraphCenter(graph)
                 text = new Text({ ctx: graph.ctx, text: boxName.value, x, y })
                 graph.appendChild(text)
-                text.listenParent('size-changed', () => {
+                text.listenParent(events.SIZE_CHANGED, () => {
                     const [x, y] = stage.getGraphCenter(text.parent)
                     text.attr({ x, y }).updateParentAndDiff()
                 })
-                stage.emitter.emit('refresh-screen')
+                stage.emitter.emit(events.REFRESH_SCREEN)
             }
             exportGraphsButton.onclick = () => {
                 console.log(stage.export())

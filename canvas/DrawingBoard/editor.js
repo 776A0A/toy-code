@@ -1,4 +1,5 @@
 import { Circle, DEFAULT_COLOR } from './Graph.js'
+import * as events from './events.js'
 
 export class Editor {
     constructor(stage) {
@@ -89,7 +90,7 @@ export class Editor {
                 this.controlPoint = null
             }
 
-            this.stage.emitter.emit('refresh-screen')
+            this.stage.emitter.emit(events.REFRESH_SCREEN)
         }
     }
     stop() {
@@ -101,7 +102,7 @@ export class Editor {
             this.graphs[this.topGraphIndex].removeChild(
                 ...this.controlPoint.controller
             )
-            this.stage.emitter.emit('refresh-screen')
+            this.stage.emitter.emit(events.REFRESH_SCREEN)
         }
         this.isEditing = this.isDragging = this.isResizing = false
         this.topGraphIndex = undefined
@@ -151,8 +152,8 @@ export class Editor {
             }
             this.controlPoint.updatePoints({ x, y })
         }
-        graph.emitter.emit('size-changed')
-        this.stage.emitter.emit('refresh-screen')
+        graph.emitter.emit(events.SIZE_CHANGED)
+        this.stage.emitter.emit(events.REFRESH_SCREEN)
     }
     recordDragPosition({ x, y }) {
         this.dragPosition = { x, y }
@@ -185,7 +186,7 @@ export class Editor {
         this.dragPosition = { x, y }
 
         this.controlPoint.updatePoints()
-        this.stage.emitter.emit('refresh-screen')
+        this.stage.emitter.emit(events.REFRESH_SCREEN)
     }
 }
 

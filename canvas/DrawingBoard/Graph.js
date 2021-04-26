@@ -1,4 +1,5 @@
 import { EventEmitter } from './EventEmitter.js'
+import * as events from './events.js'
 
 export const DEFAULT_COLOR = '#1890ff'
 export const DEFAULT_FILL_COLOR = '#a0c5e8'
@@ -17,7 +18,7 @@ class Graph {
         this.init()
     }
     init() {
-        this.emitter.on('removed-from-parent', () => {
+        this.emitter.on(events.REMOVED_FROM_PARENT, () => {
             this.parentListeners.forEach(([type, cb]) => {
                 this.parent.emitter.off(type, cb)
             })
@@ -57,7 +58,7 @@ class Graph {
         this.children = this.children.filter((g) => {
             const includes = graphs.includes(g)
             if (includes) {
-                g.emitter.emit('removed-from-parent')
+                g.emitter.emit(events.REMOVED_FROM_PARENT)
                 return false
             } else return true
         })

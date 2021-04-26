@@ -1,4 +1,5 @@
 import { Point, Polygon, Rect, DEFAULT_FILL_COLOR } from './Graph.js'
+import * as events from './events.js'
 
 export class Adder {
     constructor(stage) {
@@ -38,7 +39,7 @@ export class Adder {
             width: x - rect.x,
             height: y - rect.y,
         })
-        this.stage.emitter.emit('refresh-screen')
+        this.stage.emitter.emit(events.REFRESH_SCREEN)
     }
     addRect({ x, y }) {
         this.currentUpdatingGraph = new Rect({
@@ -49,7 +50,7 @@ export class Adder {
             height: 0,
             fillColor: DEFAULT_FILL_COLOR,
         })
-        this.stage.emitter.emit('add-graph', this.currentUpdatingGraph)
+        this.stage.emitter.emit(events.ADD_GRAPH, this.currentUpdatingGraph)
     }
     addPolygon({ x, y }) {
         const point = new Point({ ctx: this.ctx, x, y })
@@ -64,7 +65,7 @@ export class Adder {
             })
         }
 
-        this.stage.emitter.emit('add-graph', this.currentUpdatingGraph)
+        this.stage.emitter.emit(events.ADD_GRAPH, this.currentUpdatingGraph)
     }
     updatePolygon({ x, y }) {
         const polygon = this.currentUpdatingGraph
@@ -79,7 +80,7 @@ export class Adder {
             polygon.addPoint(point)
         }
         point.attr({ x, y })
-        this.stage.emitter.emit('refresh-screen')
+        this.stage.emitter.emit(events.REFRESH_SCREEN)
     }
     commitPolygon({ x, y }) {
         const polygon = this.currentUpdatingGraph

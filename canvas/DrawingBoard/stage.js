@@ -4,6 +4,7 @@ import { Editor } from './Editor.js'
 import { EventEmitter } from './EventEmitter.js'
 import { GraphManager } from './GraphManager.js'
 import { Switcher, modes } from './switcher.js'
+import * as events from './events.js'
 
 // TODO scheduler
 // TODO import功能
@@ -35,13 +36,13 @@ export class Stage {
     }
     addListener() {
         this.emitter
-            .on('add-graph', (graph) => {
+            .on(events.ADD_GRAPH, (graph) => {
                 this.graphManager.add(graph)
             })
-            .on('refresh-screen', () => {
+            .on(events.REFRESH_SCREEN, () => {
                 this.display.refresh(this.graphManager.graphs)
             })
-            .on('end-edit', () => {
+            .on(events.END_EDIT, () => {
                 this.editor.end()
             })
     }
@@ -117,7 +118,7 @@ export class Stage {
                     if (evt.target.id === 'deleteGraphButton') {
                         this.graphManager.remove(this.getEditingGraph())
                         this.editor.delete()
-                        this.emitter.emit('refresh-screen')
+                        this.emitter.emit(events.REFRESH_SCREEN)
                         menu.removeEventListener('click', handleClick)
                         menu.remove()
                     }
@@ -138,7 +139,7 @@ export class Stage {
             .on(this.canvas, 'contextmenu', handleContextMenu)
     }
     addGraph(graph) {
-        this.emitter.emit('add-graph', graph)
+        this.emitter.emit(events.ADD_GRAPH, graph)
         return this
     }
     setMode(mode) {

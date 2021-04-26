@@ -1,3 +1,5 @@
+import * as events from './events.js'
+
 export const modes = {
     adder: Symbol('ADD_MODE'),
     editor: Symbol('EDIT_MODE'),
@@ -12,7 +14,7 @@ export class Switcher {
         return {
             adder: () => {
                 this.mode = modes.adder
-                this.stage.emitter.emit('end-edit')
+                this.stage.emitter.emit(events.END_EDIT)
             },
             editor: () => (this.mode = modes.editor),
         }
