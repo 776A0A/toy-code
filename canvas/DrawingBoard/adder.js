@@ -34,7 +34,7 @@ export class Adder {
     updateRect({ x, y }) {
         const rect = this.currentUpdatingShape
         if (!rect) return
-        rect.set({
+        rect.attrs({
             width: x - rect.x,
             height: y - rect.y,
         })
@@ -78,7 +78,7 @@ export class Adder {
             point.isPreviewPoint = true
             polygon.addPoint(point)
         }
-        point.set({ x, y })
+        point.attrs({ x, y })
         this.stage.emitter.emit('update-screen')
     }
     commitPolygon({ x, y }) {

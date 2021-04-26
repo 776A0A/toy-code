@@ -8,10 +8,18 @@ import { Switcher, modes } from './switcher.js'
 // TODO scheduler
 // TODO import功能
 // TODO 适配问题
+// TODO resize问题
 // TODO 撤销和重做
 // TODO 旋转
+
+const canvasDefaultConfig = {
+    backgroundColor: '#fff',
+    strokeColor: '#1890ff',
+    fillColor: '#a0c5e8',
+}
 export class Stage {
-    constructor(canvas) {
+    constructor(canvas, config = {}) {
+        config = Object.assign(canvasDefaultConfig, config)
         this.canvas = canvas
         this.emitter = new EventEmitter()
         this.switcher = new Switcher(this)
@@ -26,7 +34,6 @@ export class Stage {
         this.addListener()
     }
     addListener() {
-        TODO
         this.emitter
             .listen('add-shape', (shape) => {
                 this.shapeBox.add(shape)
@@ -172,9 +179,9 @@ export class Stage {
 
         function shake(graphs) {
             return graphs.map((graph) => {
-                const { ctx, ...props } = graph.props
+                const { ctx, ...attrs } = graph.attrs
                 const { name, children, withParentDiff } = graph
-                const obj = { props, name, children, withParentDiff }
+                const obj = { attrs, name, children, withParentDiff }
                 if (children.length) {
                     obj.children = shake(obj.children)
                 }

@@ -5,10 +5,10 @@ export const DEFAULT_FILL_COLOR = '#a0c5e8'
 
 // TODO 使用proxy重构，监听x，y的变化
 class Graph {
-    constructor(props = {}) {
+    constructor(attrs = {}) {
         this.emitter = new EventEmitter()
         this.name = 'graph'
-        this.props = props
+        this.attrs = attrs
         this.children = []
         this.parent = null
         this.withParentDiff = { x: 0, y: 0 }
@@ -28,7 +28,7 @@ class Graph {
         this.parent.emitter.listen(type, cb)
         this.parentListeners.push([type, cb])
     }
-    set(attrs = {}) {
+    attrs(attrs = {}) {
         Object.entries(attrs).forEach(([k, v]) => (this[k] = v))
         // TODO 需不需要做事件派发？通知属性改变
         return this
@@ -78,7 +78,7 @@ class Graph {
     }
     drawPath() {}
     clone() {
-        return new this.constructor(this.props)
+        return new this.constructor(this.attrs)
     }
     /**
      * 每一个图形的位移都是相对于整个画布的，通过记录最初和初始点的位移（该位移是不变的，除非拖拽了点），
@@ -98,16 +98,16 @@ class Graph {
         ]
     }
     fillIfNeeded() {
-        const { ctx, fillColor } = this.props
+        const { ctx, fillColor } = this.attrs
         if (!fillColor) return
         ctx.fillStyle = fillColor
         ctx.fill()
     }
 }
 export class Rect extends Graph {
-    constructor(props) {
-        super(props)
-        // TODO 将this.xx改为this.props.xx
+    constructor(attrs) {
+        super(attrs)
+        // TODO 将this.xx改为this.attrs.xx
         const {
             ctx,
             x,
@@ -116,7 +116,7 @@ export class Rect extends Graph {
             height,
             lineWidth = 1,
             color = DEFAULT_COLOR,
-        } = props
+        } = attrs
         this.name = 'rect'
         this.ctx = ctx
         this.x = x
@@ -146,9 +146,9 @@ export class Rect extends Graph {
     }
 }
 export class Circle extends Graph {
-    constructor(props) {
-        super(props)
-        const { ctx, x, y, r = 5, color = DEFAULT_COLOR } = props
+    constructor(attrs) {
+        super(attrs)
+        const { ctx, x, y, r = 5, color = DEFAULT_COLOR } = attrs
         this.name = 'circle'
         this.ctx = ctx
         this.x = x
@@ -175,9 +175,9 @@ export class Circle extends Graph {
     }
 }
 export class Text extends Graph {
-    constructor(props) {
-        super(props)
-        const { ctx, text, x, y, font = '20px sarif', color = '#000' } = props
+    constructor(attrs) {
+        super(attrs)
+        const { ctx, text, x, y, font = '20px sarif', color = '#000' } = attrs
         this.name = 'text'
         this.ctx = ctx
         this.text = text
@@ -201,9 +201,9 @@ export class Text extends Graph {
     }
 }
 export class Point extends Graph {
-    constructor(props) {
-        super(props)
-        const { ctx, x, y } = props
+    constructor(attrs) {
+        super(attrs)
+        const { ctx, x, y } = attrs
         this.name = 'point'
         this.ctx = ctx
         this.x = x
@@ -223,9 +223,9 @@ export class Point extends Graph {
     }
 }
 export class Polygon extends Graph {
-    constructor(props) {
-        super(props)
-        const { ctx, points = [], color = DEFAULT_COLOR } = props
+    constructor(attrs) {
+        super(attrs)
+        const { ctx, points = [], color = DEFAULT_COLOR } = attrs
         this.name = 'polygon'
         this.ctx = ctx
         this.points = points

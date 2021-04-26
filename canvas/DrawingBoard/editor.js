@@ -64,7 +64,7 @@ export class Editor {
                         this.controlPoint.controller.length
                 ]
                 const [x, y] = diagonalPoint.getTranslate()
-                graph.set({ x, y }).updateChildrenDiff()
+                graph.attrs({ x, y }).updateChildrenDiff()
             }
             this.switchTo.resize()
         } else {
@@ -138,15 +138,15 @@ export class Editor {
         if (!this.isResizing) return
         const graph = graphs[this.topGraphIndex]
         if (graph.name === 'rect') {
-            graph.set({ width: x - graph.x, height: y - graph.y })
+            graph.attrs({ width: x - graph.x, height: y - graph.y })
             this.controlPoint.updatePoints()
         } else if (graph.name === 'polygon') {
             // TODO 只要更新了自身的坐标，就要运行updatePointsDiff和updateChildrenDiff
             if (this.controlPoint.pickedControlPointIndex === 0) {
-                graph.set({ x, y }).updatePointsDiff().updateChildrenDiff()
+                graph.attrs({ x, y }).updatePointsDiff().updateChildrenDiff()
             } else {
                 graph.points[this.controlPoint.pickedControlPointIndex]
-                    ?.set({ x, y })
+                    ?.attrs({ x, y })
                     .updateParentAndDiff()
             }
             this.controlPoint.updatePoints({ x, y })
@@ -168,14 +168,14 @@ export class Editor {
         }
 
         if (graph.name === 'rect') {
-            graph.set({
+            graph.attrs({
                 x: graph.x + diff.x,
                 y: graph.y + diff.y,
             })
         } else if (graph.name === 'polygon') {
             // TODO 建立point的x，y和polygon的x，y之间的关系，使得不用更新每一个point的属性，也就是说point的坐标可以通过计算得出
             graph.points.forEach((point) => {
-                point.set({
+                point.attrs({
                     x: point.x + diff.x,
                     y: point.y + diff.y,
                 })
@@ -221,7 +221,7 @@ class ControlPoint {
         if (position) {
             const pickedPoint = this.controller[this.pickedControlPointIndex]
             if (!pickedPoint) return
-            pickedPoint.set(position).updateParentAndDiff()
+            pickedPoint.attrs(position).updateParentAndDiff()
         } else {
             this.clearPoints()
             this.addPoints()

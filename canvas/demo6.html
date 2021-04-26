@@ -90,7 +90,7 @@
                 graph.appendChild(text)
                 text.listenParent('size-changed', () => {
                     const [x, y] = stage.getGraphCenter(text.parent)
-                    text.set({ x, y }).updateParentAndDiff()
+                    text.attrs({ x, y }).updateParentAndDiff()
                 })
                 stage.emitter.emit('update-screen')
             }
