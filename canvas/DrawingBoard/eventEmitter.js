@@ -1,33 +1,45 @@
 export class EventEmitter {
     constructor() {
-        this.listeners = {}
+        this.handlers = {}
     }
-    listen(elem, type, cb) {
+    on(elem, type, handler) {
         if (elem instanceof Element) {
-            elem.addEventListener(type, cb)
+            elem.addEventListener(type, handler)
         } else {
-            cb = type
+            handler = type
             type = elem
-            const listeners =
-                this.listeners[type] ?? (this.listeners[type] = new Set())
-            listeners.add(cb)
+
+            const handlers =
+                this.handlers[type] ?? (this.handlers[type] = new Set())
+
+            handlers.add(handler)
         }
+
+        return this
+    }
+    off(elem, type, handler) {
+        if (elem instanceof Element) {
+            elem.removeEventListener(type, handler)
+        } else {
+            handler = type
+            type = elem
+
+            const handlers = this.handlers[type]
+
+            if (!handlers || handlers.size === 0) return this
+
+            if (handler) handlers.delete(handler)
+            else this.handlers[type] = new Set() // 没有传入具体的cb，则直接清除所有该类型的监听器
+        }
+
         return this
     }
     emit(type, ...args) {
-        const listeners = this.listeners[type]
-        if (listeners) {
-            ;[...listeners].forEach((cb) => cb(...args))
-        }
-        return this
-    }
-    // TODO 添加对元素dom的事件移除
-    remove(type, cb) {
-        const listeners = this.listeners[type]
-        if (!listeners || listeners.length === 0) return this
+        const handlers = this.handlers[type]
 
-        if (cb) listeners.delete(cb)
-        else this.listeners[type] = new Set() // 没有传入具体的cb，则直接清除所有该类型的监听器
+        if (handlers && handlers.size) {
+            ;[...handlers].forEach((handler) => handler(...args))
+        }
 
         return this
     }
