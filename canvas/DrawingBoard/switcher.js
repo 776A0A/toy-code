@@ -14,7 +14,7 @@ export class Switcher {
         return {
             adder: () => {
                 this.mode = modes.adder
-                this.stage.emitter.emit(events.END_EDIT)
+                this.stage.emit(events.END_EDIT)
             },
             editor: () => (this.mode = modes.editor),
         }

@@ -20,11 +20,12 @@ const canvasDefaultConfig = {
     strokeColor: '#1890ff',
     fillColor: '#a0c5e8',
 }
-export class Stage {
+
+export class Stage extends EventEmitter {
     constructor(canvas, config = {}) {
+        super()
         config = Object.assign(canvasDefaultConfig, config)
         this.canvas = canvas
-        this.emitter = new EventEmitter()
         this.scheduler = new Scheduler()
         this.switcher = new Switcher(this)
         this.display = new Display(canvas)
@@ -38,10 +39,9 @@ export class Stage {
         this.addListener()
     }
     addListener() {
-        this.emitter
-            .on(events.ADD_GRAPH, (graph) => {
-                this.graphManager.add(graph)
-            })
+        this.on(events.ADD_GRAPH, (graph) => {
+            this.graphManager.add(graph)
+        })
             .on(events.REFRESH_SCREEN, () => {
                 this.display.refresh(this.graphManager.graphs)
             })
@@ -63,7 +63,7 @@ export class Stage {
         const handleMouseMove = (evt) => {
             const position = { x: evt.offsetX, y: evt.offsetY }
             if (this.switcher.mode === modes.adder) {
-                this.adder.refresh(position)
+                this.adder.update(position)
             } else if (this.switcher.mode === modes.editor) {
                 this.editor.edit(position, this.graphManager.graphs)
             }
@@ -117,7 +117,7 @@ export class Stage {
                     if (evt.target.id === 'deleteGraphButton') {
                         this.graphManager.remove(this.getEditingGraph())
                         this.editor.delete()
-                        this.emitter.emit(events.REFRESH_SCREEN)
+                        this.emit(events.REFRESH_SCREEN)
                         menu.removeEventListener('click', handleClick)
                         menu.remove()
                     }
@@ -129,8 +129,7 @@ export class Stage {
             }
         }
 
-        this.emitter
-            .on(this.canvas, 'mousedown', handleMouseDown)
+        this.on(this.canvas, 'mousedown', handleMouseDown)
             .on(this.canvas, 'mousemove', handleMouseMove)
             .on(this.canvas, 'mouseup', handleMouseUp)
             .on(this.canvas, 'mouseleave', handleMouseLeave)
@@ -138,7 +137,7 @@ export class Stage {
             .on(this.canvas, 'contextmenu', handleContextMenu)
     }
     addGraph(graph) {
-        this.emitter.emit(events.ADD_GRAPH, graph)
+        this.emit(events.ADD_GRAPH, graph)
         return this
     }
     setMode(mode) {

@@ -92,7 +92,7 @@
                     const [x, y] = stage.getGraphCenter(text.parent)
                     text.attr({ x, y }).updateParentAndDiff()
                 })
-                stage.emitter.emit(events.REFRESH_SCREEN)
+                stage.emit(events.REFRESH_SCREEN)
             }
             exportGraphsButton.onclick = () => {
                 console.log(stage.export())

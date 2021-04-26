@@ -5,9 +5,9 @@ export const DEFAULT_COLOR = '#1890ff'
 export const DEFAULT_FILL_COLOR = '#a0c5e8'
 
 // TODO 使用proxy重构，监听x，y的变化
-class Graph {
+class Graph extends EventEmitter {
     constructor(attrs = {}) {
-        this.emitter = new EventEmitter()
+        super()
         this.name = 'graph'
         this.attrs = attrs
         this.children = []
@@ -18,15 +18,15 @@ class Graph {
         this.init()
     }
     init() {
-        this.emitter.on(events.REMOVED_FROM_PARENT, () => {
+        this.on(events.REMOVED_FROM_PARENT, () => {
             this.parentListeners.forEach(([type, cb]) => {
-                this.parent.emitter.off(type, cb)
+                this.parent.off(type, cb)
             })
         })
     }
     listenParent(type, cb) {
         if (!this.parent) return
-        this.parent.emitter.on(type, cb)
+        this.parent.on(type, cb)
         this.parentListeners.push([type, cb])
     }
     attr(attrs = {}) {
@@ -58,7 +58,7 @@ class Graph {
         this.children = this.children.filter((g) => {
             const includes = graphs.includes(g)
             if (includes) {
-                g.emitter.emit(events.REMOVED_FROM_PARENT)
+                g.emit(events.REMOVED_FROM_PARENT)
                 return false
             } else return true
         })

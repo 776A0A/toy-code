@@ -1,4 +1,4 @@
-import { Point, Polygon, Rect, DEFAULT_FILL_COLOR } from './Graph.js'
+import { Point, DEFAULT_FILL_COLOR } from './Graph.js'
 import * as events from './events.js'
 import { DrawerGenerator } from './Drawer.js'
 
@@ -7,7 +7,7 @@ export class Adder {
         this.stage = stage
         this.canvas = stage.canvas
         this.graphMode = 'rect'
-        this.currentDrawer = null
+        this.drawer = null
         this.isDrawing = false
     }
     get switchTo() {
@@ -21,7 +21,7 @@ export class Adder {
     }
     add(offset) {
         if (this.graphMode === 'rect') {
-            this.currentDrawer = DrawerGenerator.rect.generate({
+            this.drawer = DrawerGenerator.rect.generate({
                 ctx: this.ctx,
                 x: offset.x,
                 y: offset.y,
@@ -33,10 +33,10 @@ export class Adder {
                 x: offset.x,
                 y: offset.y,
             })
-            if (this.currentDrawer) {
-                this.currentDrawer.addPoint(point)
+            if (this.drawer) {
+                this.drawer.addPoint(point)
             } else {
-                this.currentDrawer = DrawerGenerator.polygon.generate({
+                this.drawer = DrawerGenerator.polygon.generate({
                     ctx: this.ctx,
                     points: [point],
                     fillColor: DEFAULT_FILL_COLOR,
@@ -47,25 +47,25 @@ export class Adder {
         }
 
         this.isDrawing = true
-        this.stage.emitter.emit(events.ADD_GRAPH, this.currentDrawer.graph)
+        this.stage.emit(events.ADD_GRAPH, this.drawer.graph)
     }
-    refresh(position) {
-        if (!this.isDrawing || !this.currentDrawer) return
+    update(position) {
+        if (!this.isDrawing || !this.drawer) return
 
-        this.currentDrawer.update(position)
+        this.drawer.update(position)
 
-        this.stage.emitter.emit(events.REFRESH_SCREEN)
+        this.stage.emit(events.REFRESH_SCREEN)
     }
     commit(type) {
         if (this.graphMode === 'polygon') {
             if (type !== 'dblclick') return
-            this.currentDrawer?.commit()
+            this.drawer?.commit()
             this.isDrawing = false
-            this.currentDrawer = null
+            this.drawer = null
             return
         }
-        this.currentDrawer?.commit()
+        this.drawer?.commit()
         this.isDrawing = false
-        this.currentDrawer = null
+        this.drawer = null
     }
 }
