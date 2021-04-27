@@ -56,6 +56,7 @@
                 Adder,
                 editor,
                 graphModes,
+                getGraphCenter,
             } from './DrawingBoard/index.js'
             const size = 500
             const canvas = document.getElementById('canvas')
@@ -96,7 +97,7 @@
                 const graph = stage.graphManager.graphs[editor.topGraphIndex]
                 if (graph.text) graph.removeChild(graph.text)
 
-                const [x, y] = stage.getGraphCenter(graph)
+                const [x, y] = getGraphCenter(graph)
                 graph.text = new Text({
                     ctx: graph.ctx,
                     text: boxName.value,
@@ -105,7 +106,7 @@
                 })
                 graph.appendChild(graph.text)
                 graph.text.listenParent(events.SIZE_CHANGED, () => {
-                    const [x, y] = stage.getGraphCenter(graph)
+                    const [x, y] = getGraphCenter(graph)
                     graph.text.attr({ x, y }).updateParentAndDiff()
                 })
                 stage.emit(events.REFRESH_SCREEN)

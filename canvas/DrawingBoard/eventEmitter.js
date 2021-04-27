@@ -1,6 +1,6 @@
 export class EventEmitter {
     constructor() {
-        this.handlers = {}
+        this._handlers = {}
     }
     on(elem, type, handler) {
         if (elem instanceof Element) {
@@ -10,7 +10,7 @@ export class EventEmitter {
             type = elem
 
             const handlers =
-                this.handlers[type] ?? (this.handlers[type] = new Set())
+                this._handlers[type] ?? (this._handlers[type] = new Set())
 
             handlers.add(handler)
         }
@@ -24,18 +24,18 @@ export class EventEmitter {
             handler = type
             type = elem
 
-            const handlers = this.handlers[type]
+            const handlers = this._handlers[type]
 
             if (!handlers || handlers.size === 0) return this
 
             if (handler) handlers.delete(handler)
-            else this.handlers[type] = new Set() // 没有传入具体的cb，则直接清除所有该类型的监听器
+            else this._handlers[type] = new Set() // 没有传入具体的cb，则直接清除所有该类型的监听器
         }
 
         return this
     }
     emit(type, ...args) {
-        const handlers = this.handlers[type]
+        const handlers = this._handlers[type]
 
         if (handlers && handlers.size) {
             ;[...handlers].forEach((handler) => handler(...args))

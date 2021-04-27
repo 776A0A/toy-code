@@ -25,3 +25,15 @@ function calcArea(p0, p1, p2) {
         2
     )
 }
+
+export const getGraphCenter = (graph) => {
+    if (graph.name === 'rect') {
+        const { x, y, width, height } = graph
+        return [x + width / 2, y + height / 2]
+    } else if (graph.name === 'polygon') {
+        const center = utils.calculateCenter(
+            graph.points.map(({ x, y }) => [x, y])
+        )
+        return center
+    }
+}

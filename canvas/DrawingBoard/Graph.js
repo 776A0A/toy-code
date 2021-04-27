@@ -2,7 +2,7 @@ import { EventEmitter } from './EventEmitter.js'
 import * as events from './events.js'
 
 export const DEFAULT_COLOR = '#1890ff'
-export const DEFAULT_FILL_COLOR = '#a0c5e8'
+export const DEFAULT_FILL_COLOR = '#a0c5e84f'
 
 // TODO 使用proxy重构，监听x，y的变化
 class Graph extends EventEmitter {

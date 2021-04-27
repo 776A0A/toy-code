@@ -74,7 +74,7 @@ export class Adder extends Plugin {
             .on('dblclick', ({ type }) => check() && this.commit(type))
 
         function check() {
-            return stage.switcher.mode === 'adder'
+            return stage.mode === 'adder'
         }
     }
 }

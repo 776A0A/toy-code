@@ -1,15 +1,10 @@
-import { Adder } from './Adder.js'
 import { Display } from './Display.js'
-import { Editor } from './Editor.js'
 import { EventEmitter } from './EventEmitter.js'
 import { GraphManager } from './GraphManager.js'
-import { Switcher, modes } from './Switcher.js'
-import { Scheduler } from './Scheduler.js'
 import * as events from './events.js'
 import * as utils from './utils.js'
 
 // TODO 选择，框选
-// TODO scheduler
 // TODO cursor
 // TODO import功能
 // TODO 适配问题
@@ -25,20 +20,25 @@ const canvasDefaultConfig = {
 
 const LEFT_MOUSE_DOWN = 0
 
+export const stageModes = {
+    adder: 'adder',
+    editor: 'editor',
+}
+
 export class Stage extends EventEmitter {
+    mode = stageModes.adder
+    plugins = new Set()
     constructor(canvas, config = {}) {
         super()
         config = Object.assign(canvasDefaultConfig, config)
+
         this.canvas = canvas
-        this.scheduler = new Scheduler()
-        this.switcher = new Switcher(this)
         this.display = new Display(canvas)
         this.graphManager = new GraphManager(this)
-        this.plugins = new Set()
+
         this.init()
     }
     init() {
-        this.addNativeListener()
         this.addListener()
     }
     use(plugin) {
@@ -47,84 +47,72 @@ export class Stage extends EventEmitter {
         plugin.install(this)
         return this
     }
-    addListener() {
-        this.on(events.ADD_GRAPH, (graph) => {
-            this.graphManager.add(graph)
-        })
-            .on(events.REFRESH_SCREEN, () => {
-                this.display.refresh(this.graphManager.graphs)
-            })
-            .on(events.DELETE_GRAPH, (graph) => {
-                this.graphManager.delete(graph)
-            })
+    get handlers() {
+        return {
+            handleMouseDown: (evt) => {
+                if (evt.button !== LEFT_MOUSE_DOWN) return
+
+                const params = generateParams.call(this, evt, {
+                    x: evt.offsetX,
+                    y: evt.offsetY,
+                })
+
+                this.emit('mousedown', params)
+            },
+            handleMouseMove: (evt) => {
+                const params = generateParams.call(this, evt, {
+                    x: evt.offsetX,
+                    y: evt.offsetY,
+                })
+
+                this.emit('mousemove', params)
+            },
+            handleMouseUp: (evt) => {
+                const params = generateParams.call(this, evt)
+                this.emit('mouseup', params)
+            },
+            handleMouseLeave: (evt) => {
+                const params = generateParams.call(this, evt)
+                this.emit('mouseleave', params)
+            },
+            handleDblClick: (evt) => {
+                const params = generateParams.call(this, evt)
+                this.emit('dblclick', params)
+            },
+            handleContextMenu: (evt) => {
+                const params = generateParams.call(this, evt, {
+                    x: evt.clientX,
+                    y: evt.clientY,
+                })
+                this.emit('contextmenu', params)
+            },
+        }
     }
-    addNativeListener() {
-        const handleMouseDown = (evt) => {
-            if (evt.button !== LEFT_MOUSE_DOWN) return
-
-            const params = generateParams.call(this, evt, {
-                x: evt.offsetX,
-                y: evt.offsetY,
-            })
-
-            this.emit('mousedown', params)
-        }
-        const handleMouseMove = (evt) => {
-            const params = generateParams.call(this, evt, {
-                x: evt.offsetX,
-                y: evt.offsetY,
-            })
-
-            this.emit('mousemove', params)
-        }
-
-        const handleMouseUp = (evt) => {
-            const params = generateParams.call(this, evt)
-            this.emit('mouseup', params)
-        }
-        const handleMouseLeave = (evt) => {
-            const params = generateParams.call(this, evt)
-            this.emit('mouseleave', params)
-        }
-
-        const handleDblClick = (evt) => {
-            const params = generateParams.call(this, evt)
-            this.emit('dblclick', params)
-        }
-
-        const handleContextMenu = (evt) => {
-            const params = generateParams.call(this, evt, {
-                x: evt.clientX,
-                y: evt.clientY,
-            })
-            this.emit('contextmenu', params)
-        }
-
-        this.on(this.canvas, 'mousedown', handleMouseDown)
-            .on(this.canvas, 'mousemove', handleMouseMove)
-            .on(this.canvas, 'mouseup', handleMouseUp)
-            .on(this.canvas, 'mouseleave', handleMouseLeave)
-            .on(this.canvas, 'dblclick', handleDblClick)
-            .on(this.canvas, 'contextmenu', handleContextMenu)
+    addListener() {
+        this.on(this.canvas, 'mousedown', this.handlers.handleMouseDown)
+            .on(this.canvas, 'mousemove', this.handlers.handleMouseMove)
+            .on(this.canvas, 'mouseup', this.handlers.handleMouseUp)
+            .on(this.canvas, 'mouseleave', this.handlers.handleMouseLeave)
+            .on(this.canvas, 'dblclick', this.handlers.handleDblClick)
+            .on(this.canvas, 'contextmenu', this.handlers.handleContextMenu)
+            .on(events.ADD_GRAPH, (graph) => this.graphManager.add(graph))
+            .on(events.DELETE_GRAPH, (graph) => this.graphManager.delete(graph))
+            .on(events.REFRESH_SCREEN, () =>
+                this.display.refresh(this.graphManager.graphs)
+            )
     }
     addGraph(graph) {
         this.emit(events.ADD_GRAPH, graph)
         return this
     }
     setMode(mode) {
-        this.switcher.switchTo[mode]()
-        return this
-    }
-    getGraphCenter(graph) {
-        if (graph.name === 'rect') {
-            const { x, y, width, height } = graph
-            return [x + width / 2, y + height / 2]
-        } else if (graph.name === 'polygon') {
-            const center = utils.calculateCenter(
-                graph.points.map(({ x, y }) => [x, y])
-            )
-            return center
+        this.mode = mode
+
+        if (mode === stageModes.adder) {
+            this.emit(events.END_EDIT)
         }
+
+        return this
     }
     import(graphs) {}
     export() {

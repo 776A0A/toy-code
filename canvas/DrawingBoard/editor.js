@@ -166,7 +166,7 @@ export class Editor extends Plugin {
             .on(events.END_EDIT, () => this.end())
 
         function check() {
-            return stage.switcher.mode === 'editor'
+            return stage.mode === 'editor'
         }
     }
 }
