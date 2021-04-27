@@ -91,21 +91,26 @@
                 stage.setMode('editor')
                 switchActiveButton(evt)
             }
-            let text
+
             addText.onclick = (evt) => {
                 const graph = stage.graphManager.graphs[editor.topGraphIndex]
-                if (text) {
-                    graph.removeChild(text)
-                }
+                if (graph.text) graph.removeChild(graph.text)
+
                 const [x, y] = stage.getGraphCenter(graph)
-                text = new Text({ ctx: graph.ctx, text: boxName.value, x, y })
-                graph.appendChild(text)
-                text.listenParent(events.SIZE_CHANGED, () => {
-                    const [x, y] = stage.getGraphCenter(text.parent)
-                    text.attr({ x, y }).updateParentAndDiff()
+                graph.text = new Text({
+                    ctx: graph.ctx,
+                    text: boxName.value,
+                    x,
+                    y,
+                })
+                graph.appendChild(graph.text)
+                graph.text.listenParent(events.SIZE_CHANGED, () => {
+                    const [x, y] = stage.getGraphCenter(graph)
+                    graph.text.attr({ x, y }).updateParentAndDiff()
                 })
                 stage.emit(events.REFRESH_SCREEN)
             }
+
             exportGraphsButton.onclick = () => {
                 console.log(stage.export())
             }
