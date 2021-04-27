@@ -1,0 +1,6 @@
+export const REFRESH_SCREEN = Symbol('refresh-screen')
+export const ADD_GRAPH = Symbol('add-graph')
+export const END_EDIT = Symbol('end-edit')
+export const SIZE_CHANGED = Symbol('size-changed')
+export const REMOVED_FROM_PARENT = Symbol('removed-from-parent')
+export const DELETE_GRAPH = Symbol('delete-graph')

@@ -1,101 +1,96 @@
-import { Point, Polygon, Rect, DEFAULT_FILL_COLOR } from './shapes.js'
+import { Point } from './Graph.js'
+import * as events from './events.js'
+import { RectDrawer, PolygonDrawer } from './Drawer.js'
+import { Plugin } from './Plugin.js'
 
-export class Adder {
-    constructor(stage) {
-        this.stage = stage
-        this.canvas = stage.canvas
-        this.shapeMode = 'rect'
-        this.currentUpdatingShape = null
-        this.isDrawing = false
+export const adderModes = {
+    rect: Symbol('rect'),
+    polygon: Symbol('polygon'),
+}
+export class Adder extends Plugin {
+    stage = null
+    mode = adderModes.rect
+    drawers = new Map()
+    drawer = null
+    isDrawing = false
+    plugins = new Set()
+    use(plugin) {
+        if (this.plugins.has(plugin)) return
+        this.plugins.add(plugin)
+        plugin.install(this)
+        return this
     }
-    get switchTo() {
-        return {
-            rect: () => (this.shapeMode = 'rect'),
-            polygon: () => (this.shapeMode = 'polygon'),
-        }
+    injectDrawer(name, drawer) {
+        if (this.drawers.has(drawer)) return
+        this.drawers.set(name, drawer)
     }
-    get ctx() {
-        return this.canvas.getContext('2d')
+    setMode(mode) {
+        this.mode = mode
     }
-    add(position) {
-        if (this.shapeMode === 'rect') this.addRect(position)
-        else if (this.shapeMode === 'polygon') this.addPolygon(position)
-        else {
-            throw Error(`没有这个图形：${this.shapeMode}`)
+    add({ x, y }) {
+        const ctx = this.stage.canvas.getContext('2d')
+        const baseAttrs = { ctx, x, y }
+
+        if (this.mode === adderModes.rect) {
+            this.drawer = this.drawers.get('rect').generate({
+                ...baseAttrs,
+                fillColor: true,
+            })
+        } else if (this.mode === adderModes.polygon) {
+            const point = new Point({ ...baseAttrs })
+            if (this.drawer) {
+                this.drawer.addPoint(point)
+            } else {
+                this.drawer = this.drawers.get('polygon').generate({
+                    ctx,
+                    points: [point],
+                    fillColor: true,
+                })
+            }
+        } else {
+            throw Error(`没有这个图形：${this.mode}`)
         }
 
         this.isDrawing = true
+        this.stage.emit(events.ADD_GRAPH, this.drawer.graph)
     }
     update(position) {
-        if (!this.isDrawing) return
-        if (this.shapeMode === 'rect') this.updateRect(position)
-        else if (this.shapeMode === 'polygon') this.updatePolygon(position)
-    }
-    updateRect({ x, y }) {
-        const rect = this.currentUpdatingShape
-        if (!rect) return
-        rect.set({
-            width: x - rect.x,
-            height: y - rect.y,
-        })
-        this.stage.emitter.emit('update-screen')
-    }
-    addRect({ x, y }) {
-        this.currentUpdatingShape = new Rect({
-            ctx: this.ctx,
-            x,
-            y,
-            width: 0,
-            height: 0,
-            fillColor: DEFAULT_FILL_COLOR,
-        })
-        this.stage.emitter.emit('add-shape', this.currentUpdatingShape)
-    }
-    addPolygon({ x, y }) {
-        const point = new Point({ ctx: this.ctx, x, y })
+        if (!this.isDrawing || !this.drawer) return
 
-        if (this.currentUpdatingShape) {
-            this.currentUpdatingShape.addPoint(point)
-        } else {
-            this.currentUpdatingShape = new Polygon({
-                ctx: this.ctx,
-                points: [point],
-                fillColor: DEFAULT_FILL_COLOR,
-            })
-        }
+        this.drawer.update(position)
 
-        this.stage.emitter.emit('add-shape', this.currentUpdatingShape)
+        this.stage.emit(events.REFRESH_SCREEN)
     }
-    updatePolygon({ x, y }) {
-        const polygon = this.currentUpdatingShape
-        if (!polygon) return
-        const points = polygon.points
-        let point
-        if (points[points.length - 1].isPreviewPoint) {
-            point = points[points.length - 1]
-        } else {
-            point = new Point({ ctx: this.ctx, x, y })
-            point.isPreviewPoint = true
-            polygon.addPoint(point)
+    commit(type) {
+        if (this.mode === adderModes.polygon) {
+            if (type !== 'dblclick') return
+            this.drawer?.commit()
+            this.isDrawing = false
+            this.drawer = null
+            return
         }
-        point.set({ x, y })
-        this.stage.emitter.emit('update-screen')
-    }
-    commitPolygon({ x, y }) {
-        const polygon = this.currentUpdatingShape
-        if (!polygon) return
-        polygon.points = polygon.points.filter((point) => !point.isPreviewPoint) // 删除所有预览点
-        polygon.popPoint() // 因为dblclick也会触发mousedown事件，所有实际在mousedown时已经添加了两个点
+        this.drawer?.commit()
         this.isDrawing = false
-        this.currentUpdatingShape = null
+        this.drawer = null
     }
-    stop(type, position) {
-        if (this.shapeMode === 'polygon') {
-            if (type === 'dblclick' && position) {
-                return this.commitPolygon(position)
-            } else return
+    install(stage) {
+        this.stage = stage
+
+        stage
+            .on('mousedown', ({ x, y }) => check() && this.add({ x, y }))
+            .on('mousemove', ({ x, y }) => check() && this.update({ x, y }))
+            .on('mouseup', () => check() && this.commit())
+            .on('mouseleave', () => check() && this.commit())
+            .on('dblclick', ({ type }) => check() && this.commit(type))
+
+        function check() {
+            return stage.mode === 'adder'
         }
-        this.isDrawing = false
-        this.currentUpdatingShape = null
     }
 }
+
+export const adder = new Adder()
+
+const rectDrawer = new RectDrawer()
+const polygonDrawer = new PolygonDrawer()
+adder.use(rectDrawer).use(polygonDrawer)

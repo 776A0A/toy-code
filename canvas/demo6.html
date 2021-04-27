@@ -49,7 +49,15 @@
             </div>
         </div>
         <script type="module">
-            import { Stage, Text } from './DrawingBoard/index.js'
+            import {
+                Stage,
+                Text,
+                events,
+                adder,
+                editor,
+                adderModes,
+                getGraphCenter,
+            } from './DrawingBoard/index.js'
             const size = 500
             const canvas = document.getElementById('canvas')
             canvas.width = canvas.height = bgCanvas.width = bgCanvas.height = size
@@ -67,33 +75,42 @@
 
             const stage = new Stage(canvas)
 
+            stage.use(adder).use(editor)
+
             drawRectButton.onclick = (evt) => {
-                stage.setMode('adder').setShape('rect')
+                stage.setMode('adder')
+                adder.setMode(adderModes.rect)
                 switchActiveButton(evt)
             }
             drawPointButton.onclick = (evt) => {
-                stage.setMode('adder').setShape('polygon')
+                stage.setMode('adder')
+                adder.setMode(adderModes.polygon)
                 switchActiveButton(evt)
             }
             editButton.onclick = (evt) => {
                 stage.setMode('editor')
                 switchActiveButton(evt)
             }
-            let text
+
             addText.onclick = (evt) => {
-                const graph = stage.getEditingGraph()
-                if (text) {
-                    graph.removeChild(text)
-                }
-                const [x, y] = stage.getGraphCenter(graph)
-                text = new Text({ ctx: graph.ctx, text: boxName.value, x, y })
-                graph.appendChild(text)
-                text.listenParent('size-changed', () => {
-                    const [x, y] = stage.getGraphCenter(text.parent)
-                    text.set({ x, y }).updateParentAndDiff()
+                const graph = stage.graphManager.graphs[editor.topGraphIndex]
+                if (graph.text) graph.removeChild(graph.text)
+
+                const [x, y] = getGraphCenter(graph)
+                graph.text = new Text({
+                    ctx: graph.ctx,
+                    text: boxName.value,
+                    x,
+                    y,
                 })
-                stage.emitter.emit('update-screen')
+                graph.appendChild(graph.text)
+                graph.text.listenParent(events.SIZE_CHANGED, () => {
+                    const [x, y] = getGraphCenter(graph)
+                    graph.text.attr({ x, y }).updateParentAndDiff()
+                })
+                stage.emit(events.REFRESH_SCREEN)
             }
+
             exportGraphsButton.onclick = () => {
                 console.log(stage.export())
             }

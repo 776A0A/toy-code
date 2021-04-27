@@ -1,121 +1,128 @@
-import { Circle, DEFAULT_COLOR } from './shapes.js'
+import * as events from './events.js'
+import { Plugin } from './Plugin.js'
+import { PolygonTransformer, RectTransformer } from './Transformer.js'
 
-export class Editor {
-    constructor(stage) {
-        this.stage = stage
-        this.topGraphIndex = undefined
-        this.isEditing = false // 点选到了某一个图形即为true
-        this.editMode = 'wait'
-        this.dragPosition = { x: 0, y: 0 }
-        this.isDragging = false
-        this.isResizing = false
-        this.controlPoint = null
-        this.graphs = []
+export const editorModes = {
+    wait: Symbol('wait'), // 等在选择图形
+    resize: Symbol('resize'),
+    drag: Symbol('drag'),
+}
+
+export class Editor extends Plugin {
+    stage = null
+    topGraphIndex = undefined
+    isEditing = false // 点选到了某一个图形即为true
+    isDragging = false
+    isResizing = false
+    mode = editorModes.wait
+    transformers = new Map()
+    transformer = null
+    plugins = new Set()
+    constructor() {
+        super()
+        this.init()
     }
-    get switchTo() {
-        return {
-            wait: () => {
-                this.editMode = 'wait'
-            },
-            resize: () => {
-                this.editMode = 'resize'
-                this.isResizing = true
-            },
-            drag: () => {
-                this.editMode = 'drag'
-                this.isDragging = true
-            },
+    init() {
+        this.on('delete', (graph) => {
+            this.stage
+                .emit(events.DELETE_GRAPH, graph)
+                .emit(events.REFRESH_SCREEN)
+            this.delete()
+        })
+    }
+    use(plugin) {
+        if (this.plugins.has(plugin)) return
+        this.plugins.add(plugin)
+        plugin.install(this)
+        return this
+    }
+    injectTransformer(name, transformer) {
+        if (this.transformers.has(name)) return
+        this.transformers.set(name, transformer)
+    }
+    setMode(mode) {
+        this.mode = mode
+
+        if (mode === editorModes.resize) {
+            this.isResizing = true
+            this.transformer.start()
+        } else if (mode === editorModes.drag) {
+            this.isDragging = true
+        } else if (mode === editorModes.wait) {
+            this.isResizing = this.isDragging = false
         }
     }
-    get ctx() {
-        return this.stage.canvas.getContext('2d')
-    }
-    edit(position, graphs) {
-        this.graphs = graphs
+    edit({ x, y }) {
+        if (!this.isEditing || this.mode === editorModes.wait) return
 
-        if (!this.isEditing || this.editMode === 'wait') return
+        if (this.mode === editorModes.resize && this.isResizing) {
+            this.transformer.resize({ x, y })
+        } else if (this.mode === editorModes.drag && this.isDragging) {
+            this.transformer.drag({ x, y })
+        } else throw Error(`没有这个编辑模式：${this.mode}`)
 
-        if (this.editMode === 'resize') this.handleResize(position, graphs)
-        else if (this.editMode === 'drag') this.handleDrag(position, graphs)
-        else throw Error(`没有这个编辑模式：${this.editMode}`)
+        this.stage.emit(events.REFRESH_SCREEN)
     }
-    delete() {
-        const graph = this.graphs[this.topGraphIndex]
-        if (!graph) return
-        this.topGraphIndex = undefined
-        this.controlPoint = null
-        this.stop()
-    }
-    pick(position, graphs) {
-        this.graphs = graphs
+    pick({ x, y }) {
+        this.removeMenuIfHas()
+
+        const graphs = this.stage.graphManager.graphs
         if (!graphs.length) return
 
-        const pickedControlPointIndex = this.findPickControlPoint(position)
-        if (
-            this.isEditing &&
-            this.topGraphIndex !== undefined &&
-            pickedControlPointIndex !== -1
-        ) {
-            this.controlPoint.pickedControlPointIndex = pickedControlPointIndex
-            const graph = graphs[this.topGraphIndex]
-            if (graph.name === 'rect') {
-                const diagonalPoint = this.controlPoint.controller[
-                    (pickedControlPointIndex + 2) %
-                        this.controlPoint.controller.length
-                ]
-                const [x, y] = diagonalPoint.getTranslate()
-                graph.set({ x, y }).updateChildrenDiff()
-            }
-            this.switchTo.resize()
+        if (this.transformer && this.transformer.isPicked({ x, y }) !== -1) {
+            this.setMode(editorModes.resize)
         } else {
-            const top = this.findTop(position, graphs)
+            const top = this.findTop({ x, y })
 
             // 没有选中过，什么都不做
             if (top === undefined && this.topGraphIndex === undefined) return
 
+            this.transformer?.end()
+
             if (top !== undefined) {
-                if (top !== this.topGraphIndex) {
-                    this.controlPoint?.clearPoints()
-                    this.controlPoint = new ControlPoint(graphs[top])
-                }
+                const graph = graphs[top]
+                this.transformer = this.transformers
+                    .get(graph.name)
+                    .generate(graph, { x, y })
+
                 this.isEditing = true
                 this.topGraphIndex = top
-                this.recordDragPosition(position) // 记录拖拽鼠标位置
-                this.switchTo.drag()
+                this.setMode(editorModes.drag)
             } else {
                 this.isEditing = false
                 this.topGraphIndex = undefined
-                this.controlPoint?.clearPoints()
-                this.controlPoint = null
             }
 
-            this.stage.emitter.emit('update-screen')
+            this.stage.emit(events.REFRESH_SCREEN)
         }
     }
-    stop() {
-        this.switchTo.wait()
-        this.isDragging = this.isResizing = false
+    // 删除图形
+    delete() {
+        this.topGraphIndex = undefined
+        this.transformer = null
+        this.setMode(editorModes.wait)
     }
+    // 结束编辑，已经进入非编辑状态
     end() {
-        if (this.topGraphIndex !== undefined) {
-            this.graphs[this.topGraphIndex].removeChild(
-                ...this.controlPoint.controller
-            )
-            this.stage.emitter.emit('update-screen')
+        if (this.transformer) {
+            this.transformer.end()
+            this.stage.emit(events.REFRESH_SCREEN)
         }
+        this.removeMenuIfHas()
         this.isEditing = this.isDragging = this.isResizing = false
         this.topGraphIndex = undefined
-        this.dragPosition = { x: 0, y: 0 }
-        this.graphs = []
-        this.controlPoint = null
+        this.transformer = null
     }
-    findTop({ x, y }, graphs = []) {
-        let top
-        const { ctx } = this
+    findTop({ x, y }) {
+        const graphs = this.stage.graphManager.graphs
+        if (!graphs.length) return
 
-        ;[...graphs].forEach((shape, idx) => {
+        let top
+        const ctx = this.stage.canvas.getContext('2d')
+
+        ;[...graphs].forEach((graph, idx) => {
             ctx.save()
-            shape.drawPath()
+            graph.drawPath()
             ctx.restore()
             // TODO 因为文字的原因，还需要增加判断是否在stroke上，可以在editor中增加方法抹平判断
             if (ctx.isPointInPath(x, y)) top = idx
@@ -123,124 +130,41 @@ export class Editor {
 
         return top
     }
-    findPickControlPoint({ x, y }) {
-        if (!this.controlPoint) return -1
+    removeMenuIfHas() {
+        if (this.transformer?.menu) {
+            this.transformer.menu.remove()
+            this.transformer.menu = null
+        }
+    }
+    handleContextmenu({ x, y, nativeEvent }) {
+        nativeEvent.preventDefault()
 
-        return this.controlPoint.controller.findIndex((circle) => {
-            const translate = circle.getTranslate()
-            return (
-                getDistance({ x: translate[0], y: translate[1] }, { x, y }) <=
-                circle.r
+        if (this.topGraphIndex === undefined) return
+
+        this.transformer.handleContextmenu({ x, y, nativeEvent })
+    }
+    install(stage) {
+        this.stage = stage
+
+        stage
+            .on('mousedown', (event) => check() && this.pick(event))
+            .on('mousemove', (event) => check() && this.edit(event))
+            .on('mouseup', () => check() && this.setMode(editorModes.wait))
+            .on('mouseleave', () => check() && this.setMode(editorModes.wait))
+            .on(
+                'contextmenu',
+                (event) => check() && this.handleContextmenu(event)
             )
-        })
-    }
-    handleResize({ x, y }, graphs) {
-        if (!this.isResizing) return
-        const graph = graphs[this.topGraphIndex]
-        if (graph.name === 'rect') {
-            graph.set({ width: x - graph.x, height: y - graph.y })
-            this.controlPoint.updatePoints()
-        } else if (graph.name === 'polygon') {
-            // TODO 只要更新了自身的坐标，就要运行updatePointsDiff和updateChildrenDiff
-            if (this.controlPoint.pickedControlPointIndex === 0) {
-                graph.set({ x, y }).updatePointsDiff().updateChildrenDiff()
-            } else {
-                graph.points[this.controlPoint.pickedControlPointIndex]
-                    ?.set({ x, y })
-                    .updateParentAndDiff()
-            }
-            this.controlPoint.updatePoints({ x, y })
+            .on(events.END_EDIT, () => this.end())
+
+        function check() {
+            return stage.mode === 'editor'
         }
-        graph.emitter.emit('size-changed')
-        this.stage.emitter.emit('update-screen')
-    }
-    recordDragPosition({ x, y }) {
-        this.dragPosition = { x, y }
-    }
-    handleDrag({ x, y }, graphs) {
-        if (!this.isDragging) return
-
-        const graph = graphs[this.topGraphIndex]
-
-        const diff = {
-            x: x - this.dragPosition.x,
-            y: y - this.dragPosition.y,
-        }
-
-        if (graph.name === 'rect') {
-            graph.set({
-                x: graph.x + diff.x,
-                y: graph.y + diff.y,
-            })
-        } else if (graph.name === 'polygon') {
-            // TODO 建立point的x，y和polygon的x，y之间的关系，使得不用更新每一个point的属性，也就是说point的坐标可以通过计算得出
-            graph.points.forEach((point) => {
-                point.set({
-                    x: point.x + diff.x,
-                    y: point.y + diff.y,
-                })
-            })
-        }
-
-        this.dragPosition = { x, y }
-
-        this.controlPoint.updatePoints()
-        this.stage.emitter.emit('update-screen')
     }
 }
 
-class ControlPoint {
-    constructor(graph) {
-        this.graph = graph
-        this.controller = null
-        this.pickedControlPointIndex = -1
-        this.r = 10
-        this.addPoints()
-    }
-    addPoints() {
-        if (this.graph.name === 'rect') {
-            const { x, y, width, height } = this.graph
-            this.controller = this.createController([
-                [x, y],
-                [x + width, y],
-                [x + width, y + height],
-                [x, y + height],
-            ])
-        } else if (this.graph.name === 'polygon') {
-            const points = this.graph.points
-            this.controller = this.createController(
-                points.map((point) => [point.x, point.y])
-            )
-        }
-        this.graph.appendChild(...this.controller)
-    }
-    clearPoints() {
-        this.graph.removeChild(...this.controller)
-    }
-    updatePoints(position) {
-        if (position) {
-            const pickedPoint = this.controller[this.pickedControlPointIndex]
-            if (!pickedPoint) return
-            pickedPoint.set(position).updateParentAndDiff()
-        } else {
-            this.clearPoints()
-            this.addPoints()
-        }
-    }
-    pointFactory(x, y) {
-        return new Circle({
-            ctx: this.graph.ctx,
-            x,
-            y,
-            r: this.r,
-            fillColor: DEFAULT_COLOR,
-        })
-    }
-    createController(points = []) {
-        return points.map(([x, y]) => this.pointFactory(x, y))
-    }
-}
+export const editor = new Editor()
+const rectTransformer = new RectTransformer()
+const polygonTransformer = new PolygonTransformer()
 
-function getDistance(p1, p2) {
-    return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2)
-}
+editor.use(rectTransformer).use(polygonTransformer)
