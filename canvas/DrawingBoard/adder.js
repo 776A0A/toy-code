@@ -1,6 +1,6 @@
 import { Point } from './Graph.js'
 import * as events from './events.js'
-import { drawerGenerator } from './Drawer.js'
+import { RectDrawer, PolygonDrawer } from './Drawer.js'
 import { Plugin } from './Plugin.js'
 
 export const graphModes = {
@@ -8,12 +8,21 @@ export const graphModes = {
     polygon: Symbol('polygon'),
 }
 export class Adder extends Plugin {
-    constructor() {
-        super()
-        this.stage = null
-        this.graphMode = graphModes.rect
-        this.drawer = null
-        this.isDrawing = false
+    stage = null
+    graphMode = graphModes.rect
+    drawers = new Map()
+    drawer = null
+    isDrawing = false
+    plugins = new Set()
+    use(plugin) {
+        if (this.plugins.has(plugin)) return
+        this.plugins.add(plugin)
+        plugin.install(this)
+        return this
+    }
+    injectDrawer(name, drawer) {
+        if (this.drawers.has(drawer)) return
+        this.drawers.set(name, drawer)
     }
     setMode(mode) {
         this.graphMode = mode
@@ -22,7 +31,7 @@ export class Adder extends Plugin {
         const ctx = this.stage.canvas.getContext('2d')
         const baseAttrs = { ctx, x, y }
         if (this.graphMode === graphModes.rect) {
-            this.drawer = drawerGenerator.rect.generate({
+            this.drawer = this.drawers.get('rect').generate({
                 ...baseAttrs,
                 fillColor: true,
             })
@@ -31,7 +40,7 @@ export class Adder extends Plugin {
             if (this.drawer) {
                 this.drawer.addPoint(point)
             } else {
-                this.drawer = drawerGenerator.polygon.generate({
+                this.drawer = this.drawers.get('polygon').generate({
                     ctx,
                     points: [point],
                     fillColor: true,
@@ -78,3 +87,9 @@ export class Adder extends Plugin {
         }
     }
 }
+
+export const adder = new Adder()
+
+const rectDrawer = new RectDrawer()
+const polygonDrawer = new PolygonDrawer()
+adder.use(rectDrawer).use(polygonDrawer)

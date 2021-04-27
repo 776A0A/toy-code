@@ -1,4 +1,4 @@
-export function calculateCenter(points) {
+function calculateCenter(points) {
     let sum_x = 0
     let sum_y = 0
     let sum_area = 0
@@ -31,9 +31,7 @@ export const getGraphCenter = (graph) => {
         const { x, y, width, height } = graph
         return [x + width / 2, y + height / 2]
     } else if (graph.name === 'polygon') {
-        const center = utils.calculateCenter(
-            graph.points.map(({ x, y }) => [x, y])
-        )
+        const center = calculateCenter(graph.points.map(({ x, y }) => [x, y]))
         return center
     }
 }

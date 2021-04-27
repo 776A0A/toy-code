@@ -1,18 +1,27 @@
 import { Point, Polygon, Rect } from './Graph.js'
+import { Plugin } from './Plugin.js'
 
 // 绘制器，用于添加图形
-class Drawer {
+class Drawer extends Plugin {
     graph = null
+    graphName = 'drawer'
+    adder = null
     // 更新显示
     update() {}
     // 提交图形，即完成绘制
     commit() {}
+    install(adder) {
+        this.adder = adder
+        adder.injectDrawer(this.graphName, this)
+    }
+    generate(attrs) {}
 }
 
-class RectDrawer extends Drawer {
-    constructor(attrs) {
-        super()
+export class RectDrawer extends Drawer {
+    graphName = 'rect'
+    generate(attrs) {
         this.graph = new Rect(attrs)
+        return this
     }
     update({ x, y }) {
         const rect = this.graph
@@ -25,10 +34,11 @@ class RectDrawer extends Drawer {
     }
 }
 
-class PolygonDrawer extends Drawer {
-    constructor(attrs) {
-        super()
+export class PolygonDrawer extends Drawer {
+    graphName = 'polygon'
+    generate(attrs) {
         this.graph = new Polygon(attrs)
+        return this
     }
     update(position) {
         const polygon = this.graph
@@ -61,9 +71,4 @@ class PolygonDrawer extends Drawer {
 
         polygon.popPoint() // 因为dblclick也会触发mousedown事件，所有实际在mousedown时已经添加了两个点
     }
-}
-
-export const drawerGenerator = {
-    rect: { generate: (attrs) => new RectDrawer(attrs) },
-    polygon: { generate: (attrs) => new PolygonDrawer(attrs) },
 }
