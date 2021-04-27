@@ -7,7 +7,6 @@ import * as utils from './utils.js'
 // TODO 选择，框选
 // TODO cursor
 // TODO import功能
-// TODO 适配问题
 // TODO resize问题
 // TODO 撤销和重做
 // TODO 旋转

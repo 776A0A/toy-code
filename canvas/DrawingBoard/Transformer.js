@@ -24,7 +24,7 @@ class Transformer extends Plugin {
     drag() {}
     delete() {}
     handleContextmenu({ x, y }) {
-        if (this.menu) return
+        if (!this.isInPath({ x, y }) || this.menu) return
         this.menu = new Menu({ x, y }, this.editor, this)
         this.menu.append()
     }
@@ -37,6 +37,17 @@ class Transformer extends Plugin {
             const [x, y] = circle.getTranslate()
             return getDistance({ x, y }, position) <= circle.r
         }))
+    }
+    isInPath({ x, y }) {
+        const graph = this.graph
+        const ctx = graph.ctx
+
+        ctx.save()
+        graph.drawPath()
+        ctx.restore()
+
+        const { left, top } = ctx.canvas.getBoundingClientRect()
+        return graph.ctx.isPointInPath(x - left, y - top)
     }
 }
 
