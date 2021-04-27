@@ -49,6 +49,12 @@ class Transformer extends Plugin {
         const { left, top } = ctx.canvas.getBoundingClientRect()
         return graph.ctx.isPointInPath(x - left, y - top)
     }
+    getDiff({ x, y }) {
+        return {
+            x: x - this.dragPosition.x,
+            y: y - this.dragPosition.y,
+        }
+    }
 }
 
 export class RectTransformer extends Transformer {
@@ -71,10 +77,7 @@ export class RectTransformer extends Transformer {
         this.graph.emit(events.SIZE_CHANGED)
     }
     drag({ x, y }) {
-        const diff = {
-            x: x - this.dragPosition.x,
-            y: y - this.dragPosition.y,
-        }
+        const diff = this.getDiff({ x, y })
 
         const graph = this.graph
 
@@ -100,16 +103,28 @@ export class PolygonTransformer extends Transformer {
         this.controller.updatePoints(position)
         this.graph.emit(events.SIZE_CHANGED)
     }
+    // TODO 图形缩放
     drag({ x, y }) {
-        const diff = {
-            x: x - this.dragPosition.x,
-            y: y - this.dragPosition.y,
-        }
+        const diff = this.getDiff({ x, y })
 
         // TODO 建立point的x，y和polygon的x，y之间的关系，使得不用更新每一个point的属性，也就是说point的坐标可以通过计算得出
         this.graph.points.forEach((point) =>
             point.attr({ x: point.x + diff.x, y: point.y + diff.y })
         )
+        this.controller.updatePoints()
+
+        this.dragPosition = { x, y }
+    }
+}
+
+export class PictureTransformer extends Transformer {
+    name = 'pictureTransformer'
+    graphName = 'picture'
+    drag({ x, y }) {
+        const diff = this.getDiff({ x, y })
+
+        this.graph.attr({ x: this.graph.x + diff.x, y: this.graph.y + diff.y })
+
         this.controller.updatePoints()
 
         this.dragPosition = { x, y }

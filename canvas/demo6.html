@@ -36,7 +36,7 @@
     <body>
         <div id="container">
             <div id="canvas-wrapper">
-                <canvas id="bgCanvas" style="border: 1px solid"></canvas>
+                <!-- <canvas id="bgCanvas" style="border: 1px solid"></canvas> -->
                 <canvas id="canvas" style="border: 1px solid"></canvas>
             </div>
             <div id="buttonGroup">
@@ -57,19 +57,21 @@
                 editor,
                 adderModes,
                 getGraphCenter,
+                Picture,
             } from './DrawingBoard/index.js'
             const size = 500
             const canvas = document.getElementById('canvas')
-            canvas.width = canvas.height = bgCanvas.width = bgCanvas.height = size
+            const ctx = canvas.getContext('2d')
+            canvas.width = canvas.height = size
 
             drawGgImage()
 
             function drawGgImage() {
-                const ctx = bgCanvas.getContext('2d')
                 const image = new Image()
                 image.src = './图片4.png'
                 image.onload = () => {
-                    ctx.drawImage(image, 0, 0, size, size)
+                    const picture = new Picture({ ctx, image })
+                    stage.addGraph(picture).display()
                 }
             }
 

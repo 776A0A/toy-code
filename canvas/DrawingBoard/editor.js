@@ -1,6 +1,10 @@
 import * as events from './events.js'
 import { Plugin } from './Plugin.js'
-import { PolygonTransformer, RectTransformer } from './Transformer.js'
+import {
+    PolygonTransformer,
+    RectTransformer,
+    PictureTransformer,
+} from './Transformer.js'
 
 export const editorModes = {
     wait: Symbol('wait'), // 等在选择图形
@@ -166,5 +170,6 @@ export class Editor extends Plugin {
 export const editor = new Editor()
 const rectTransformer = new RectTransformer()
 const polygonTransformer = new PolygonTransformer()
+const pictureTransformer = new PictureTransformer()
 
-editor.use(rectTransformer).use(polygonTransformer)
+editor.use(rectTransformer).use(polygonTransformer).use(pictureTransformer)

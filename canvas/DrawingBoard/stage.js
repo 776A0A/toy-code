@@ -4,6 +4,7 @@ import { GraphManager } from './GraphManager.js'
 import * as events from './events.js'
 import * as utils from './utils.js'
 
+// TODO 优化重复代码，例如很多方法中都要用到的那几行代码
 // TODO 选择，框选
 // TODO cursor
 // TODO import功能
@@ -32,13 +33,22 @@ export class Stage extends EventEmitter {
         config = Object.assign(canvasDefaultConfig, config)
 
         this.canvas = canvas
-        this.display = new Display(canvas)
+        this._display = new Display(canvas)
         this.graphManager = new GraphManager(this)
 
         this.init()
     }
     init() {
         this.addListener()
+    }
+    setMode(mode) {
+        this.mode = mode
+
+        if (mode === stageModes.adder) {
+            this.emit(events.END_EDIT)
+        }
+
+        return this
     }
     use(plugin) {
         if (this.plugins.has(plugin)) return
@@ -97,21 +107,15 @@ export class Stage extends EventEmitter {
             .on(events.ADD_GRAPH, (graph) => this.graphManager.add(graph))
             .on(events.DELETE_GRAPH, (graph) => this.graphManager.delete(graph))
             .on(events.REFRESH_SCREEN, () =>
-                this.display.refresh(this.graphManager.graphs)
+                this._display.refresh(this.graphManager.graphs)
             )
     }
     addGraph(graph) {
         this.emit(events.ADD_GRAPH, graph)
         return this
     }
-    setMode(mode) {
-        this.mode = mode
-
-        if (mode === stageModes.adder) {
-            this.emit(events.END_EDIT)
-        }
-
-        return this
+    display() {
+        this.emit(events.REFRESH_SCREEN)
     }
     import(graphs) {}
     export() {

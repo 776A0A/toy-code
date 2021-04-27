@@ -289,3 +289,37 @@ export class Polygon extends Graph {
         ctx.closePath()
     }
 }
+
+export class Picture extends Graph {
+    name = 'picture'
+    constructor(attrs) {
+        super(attrs)
+        const {
+            ctx,
+            image,
+            x = 0,
+            y = 0,
+            width = image.naturalWidth,
+            height = image.naturalHeight,
+        } = attrs
+        this.ctx = ctx
+        this.image = image
+        this.x = x
+        this.y = y
+        this.width = width
+        this.height = height
+    }
+    draw() {
+        const { ctx, image, width, height } = this
+        ctx.save()
+        this.drawPath()
+        ctx.drawImage(image, 0, 0, width, height)
+        ctx.restore()
+        this.drawChildren()
+    }
+    drawPath() {
+        const { ctx, width, height } = this
+        ctx.translate(...this.getTranslate())
+        ctx.rect(0, 0, width, height)
+    }
+}
