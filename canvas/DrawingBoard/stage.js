@@ -49,91 +49,54 @@ export class Stage extends EventEmitter {
     addListener() {
         this.on(events.ADD_GRAPH, (graph) => {
             this.graphManager.add(graph)
-        }).on(events.REFRESH_SCREEN, () => {
-            this.display.refresh(this.graphManager.graphs)
         })
+            .on(events.REFRESH_SCREEN, () => {
+                this.display.refresh(this.graphManager.graphs)
+            })
+            .on(events.DELETE_GRAPH, (graph) => {
+                this.graphManager.delete(graph)
+            })
     }
     addNativeListener() {
         const handleMouseDown = (evt) => {
             if (evt.button !== LEFT_MOUSE_DOWN) return
-            this.removeMenuIfHas()
 
-            const params = {
+            const params = generateParams.call(this, evt, {
                 x: evt.offsetX,
                 y: evt.offsetY,
-                graphs: this.graphManager.graphs,
-                type: evt.type,
-            }
+            })
 
             this.emit('mousedown', params)
         }
         const handleMouseMove = (evt) => {
-            const params = {
+            const params = generateParams.call(this, evt, {
                 x: evt.offsetX,
                 y: evt.offsetY,
-                graphs: this.graphManager.graphs,
-                type: evt.type,
-            }
+            })
+
             this.emit('mousemove', params)
         }
 
         const handleMouseUp = (evt) => {
-            const params = { type: evt.type }
+            const params = generateParams.call(this, evt)
             this.emit('mouseup', params)
         }
         const handleMouseLeave = (evt) => {
-            const params = { type: evt.type }
+            const params = generateParams.call(this, evt)
             this.emit('mouseleave', params)
         }
 
         const handleDblClick = (evt) => {
-            const params = { type: evt.type }
+            const params = generateParams.call(this, evt)
             this.emit('dblclick', params)
         }
 
         const handleContextMenu = (evt) => {
-            if (this.switcher.mode === modes.editor) {
-                evt.preventDefault()
-                const graph = this.getEditingGraph()
-                if (!graph) return
-
-                const { clientX, clientY } = evt
-
-                const menu = document.createElement('div')
-                menu.id = 'canvas-editor-menu'
-                Object.assign(menu.style, {
-                    position: 'fixed',
-                    left: clientX + 'px',
-                    top: clientY + 'px',
-                    userSelect: 'none',
-                })
-                const content = `
-                <ul style="padding: 0; list-style: none;">
-                    <li id="deleteGraphButton" role="button"
-                    style="
-                    border: 1px solid #aaa;
-                    padding: 0px 12px;
-                    cursor: pointer;
-                    background: #fff;
-                    ">
-                    删除
-                    </li>
-                </ul>
-                `
-                const handleClick = (evt) => {
-                    if (evt.target.id === 'deleteGraphButton') {
-                        this.graphManager.delete(this.getEditingGraph())
-                        this.editor.delete()
-                        this.emit(events.REFRESH_SCREEN)
-                        menu.removeEventListener('click', handleClick)
-                        menu.remove()
-                    }
-                }
-                menu.handleClick = handleClick
-                menu.addEventListener('click', handleClick)
-                menu.innerHTML = content
-                document.body.append(menu)
-            }
+            const params = generateParams.call(this, evt, {
+                x: evt.clientX,
+                y: evt.clientY,
+            })
+            this.emit('contextmenu', params)
         }
 
         this.on(this.canvas, 'mousedown', handleMouseDown)
@@ -151,15 +114,6 @@ export class Stage extends EventEmitter {
         this.switcher.switchTo[mode]()
         return this
     }
-    setGraph(graph) {
-        if (this.switcher.mode !== modes.adder) {
-            throw Error('非绘制（adder）模式')
-        }
-        this.adder.setMode(graph)
-    }
-    getEditingGraph() {
-        return this.graphManager.graphs[this.editor.topGraphIndex]
-    }
     getGraphCenter(graph) {
         if (graph.name === 'rect') {
             const { x, y, width, height } = graph
@@ -170,12 +124,6 @@ export class Stage extends EventEmitter {
             )
             return center
         }
-    }
-    removeMenuIfHas() {
-        const menu = document.getElementById('canvas-editor-menu')
-        if (!menu) return
-        menu.removeEventListener('click', menu.handleClick)
-        menu.remove()
     }
     import(graphs) {}
     export() {
@@ -194,5 +142,14 @@ export class Stage extends EventEmitter {
                 return obj
             })
         }
+    }
+}
+
+function generateParams(evt, params) {
+    return {
+        type: evt.type,
+        nativeEvent: evt,
+        graphs: this.graphManager.graphs,
+        ...params,
     }
 }

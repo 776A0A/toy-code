@@ -42,6 +42,7 @@ export class Editor extends Plugin {
         else throw Error(`没有这个编辑模式：${this.editMode}`)
     }
     pick(position, graphs) {
+        this.removeMenuIfHas()
         this.graphs = graphs
         if (!graphs.length) return
 
@@ -89,6 +90,7 @@ export class Editor extends Plugin {
             this.transformer.end()
             this.stage.emit(events.REFRESH_SCREEN)
         }
+        this.removeMenuIfHas()
         this.isEditing = this.isDragging = this.isResizing = false
         this.topGraphIndex = undefined
         this.graphs = []
@@ -108,6 +110,12 @@ export class Editor extends Plugin {
 
         return top
     }
+    removeMenuIfHas() {
+        const menu = document.getElementById('canvas-editor-menu')
+        if (!menu) return
+        menu.removeEventListener('click', menu.handleClick)
+        menu.remove()
+    }
     handleResize(position) {
         if (!this.isResizing) return
 
@@ -121,6 +129,48 @@ export class Editor extends Plugin {
         this.transformer.drag(position)
 
         this.stage.emit(events.REFRESH_SCREEN)
+    }
+    handleContextMenu({ x, y, nativeEvent }) {
+        nativeEvent.preventDefault()
+        if (this.topGraphIndex === undefined) return
+
+        const menu = document.createElement('div')
+        menu.id = 'canvas-editor-menu'
+        Object.assign(menu.style, {
+            position: 'fixed',
+            left: x + 'px',
+            top: y + 'px',
+            userSelect: 'none',
+        })
+        const content = `
+        <ul style="padding: 0; list-style: none;">
+            <li id="deleteGraphButton" role="button"
+            style="
+            border: 1px solid #aaa;
+            padding: 0px 12px;
+            cursor: pointer;
+            background: #fff;
+            ">
+            删除
+            </li>
+        </ul>
+        `
+        const handleClick = (evt) => {
+            if (evt.target.id === 'deleteGraphButton') {
+                this.stage.emit(
+                    events.DELETE_GRAPH,
+                    this.stage.graphManager.graphs[this.topGraphIndex]
+                )
+                this.delete()
+                this.stage.emit(events.REFRESH_SCREEN)
+                menu.removeEventListener('click', handleClick)
+                menu.remove()
+            }
+        }
+        menu.handleClick = handleClick
+        menu.addEventListener('click', handleClick)
+        menu.innerHTML = content
+        document.body.append(menu)
     }
     install(stage) {
         this.stage = stage
@@ -136,6 +186,10 @@ export class Editor extends Plugin {
             )
             .on('mouseup', () => check() && this.stop())
             .on('mouseleave', () => check() && this.stop())
+            .on(
+                'contextmenu',
+                (event) => check() && this.handleContextMenu(event)
+            )
             .on(events.END_EDIT, () => this.end())
 
         function check() {
