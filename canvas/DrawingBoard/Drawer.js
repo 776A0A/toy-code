@@ -6,15 +6,15 @@ class Drawer extends Plugin {
     graph = null
     graphName = 'drawer'
     adder = null
-    // 更新显示
-    update() {}
-    // 提交图形，即完成绘制
-    commit() {}
     install(adder) {
         this.adder = adder
         adder.injectDrawer(this.graphName, this)
     }
     generate(attrs) {}
+    // 更新显示
+    update() {}
+    // 提交图形，即完成绘制
+    commit() {}
 }
 
 export class RectDrawer extends Drawer {

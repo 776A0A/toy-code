@@ -20,6 +20,9 @@ export class Editor extends Plugin {
     plugins = new Set()
     constructor() {
         super()
+        this.init()
+    }
+    init() {
         this.on('delete', (graph) => {
             this.stage
                 .emit(events.DELETE_GRAPH, graph)
@@ -39,23 +42,26 @@ export class Editor extends Plugin {
     }
     setMode(mode) {
         this.mode = mode
+
         if (mode === editorModes.resize) {
             this.isResizing = true
             this.transformer.start()
-        } else if (mode === editorModes.drag) this.isDragging = true
-        else if (mode === editorModes.wait) {
+        } else if (mode === editorModes.drag) {
+            this.isDragging = true
+        } else if (mode === editorModes.wait) {
             this.isResizing = this.isDragging = false
         }
-    }
-    get ctx() {
-        return this.stage.canvas.getContext('2d')
     }
     edit({ x, y }) {
         if (!this.isEditing || this.mode === editorModes.wait) return
 
-        if (this.mode === editorModes.resize) this.handleResize({ x, y })
-        else if (this.mode === editorModes.drag) this.handleDrag({ x, y })
-        else throw Error(`没有这个编辑模式：${this.mode}`)
+        if (this.mode === editorModes.resize && this.isResizing) {
+            this.transformer.resize({ x, y })
+        } else if (this.mode === editorModes.drag && this.isDragging) {
+            this.transformer.drag({ x, y })
+        } else throw Error(`没有这个编辑模式：${this.mode}`)
+
+        this.stage.emit(events.REFRESH_SCREEN)
     }
     pick({ x, y }) {
         this.removeMenuIfHas()
@@ -112,7 +118,7 @@ export class Editor extends Plugin {
         if (!graphs.length) return
 
         let top
-        const { ctx } = this
+        const ctx = this.stage.canvas.getContext('2d')
 
         ;[...graphs].forEach((graph, idx) => {
             ctx.save()
@@ -129,20 +135,6 @@ export class Editor extends Plugin {
             this.transformer.menu.remove()
             this.transformer.menu = null
         }
-    }
-    handleResize(position) {
-        if (!this.isResizing) return
-
-        this.transformer.resize(position)
-
-        this.stage.emit(events.REFRESH_SCREEN)
-    }
-    handleDrag(position) {
-        if (!this.isDragging) return
-
-        this.transformer.drag(position)
-
-        this.stage.emit(events.REFRESH_SCREEN)
     }
     handleContextmenu({ x, y, nativeEvent }) {
         nativeEvent.preventDefault()

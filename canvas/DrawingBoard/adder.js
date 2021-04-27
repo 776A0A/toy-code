@@ -3,13 +3,13 @@ import * as events from './events.js'
 import { RectDrawer, PolygonDrawer } from './Drawer.js'
 import { Plugin } from './Plugin.js'
 
-export const graphModes = {
+export const adderModes = {
     rect: Symbol('rect'),
     polygon: Symbol('polygon'),
 }
 export class Adder extends Plugin {
     stage = null
-    graphMode = graphModes.rect
+    mode = adderModes.rect
     drawers = new Map()
     drawer = null
     isDrawing = false
@@ -25,17 +25,18 @@ export class Adder extends Plugin {
         this.drawers.set(name, drawer)
     }
     setMode(mode) {
-        this.graphMode = mode
+        this.mode = mode
     }
     add({ x, y }) {
         const ctx = this.stage.canvas.getContext('2d')
         const baseAttrs = { ctx, x, y }
-        if (this.graphMode === graphModes.rect) {
+
+        if (this.mode === adderModes.rect) {
             this.drawer = this.drawers.get('rect').generate({
                 ...baseAttrs,
                 fillColor: true,
             })
-        } else if (this.graphMode === graphModes.polygon) {
+        } else if (this.mode === adderModes.polygon) {
             const point = new Point({ ...baseAttrs })
             if (this.drawer) {
                 this.drawer.addPoint(point)
@@ -47,7 +48,7 @@ export class Adder extends Plugin {
                 })
             }
         } else {
-            throw Error(`没有这个图形：${this.graphMode}`)
+            throw Error(`没有这个图形：${this.mode}`)
         }
 
         this.isDrawing = true
@@ -61,7 +62,7 @@ export class Adder extends Plugin {
         this.stage.emit(events.REFRESH_SCREEN)
     }
     commit(type) {
-        if (this.graphMode === graphModes.polygon) {
+        if (this.mode === adderModes.polygon) {
             if (type !== 'dblclick') return
             this.drawer?.commit()
             this.isDrawing = false

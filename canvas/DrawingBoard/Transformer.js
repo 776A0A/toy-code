@@ -9,6 +9,16 @@ class Transformer extends Plugin {
     dragPosition = { x: 0, y: 0 }
     controller = null
     menu = null
+    install(editor) {
+        this.editor = editor
+        editor.injectTransformer(this.graphName, this)
+    }
+    generate(graph, dragPosition) {
+        this.graph = graph
+        this.dragPosition = dragPosition // 记录拖拽鼠标位置
+        this.controller = new ControlPoint(graph)
+        return this
+    }
     start() {}
     resize() {}
     drag() {}
@@ -27,16 +37,6 @@ class Transformer extends Plugin {
             const [x, y] = circle.getTranslate()
             return getDistance({ x, y }, position) <= circle.r
         }))
-    }
-    install(editor) {
-        this.editor = editor
-        editor.injectTransformer(this.graphName, this)
-    }
-    generate(graph, dragPosition) {
-        this.graph = graph
-        this.dragPosition = dragPosition // 记录拖拽鼠标位置
-        this.controller = new ControlPoint(graph)
-        return this
     }
 }
 
