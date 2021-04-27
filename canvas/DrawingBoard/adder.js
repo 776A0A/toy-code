@@ -3,11 +3,15 @@ import * as events from './events.js'
 import { drawerGenerator } from './Drawer.js'
 import { Plugin } from './Plugin.js'
 
+export const graphModes = {
+    rect: Symbol('rect'),
+    polygon: Symbol('polygon'),
+}
 export class Adder extends Plugin {
     constructor() {
         super()
         this.stage = null
-        this.graphMode = 'rect'
+        this.graphMode = graphModes.rect
         this.drawer = null
         this.isDrawing = false
     }
@@ -17,12 +21,12 @@ export class Adder extends Plugin {
     add({ x, y }) {
         const ctx = this.stage.canvas.getContext('2d')
         const baseAttrs = { ctx, x, y }
-        if (this.graphMode === 'rect') {
+        if (this.graphMode === graphModes.rect) {
             this.drawer = drawerGenerator.rect.generate({
                 ...baseAttrs,
                 fillColor: true,
             })
-        } else if (this.graphMode === 'polygon') {
+        } else if (this.graphMode === graphModes.polygon) {
             const point = new Point({ ...baseAttrs })
             if (this.drawer) {
                 this.drawer.addPoint(point)
@@ -48,7 +52,7 @@ export class Adder extends Plugin {
         this.stage.emit(events.REFRESH_SCREEN)
     }
     commit(type) {
-        if (this.graphMode === 'polygon') {
+        if (this.graphMode === graphModes.polygon) {
             if (type !== 'dblclick') return
             this.drawer?.commit()
             this.isDrawing = false

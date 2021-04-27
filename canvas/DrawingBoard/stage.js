@@ -8,6 +8,7 @@ import { Scheduler } from './Scheduler.js'
 import * as events from './events.js'
 import * as utils from './utils.js'
 
+// TODO 选择，框选
 // TODO scheduler
 // TODO cursor
 // TODO import功能

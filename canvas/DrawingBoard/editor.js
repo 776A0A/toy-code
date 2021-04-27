@@ -1,56 +1,72 @@
 import * as events from './events.js'
 import { Plugin } from './Plugin.js'
-import { transformerGenerator } from './Transformer.js'
+import { PolygonTransformer, RectTransformer } from './Transformer.js'
+
+export const editorModes = {
+    wait: Symbol('wait'), // 等在选择图形
+    resize: Symbol('resize'),
+    drag: Symbol('drag'),
+}
 
 export class Editor extends Plugin {
+    stage = null
+    topGraphIndex = undefined
+    isEditing = false // 点选到了某一个图形即为true
+    isDragging = false
+    isResizing = false
+    mode = editorModes.wait
+    transformers = new Map()
+    transformer = null
+    plugins = new Set()
     constructor() {
         super()
-        this.stage = null
-        this.topGraphIndex = undefined
-        this.isEditing = false // 点选到了某一个图形即为true
-        this.editMode = 'wait'
-        this.isDragging = false
-        this.isResizing = false
-        this.graphs = []
-        this.transformer = null
+        this.on('delete', (graph) => {
+            this.stage
+                .emit(events.DELETE_GRAPH, graph)
+                .emit(events.REFRESH_SCREEN)
+            this.delete()
+        })
     }
-    get switchTo() {
-        return {
-            wait: () => {
-                this.editMode = 'wait'
-            },
-            resize: () => {
-                this.editMode = 'resize'
-                this.isResizing = true
-            },
-            drag: () => {
-                this.editMode = 'drag'
-                this.isDragging = true
-            },
+    use(plugin) {
+        if (this.plugins.has(plugin)) return
+        this.plugins.add(plugin)
+        plugin.install(this)
+        return this
+    }
+    injectTransformer(name, transformer) {
+        if (this.transformers.has(name)) return
+        this.transformers.set(name, transformer)
+    }
+    setMode(mode) {
+        this.mode = mode
+        if (mode === editorModes.resize) {
+            this.isResizing = true
+            this.transformer.start()
+        } else if (mode === editorModes.drag) this.isDragging = true
+        else if (mode === editorModes.wait) {
+            this.isResizing = this.isDragging = false
         }
     }
     get ctx() {
         return this.stage.canvas.getContext('2d')
     }
-    edit(position, graphs) {
-        this.graphs = graphs
+    edit({ x, y }) {
+        if (!this.isEditing || this.mode === editorModes.wait) return
 
-        if (!this.isEditing || this.editMode === 'wait') return
-
-        if (this.editMode === 'resize') this.handleResize(position)
-        else if (this.editMode === 'drag') this.handleDrag(position)
-        else throw Error(`没有这个编辑模式：${this.editMode}`)
+        if (this.mode === editorModes.resize) this.handleResize({ x, y })
+        else if (this.mode === editorModes.drag) this.handleDrag({ x, y })
+        else throw Error(`没有这个编辑模式：${this.mode}`)
     }
-    pick(position, graphs) {
+    pick({ x, y }) {
         this.removeMenuIfHas()
-        this.graphs = graphs
+
+        const graphs = this.stage.graphManager.graphs
         if (!graphs.length) return
 
-        if (this.transformer && this.transformer?.isPicked(position) !== -1) {
-            this.transformer.start()
-            this.switchTo.resize()
+        if (this.transformer && this.transformer.isPicked({ x, y }) !== -1) {
+            this.setMode(editorModes.resize)
         } else {
-            const top = this.findTop(position, graphs)
+            const top = this.findTop({ x, y })
 
             // 没有选中过，什么都不做
             if (top === undefined && this.topGraphIndex === undefined) return
@@ -59,14 +75,13 @@ export class Editor extends Plugin {
 
             if (top !== undefined) {
                 const graph = graphs[top]
-                this.transformer = transformerGenerator[graph.name].generate(
-                    graph,
-                    position
-                )
+                this.transformer = this.transformers
+                    .get(graph.name)
+                    .generate(graph, { x, y })
 
                 this.isEditing = true
                 this.topGraphIndex = top
-                this.switchTo.drag()
+                this.setMode(editorModes.drag)
             } else {
                 this.isEditing = false
                 this.topGraphIndex = undefined
@@ -75,16 +90,13 @@ export class Editor extends Plugin {
             this.stage.emit(events.REFRESH_SCREEN)
         }
     }
+    // 删除图形
     delete() {
-        this.transformer?.end()
         this.topGraphIndex = undefined
         this.transformer = null
-        this.stop()
+        this.setMode(editorModes.wait)
     }
-    stop() {
-        this.switchTo.wait()
-        this.isDragging = this.isResizing = false
-    }
+    // 结束编辑，已经进入非编辑状态
     end() {
         if (this.transformer) {
             this.transformer.end()
@@ -93,10 +105,12 @@ export class Editor extends Plugin {
         this.removeMenuIfHas()
         this.isEditing = this.isDragging = this.isResizing = false
         this.topGraphIndex = undefined
-        this.graphs = []
         this.transformer = null
     }
-    findTop({ x, y }, graphs = []) {
+    findTop({ x, y }) {
+        const graphs = this.stage.graphManager.graphs
+        if (!graphs.length) return
+
         let top
         const { ctx } = this
 
@@ -111,10 +125,10 @@ export class Editor extends Plugin {
         return top
     }
     removeMenuIfHas() {
-        const menu = document.getElementById('canvas-editor-menu')
-        if (!menu) return
-        menu.removeEventListener('click', menu.handleClick)
-        menu.remove()
+        if (this.transformer?.menu) {
+            this.transformer.menu.remove()
+            this.transformer.menu = null
+        }
     }
     handleResize(position) {
         if (!this.isResizing) return
@@ -130,65 +144,24 @@ export class Editor extends Plugin {
 
         this.stage.emit(events.REFRESH_SCREEN)
     }
-    handleContextMenu({ x, y, nativeEvent }) {
+    handleContextmenu({ x, y, nativeEvent }) {
         nativeEvent.preventDefault()
+
         if (this.topGraphIndex === undefined) return
 
-        const menu = document.createElement('div')
-        menu.id = 'canvas-editor-menu'
-        Object.assign(menu.style, {
-            position: 'fixed',
-            left: x + 'px',
-            top: y + 'px',
-            userSelect: 'none',
-        })
-        const content = `
-        <ul style="padding: 0; list-style: none;">
-            <li id="deleteGraphButton" role="button"
-            style="
-            border: 1px solid #aaa;
-            padding: 0px 12px;
-            cursor: pointer;
-            background: #fff;
-            ">
-            删除
-            </li>
-        </ul>
-        `
-        const handleClick = (evt) => {
-            if (evt.target.id === 'deleteGraphButton') {
-                this.stage.emit(
-                    events.DELETE_GRAPH,
-                    this.stage.graphManager.graphs[this.topGraphIndex]
-                )
-                this.delete()
-                this.stage.emit(events.REFRESH_SCREEN)
-                menu.removeEventListener('click', handleClick)
-                menu.remove()
-            }
-        }
-        menu.handleClick = handleClick
-        menu.addEventListener('click', handleClick)
-        menu.innerHTML = content
-        document.body.append(menu)
+        this.transformer.handleContextmenu({ x, y, nativeEvent })
     }
     install(stage) {
         this.stage = stage
 
         stage
-            .on(
-                'mousedown',
-                ({ x, y, graphs }) => check() && this.pick({ x, y }, graphs)
-            )
-            .on(
-                'mousemove',
-                ({ x, y, graphs }) => check() && this.edit({ x, y }, graphs)
-            )
-            .on('mouseup', () => check() && this.stop())
-            .on('mouseleave', () => check() && this.stop())
+            .on('mousedown', (event) => check() && this.pick(event))
+            .on('mousemove', (event) => check() && this.edit(event))
+            .on('mouseup', () => check() && this.setMode(editorModes.wait))
+            .on('mouseleave', () => check() && this.setMode(editorModes.wait))
             .on(
                 'contextmenu',
-                (event) => check() && this.handleContextMenu(event)
+                (event) => check() && this.handleContextmenu(event)
             )
             .on(events.END_EDIT, () => this.end())
 
@@ -197,3 +170,9 @@ export class Editor extends Plugin {
         }
     }
 }
+
+export const editor = new Editor()
+const rectTransformer = new RectTransformer()
+const polygonTransformer = new PolygonTransformer()
+
+editor.use(rectTransformer).use(polygonTransformer)

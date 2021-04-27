@@ -54,7 +54,8 @@
                 Text,
                 events,
                 Adder,
-                Editor,
+                editor,
+                graphModes,
             } from './DrawingBoard/index.js'
             const size = 500
             const canvas = document.getElementById('canvas')
@@ -73,18 +74,17 @@
 
             const stage = new Stage(canvas)
             const adder = new Adder()
-            const editor = new Editor()
 
             stage.use(adder).use(editor)
 
             drawRectButton.onclick = (evt) => {
                 stage.setMode('adder')
-                adder.setMode('rect')
+                adder.setMode(graphModes.rect)
                 switchActiveButton(evt)
             }
             drawPointButton.onclick = (evt) => {
                 stage.setMode('adder')
-                adder.setMode('polygon')
+                adder.setMode(graphModes.polygon)
                 switchActiveButton(evt)
             }
             editButton.onclick = (evt) => {
