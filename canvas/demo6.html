@@ -96,19 +96,19 @@
 
             addText.onclick = (evt) => {
                 const graph = stage.graphManager.graphs[editor.topGraphIndex]
-                if (graph.text) graph.removeChild(graph.text)
+                if (graph.staging.text) graph.removeChild(graph.staging.text)
 
                 const [x, y] = getGraphCenter(graph)
-                graph.text = new Text({
-                    ctx: graph.ctx,
+                graph.staging.text = new Text({
+                    ctx: graph.attrs.ctx,
                     text: boxName.value,
                     x,
                     y,
                 })
-                graph.appendChild(graph.text)
-                graph.text.listenParent(events.SIZE_CHANGED, () => {
+                graph.appendChild(graph.staging.text)
+                graph.staging.text.listenParent(events.SIZE_CHANGED, () => {
                     const [x, y] = getGraphCenter(graph)
-                    graph.text.attr({ x, y }).updateParentAndDiff()
+                    graph.staging.text.attr({ x, y }).updateParentAndDiff()
                 })
                 stage.emit(events.REFRESH_SCREEN)
             }

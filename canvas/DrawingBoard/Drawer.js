@@ -28,8 +28,8 @@ export class RectDrawer extends Drawer {
         if (!rect) return
 
         rect.attr({
-            width: x - rect.x,
-            height: y - rect.y,
+            width: x - rect.attrs.x,
+            height: y - rect.attrs.y,
         })
     }
 }
@@ -44,7 +44,7 @@ export class PolygonDrawer extends Drawer {
         const polygon = this.graph
         if (!polygon) return
 
-        const polygonPoints = polygon.points
+        const polygonPoints = polygon.attrs.points
         let point
 
         if (polygonPoints[polygonPoints.length - 1].isPreviewPoint) {
@@ -52,7 +52,7 @@ export class PolygonDrawer extends Drawer {
             point.attr(position)
         } else {
             point = new Point({
-                ctx: polygon.ctx,
+                ctx: polygon.attrs.ctx,
                 x: position.x,
                 y: position.y,
             })
@@ -67,7 +67,11 @@ export class PolygonDrawer extends Drawer {
         const polygon = this.graph
         if (!polygon) return
 
-        polygon.points = polygon.points.filter((point) => !point.isPreviewPoint) // 删除所有预览点
+        polygon.attr({
+            points: polygon.attrs.points.filter(
+                (point) => !point.isPreviewPoint
+            ),
+        }) // 删除所有预览点})
 
         polygon.popPoint() // 因为dblclick也会触发mousedown事件，所有实际在mousedown时已经添加了两个点
     }

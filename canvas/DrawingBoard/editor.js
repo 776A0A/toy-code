@@ -125,11 +125,7 @@ export class Editor extends Plugin {
         const ctx = this.stage.canvas.getContext('2d')
 
         ;[...graphs].forEach((graph, idx) => {
-            ctx.save()
-            graph.drawPath()
-            ctx.restore()
-            // TODO 因为文字的原因，还需要增加判断是否在stroke上，可以在editor中增加方法抹平判断
-            if (ctx.isPointInPath(x, y)) top = idx
+            if (graph.isInPath(x, y)) top = idx
         })
 
         return top
