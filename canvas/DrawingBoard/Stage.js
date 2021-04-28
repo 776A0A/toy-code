@@ -8,6 +8,7 @@ import * as events from './events.js'
 // TODO 优化重复代码，例如很多方法中都要用到的那几行代码
 // TODO wheel 整个放大缩小
 // TODO 选择，框选
+// TODO 优化使用插件的类的共有代码
 // TODO cursor
 // TODO import功能
 // TODO 显示窗口resize问题
