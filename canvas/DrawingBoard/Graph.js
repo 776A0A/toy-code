@@ -210,15 +210,15 @@ export class Point extends Graph {
     constructor({ x = 0, y = 0, ...rest }) {
         super({ x, y, ...rest })
     }
-    draw() {
+    draw(x = 0, y = 0) {
         const { ctx } = this.attrs
         ctx.save()
-        this.drawPath()
+        this.drawPath(x, y)
         ctx.restore()
     }
-    drawPath() {
+    drawPath(x, y) {
         const { ctx } = this.attrs
-        ctx.resetTransform()
+        ctx.translate(-x, -y)
         ctx.translate(...this.getTranslate())
         ctx.lineTo(0, 0)
     }
@@ -298,7 +298,7 @@ export class Polygon extends Graph {
         ctx.translate(...this.getTranslate())
         ctx.beginPath()
         ctx.moveTo(0, 0)
-        points.forEach((point) => point.draw())
+        points.forEach((point) => point.draw(this.attrs.x, this.attrs.y))
         ctx.closePath()
     }
 }
