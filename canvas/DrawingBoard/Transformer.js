@@ -35,19 +35,13 @@ class Transformer extends Plugin {
         const points = this.controller.points
         return (this.controller.pickedIndex = points.findIndex((circle) => {
             const [x, y] = circle.getTranslate()
-            return getDistance({ x, y }, position) <= circle.r
+            return getDistance({ x, y }, position) <= circle.attrs.r
         }))
     }
     isInPath({ x, y }) {
-        const graph = this.graph
-        const ctx = graph.ctx
+        const { left, top } = this.graph.ctx.canvas.getBoundingClientRect()
 
-        ctx.save()
-        graph.drawPath()
-        ctx.restore()
-
-        const { left, top } = ctx.canvas.getBoundingClientRect()
-        return graph.ctx.isPointInPath(x - left, y - top)
+        return this.graph.isInPath(x - left, y - top)
     }
     getDiff({ x, y }) {
         return {
@@ -76,13 +70,19 @@ export class RectTransformer extends Transformer {
 
         const graph = this.graph
 
-        graph.attr({ x: graph.x + diff.x, y: graph.y + diff.y })
+        graph.attr({
+            x: graph.attrs.x + diff.x,
+            y: graph.attrs.y + diff.y,
+        })
         this.controller.updatePoints()
 
         this.dragPosition = { x, y }
     }
     resize({ x, y }) {
-        this.graph.attr({ width: x - this.graph.x, height: y - this.graph.y })
+        this.graph.attr({
+            width: x - this.graph.attrs.x,
+            height: y - this.graph.attrs.y,
+        })
         this.controller.updatePoints()
         this.graph.emit(events.SIZE_CHANGED)
     }
@@ -95,19 +95,22 @@ export class PolygonTransformer extends Transformer {
         const diff = this.getDiff({ x, y })
 
         // TODO 建立point的x，y和polygon的x，y之间的关系，使得不用更新每一个point的属性，也就是说point的坐标可以通过计算得出
-        this.graph.points.forEach((point) =>
-            point.attr({ x: point.x + diff.x, y: point.y + diff.y })
+        this.graph.attrs.points.forEach((point) =>
+            point.attr({
+                x: point.attrs.x + diff.x,
+                y: point.attrs.y + diff.y,
+            })
         )
         this.controller.updatePoints()
 
         this.dragPosition = { x, y }
     }
-    resize(position, pickedIndex) {
+    resize(position) {
         // TODO 只要更新了自身的坐标，就要运行updatePointsDiff和updateChildrenDiff
         if (this.controller.pickedIndex === 0) {
             this.graph.attr(position).updatePointsDiff().updateChildrenDiff()
         } else {
-            this.graph.points[this.controller.pickedIndex]
+            this.graph.attrs.points[this.controller.pickedIndex]
                 ?.attr(position)
                 .updateParentAndDiff()
         }
@@ -133,14 +136,20 @@ export class PictureTransformer extends Transformer {
     drag({ x, y }) {
         const diff = this.getDiff({ x, y })
 
-        this.graph.attr({ x: this.graph.x + diff.x, y: this.graph.y + diff.y })
+        this.graph.attr({
+            x: this.graph.attrs.x + diff.x,
+            y: this.graph.attrs.y + diff.y,
+        })
 
         this.controller.updatePoints()
 
         this.dragPosition = { x, y }
     }
     resize({ x, y }, pickedIndex) {
-        this.graph.attr({ width: x - this.graph.x, height: y - this.graph.y })
+        this.graph.attr({
+            width: x - this.graph.attrs.x,
+            height: y - this.graph.attrs.y,
+        })
         this.controller.updatePoints()
         this.graph.emit(events.SIZE_CHANGED)
     }
@@ -174,7 +183,7 @@ class ControlPoint {
     createController(points = []) {
         const factory = (x, y) => {
             return new Circle({
-                ctx: this.graph.ctx,
+                ctx: this.graph.attrs.ctx,
                 x,
                 y,
                 r: this.r,
@@ -185,7 +194,7 @@ class ControlPoint {
     }
     get pointGenerators() {
         const rectPointGenerator = () => {
-            const { x, y, width, height } = this.graph
+            const { x, y, width, height } = this.graph.attrs
             this.points = this.createController([
                 [x, y],
                 [x + width, y],
@@ -194,9 +203,9 @@ class ControlPoint {
             ])
         }
         const polyPointGenerator = () => {
-            const points = this.graph.points
+            const points = this.graph.attrs.points
             this.points = this.createController(
-                points.map((point) => [point.x, point.y])
+                points.map((point) => [point.attrs.x, point.attrs.y])
             )
         }
         return {

@@ -1,21 +1,29 @@
 import { EventEmitter } from './EventEmitter.js'
 import * as events from './events.js'
+import { merge } from './utils.js'
 
 export const DEFAULT_COLOR = '#1890ff'
 export const DEFAULT_FILL_COLOR = '#a0c5e84f'
+const defaultAttrs = { color: DEFAULT_COLOR, fillColor: false }
 
 // TODO 使用proxy重构，监听x，y的变化
 class Graph extends EventEmitter {
+    name = 'graph'
+    parent = null
+    children = []
+    withParentDiff = { x: 0, y: 0 }
+    parentListeners = []
+    staging = {}
     constructor(attrs = {}) {
         super()
-        this.name = 'graph'
-        this.attrs = attrs
-        this.children = []
-        this.parent = null
-        this.withParentDiff = { x: 0, y: 0 }
-        this.parentListeners = []
 
+        this._attrs = merge(defaultAttrs, attrs)
+
+        // this.assignAttrs()
         this.init()
+    }
+    get attrs() {
+        return this._attrs
     }
     init() {
         this.on(events.REMOVED_FROM_PARENT, () => {
@@ -30,8 +38,7 @@ class Graph extends EventEmitter {
         this.parentListeners.push([type, cb])
     }
     attr(attrs = {}) {
-        Object.entries(attrs).forEach(([k, v]) => (this[k] = v))
-        // TODO 需不需要做事件派发？通知属性改变
+        Object.entries(attrs).forEach(([k, v]) => (this._attrs[k] = v))
         return this
     }
     appendChild(...graphs) {
@@ -41,7 +48,10 @@ class Graph extends EventEmitter {
     }
     setParentAndDiff(graph, parent) {
         graph.parent = parent
-        graph.withParentDiff = { x: graph.x - parent.x, y: graph.y - parent.y }
+        graph.withParentDiff = {
+            x: graph.attrs.x - parent.attrs.x,
+            y: graph.attrs.y - parent.attrs.y,
+        }
         return this
     }
     // 更新与父图形的diff，通常发生在改变了自身的x，y时
@@ -55,10 +65,10 @@ class Graph extends EventEmitter {
         return this
     }
     removeChild(...graphs) {
-        this.children = this.children.filter((g) => {
-            const includes = graphs.includes(g)
+        this.children = this.children.filter((graph) => {
+            const includes = graphs.includes(graph)
             if (includes) {
-                g.emit(events.REMOVED_FROM_PARENT)
+                graph.emit(events.REMOVED_FROM_PARENT)
                 return false
             } else return true
         })
@@ -86,11 +96,11 @@ class Graph extends EventEmitter {
      * 就可以在图形移动时根据这个最初位移和当前x，y的数值计算出正确的位移
      */
     getTranslate() {
-        const { x, y } = this
+        const { x, y } = this.attrs
 
         const currentWidthParentDiff = {
-            x: this.parent ? x - this.parent.x : 0,
-            y: this.parent ? y - this.parent.y : 0,
+            x: this.parent ? x - this.parent.attrs.x : 0,
+            y: this.parent ? y - this.parent.attrs.y : 0,
         }
 
         return [
@@ -104,31 +114,31 @@ class Graph extends EventEmitter {
         ctx.fillStyle = fillColor === true ? DEFAULT_FILL_COLOR : fillColor
         ctx.fill()
     }
+    // TODO 因为文字的原因，还需要增加判断是否在stroke上，可以在editor中增加方法抹平判断
+    isInPath(x, y) {
+        const { ctx } = this.attrs
+
+        ctx.save()
+        this.drawPath()
+        ctx.restore()
+
+        return ctx.isPointInPath(x, y)
+    }
 }
 export class Rect extends Graph {
-    constructor(attrs) {
-        super(attrs)
-        // TODO 将this.xx改为this.attrs.xx
-        const {
-            ctx,
-            x = 0,
-            y = 0,
-            width = 0,
-            height = 0,
-            lineWidth = 1,
-            color = DEFAULT_COLOR,
-        } = attrs
-        this.name = 'rect'
-        this.ctx = ctx
-        this.x = x
-        this.y = y
-        this.width = width
-        this.height = height
-        this.lineWidth = lineWidth
-        this.color = color
+    name = 'rect'
+    constructor({
+        x = 0,
+        y = 0,
+        width = 0,
+        height = 0,
+        lineWidth = 1,
+        ...rest
+    } = {}) {
+        super({ x, y, width, height, lineWidth, ...rest })
     }
     draw() {
-        const { ctx, lineWidth, color } = this
+        const { ctx, lineWidth, color } = this.attrs
         ctx.save()
         ctx.lineWidth = lineWidth
         ctx.strokeStyle = color
@@ -139,7 +149,7 @@ export class Rect extends Graph {
         this.drawChildren()
     }
     drawPath() {
-        const { ctx, width, height } = this
+        const { ctx, width, height } = this.attrs
         ctx.translate(...this.getTranslate())
         ctx.beginPath()
         ctx.rect(0, 0, width, height)
@@ -147,18 +157,12 @@ export class Rect extends Graph {
     }
 }
 export class Circle extends Graph {
-    constructor(attrs) {
-        super(attrs)
-        const { ctx, x, y, r = 5, color = DEFAULT_COLOR } = attrs
-        this.name = 'circle'
-        this.ctx = ctx
-        this.x = x
-        this.y = y
-        this.r = r
-        this.color = color
+    name = 'circle'
+    constructor({ x = 0, y = 0, r = 5, ...rest } = {}) {
+        super({ x, y, r, ...rest })
     }
     draw() {
-        const { ctx, color } = this
+        const { ctx, color } = this.attrs
         ctx.save()
         this.drawPath()
         ctx.strokeStyle = color
@@ -168,7 +172,7 @@ export class Circle extends Graph {
         this.drawChildren()
     }
     drawPath() {
-        const { ctx, r } = this
+        const { ctx, r } = this.attrs
         ctx.translate(...this.getTranslate())
         ctx.beginPath()
         ctx.arc(0, 0, r, 0, 2 * Math.PI)
@@ -176,19 +180,19 @@ export class Circle extends Graph {
     }
 }
 export class Text extends Graph {
-    constructor(attrs) {
-        super(attrs)
-        const { ctx, text, x, y, font = '20px sarif', color = '#000' } = attrs
-        this.name = 'text'
-        this.ctx = ctx
-        this.text = text
-        this.x = x
-        this.y = y
-        this.font = font
-        this.color = color
+    name = 'text'
+    constructor({
+        text,
+        x = 0,
+        y = 0,
+        font = '20px sarif',
+        color = '#000',
+        ...rest
+    } = {}) {
+        super({ text, x, y, font, color, ...rest })
     }
     draw() {
-        const { ctx, text, font, color } = this
+        const { ctx, text, font, color } = this.attrs
         ctx.save()
         ctx.translate(...this.getTranslate())
         ctx.textAlign = 'center'
@@ -202,49 +206,59 @@ export class Text extends Graph {
     }
 }
 export class Point extends Graph {
-    constructor(attrs) {
-        super(attrs)
-        const { ctx, x, y } = attrs
-        this.name = 'point'
-        this.ctx = ctx
-        this.x = x
-        this.y = y
+    name = 'point'
+    isPreviewPoint = false
+    constructor({ x = 0, y = 0, ...rest }) {
+        super({ x, y, ...rest })
     }
     draw() {
-        const { ctx } = this
+        const { ctx } = this.attrs
         ctx.save()
         this.drawPath()
         ctx.restore()
     }
     drawPath() {
-        const { ctx } = this
+        const { ctx } = this.attrs
         ctx.resetTransform()
         ctx.translate(...this.getTranslate())
         ctx.lineTo(0, 0)
     }
 }
 export class Polygon extends Graph {
-    constructor(attrs) {
-        super(attrs)
-        const { ctx, points = [], color = DEFAULT_COLOR } = attrs
-        this.name = 'polygon'
-        this.ctx = ctx
-        this.points = points
-        this.color = color
-
+    name = 'polygon'
+    constructor({ points = [], ...rest } = {}) {
+        super({ points, ...rest })
         this.injectParentToPoints()
     }
-    get x() {
-        return this.points[0].x
+    attr(attrs = {}) {
+        const _attrs = { ...attrs }
+
+        if ('x' in attrs) this.attrs.x = _attrs.x
+        if ('y' in attrs) this.attrs.y = _attrs.y
+        delete _attrs.x
+        delete _attrs.y
+
+        Object.entries(_attrs).forEach(([k, v]) => (this._attrs[k] = v))
+
+        return this
     }
-    set x(x) {
-        this.points[0].x = x
-    }
-    get y() {
-        return this.points[0].y
-    }
-    set y(y) {
-        this.points[0].y = y
+    get attrs() {
+        const firstPoint = this._attrs.points[0]
+        return {
+            ...this._attrs,
+            get x() {
+                return firstPoint.attrs.x
+            },
+            set x(x) {
+                firstPoint.attr({ x })
+            },
+            get y() {
+                return firstPoint.attrs.y
+            },
+            set y(y) {
+                firstPoint.attr({ y })
+            },
+        }
     }
     /**
      * 因为多边形的点无法根据初始点x，y推算出来，所以每个点都需要记录和初始点x，y之间的位移。
@@ -252,23 +266,23 @@ export class Polygon extends Graph {
      * 所以添加一层injectParentToPoints和addPoint，对每个点进行处理（要跳过预览点）。
      */
     injectParentToPoints() {
-        this.points.forEach((point) => this.setParentAndDiff(point, this))
+        this.attrs.points.forEach((point) => this.setParentAndDiff(point, this))
     }
     addPoint(point) {
         if (!point.isPreviewPoint) {
             this.setParentAndDiff(point, this)
         }
-        this.points.push(point)
+        this.attrs.points.push(point)
     }
     updatePointsDiff() {
         this.injectParentToPoints()
         return this
     }
     popPoint() {
-        return this.points.pop()
+        return this.attrs.points.pop()
     }
     draw() {
-        const { ctx, color } = this
+        const { ctx, color } = this.attrs
         ctx.save()
         this.drawPath()
         ctx.strokeStyle = color
@@ -281,7 +295,7 @@ export class Polygon extends Graph {
         const {
             ctx,
             points: [_, ...points],
-        } = this
+        } = this.attrs
         ctx.translate(...this.getTranslate())
         ctx.beginPath()
         ctx.moveTo(0, 0)
@@ -292,25 +306,18 @@ export class Polygon extends Graph {
 
 export class Picture extends Graph {
     name = 'picture'
-    constructor(attrs) {
-        super(attrs)
-        const {
-            ctx,
-            image,
-            x = 0,
-            y = 0,
-            width = image.naturalWidth,
-            height = image.naturalHeight,
-        } = attrs
-        this.ctx = ctx
-        this.image = image
-        this.x = x
-        this.y = y
-        this.width = width
-        this.height = height
+    constructor({
+        image,
+        x = 0,
+        y = 0,
+        width = image.naturalWidth,
+        height = image.naturalHeight,
+        ...rest
+    } = {}) {
+        super({ image, x, y, width, height, ...rest })
     }
     draw() {
-        const { ctx, image, width, height } = this
+        const { ctx, image, width, height } = this.attrs
         ctx.save()
         this.drawPath()
         ctx.drawImage(image, 0, 0, width, height)
@@ -318,7 +325,7 @@ export class Picture extends Graph {
         this.drawChildren()
     }
     drawPath() {
-        const { ctx, width, height } = this
+        const { ctx, width, height } = this.attrs
         ctx.translate(...this.getTranslate())
         ctx.rect(0, 0, width, height)
     }

@@ -28,10 +28,23 @@ function calcArea(p0, p1, p2) {
 
 export const getGraphCenter = (graph) => {
     if (graph.name === 'rect') {
-        const { x, y, width, height } = graph
+        const { x, y, width, height } = graph.attrs
         return [x + width / 2, y + height / 2]
     } else if (graph.name === 'polygon') {
-        const center = calculateCenter(graph.points.map(({ x, y }) => [x, y]))
+        const center = calculateCenter(
+            graph.attrs.points.map(({ attrs: { x, y } }) => [x, y])
+        )
         return center
     }
+}
+
+export const merge = (o1, o2) => {
+    const obj = { ...o1 }
+    for (const key in o2) {
+        if (Object.hasOwnProperty.call(o2, key)) {
+            const value = o2[key]
+            if (value != null) obj[key] = value
+        }
+    }
+    return obj
 }

@@ -2,9 +2,9 @@ import { Display } from './Display.js'
 import { EventEmitter } from './EventEmitter.js'
 import { GraphManager } from './GraphManager.js'
 import * as events from './events.js'
-import * as utils from './utils.js'
 
 // TODO 增加八个控制点
+// TODO 有些属性只提供只读接口，然后用户可使用preserve属性向其中添加自定义属性
 // TODO 优化重复代码，例如很多方法中都要用到的那几行代码
 // TODO wheel 整个放大缩小
 // TODO 选择，框选
@@ -30,9 +30,8 @@ export const stageModes = {
 export class Stage extends EventEmitter {
     mode = stageModes.adder
     plugins = new Set()
-    constructor(canvas, config = {}) {
+    constructor(canvas) {
         super()
-        config = Object.assign(canvasDefaultConfig, config)
 
         this.canvas = canvas
         this._display = new Display(canvas)
