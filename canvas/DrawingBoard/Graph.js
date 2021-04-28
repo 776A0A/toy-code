@@ -19,7 +19,6 @@ class Graph extends EventEmitter {
 
         this._attrs = merge(defaultAttrs, attrs)
 
-        // this.assignAttrs()
         this.init()
     }
     get attrs() {
