@@ -2,6 +2,7 @@ import { Display } from './Display.js'
 import { EventEmitter } from './EventEmitter.js'
 import { GraphManager } from './GraphManager.js'
 import * as events from './events.js'
+import { Circle, Picture, Point, Polygon, Rect, Text } from './Graph.js'
 
 // TODO 增加八个控制点
 // TODO 有些属性只提供只读接口，然后用户可使用preserve属性向其中添加自定义属性
@@ -127,7 +128,58 @@ export class Stage extends EventEmitter {
     display() {
         this._display.refresh(this.graphManager.graphs)
     }
-    import(graphs) {}
+    import(graphs) {
+        const constructorMap = {
+            rect: Rect,
+            polygon: Polygon,
+            text: Text,
+            circle: Circle,
+            point: Point,
+            picture: Picture,
+        }
+        const ctx = this.canvas.getContext('2d')
+        let a = 0,
+            b = 0
+
+        const generate = (graphs, parent) => {
+            graphs.forEach(({ attrs, name, children }) => {
+                const constructor = constructorMap[name]
+
+                if (name === 'picture') {
+                    a++
+                    const image = new Image()
+                    image.src = attrs.image
+                    image.crossOrigin = 'anonymous'
+                    attrs.image = image
+                    image.onload = () => b++
+                }
+
+                const graph = new constructor({ ctx, ...attrs })
+
+                // TODO 变形有问题
+                if (children.length) generate(children, graph)
+                if (name === 'polygon') {
+                    graph.attr({
+                        points: attrs.points.map((point) => {
+                            return new Point({ ctx, ...point.attrs })
+                        }),
+                    })
+                }
+
+                if (parent) parent.appendChild(graph)
+                else this.addGraph(graph)
+            })
+        }
+
+        generate(graphs)
+
+        const d = () => {
+            if (a === b) this.display()
+            else setTimeout(d, 50)
+        }
+
+        setTimeout(d, 50)
+    }
     // TODO 导出数据中增加canvas的宽高
     export() {
         const graphs = this.graphManager.graphs
@@ -137,11 +189,22 @@ export class Stage extends EventEmitter {
         function shake(graphs) {
             return graphs.map((graph) => {
                 const { ctx, ...attrs } = graph.attrs
-                const { name, children, withParentDiff } = graph
-                const obj = { attrs, name, children, withParentDiff }
-                if (children.length) {
-                    obj.children = shake(obj.children)
-                }
+
+                const { name, children } = graph
+
+                if (name === 'picture') attrs.image = attrs.image.src
+                if (name === 'polygon')
+                    attrs.points = attrs.points.map((point) => {
+                        const { ctx, ...attrs } = point.attrs
+                        const { name, children } = point
+
+                        return { name, children, attrs }
+                    })
+
+                const obj = { attrs, name, children }
+
+                if (children.length) obj.children = shake(obj.children)
+
                 return obj
             })
         }

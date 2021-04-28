@@ -41,6 +41,7 @@
                 <input type="text" id="boxName" />
                 <button id="addText">添加盒子名称</button>
                 <button id="exportGraphsButton">导出</button>
+                <button id="importGraphButton">导入</button>
             </div>
         </div>
         <script type="module">
@@ -62,7 +63,127 @@
             canvas.width = width
             canvas.height = height
 
-            drawGgImage()
+            // drawGgImage()
+
+            const obj = [
+                {
+                    attrs: {
+                        color: '#1890ff',
+                        fillColor: false,
+                        image: 'http://127.0.0.1:5500/%E5%9B%BE%E7%89%874.png',
+                        x: 0,
+                        y: 0,
+                        width: 519,
+                        height: 424,
+                    },
+                    name: 'picture',
+                    children: [],
+                },
+                {
+                    attrs: {
+                        color: '#1890ff',
+                        fillColor: true,
+                        x: 181,
+                        y: 216,
+                        width: 241,
+                        height: 171,
+                        lineWidth: 1,
+                    },
+                    name: 'rect',
+                    children: [
+                        {
+                            attrs: {
+                                color: '#000',
+                                fillColor: false,
+                                text: '111',
+                                x: 301.5,
+                                y: 301.5,
+                                font: '20px sarif',
+                            },
+                            name: 'text',
+                            children: [],
+                        },
+                    ],
+                },
+                {
+                    attrs: {
+                        color: '#1890ff',
+                        fillColor: true,
+                        x: 287,
+                        y: 364,
+                        width: 0,
+                        height: 0,
+                        lineWidth: 1,
+                    },
+                    name: 'rect',
+                    children: [],
+                },
+                {
+                    attrs: {
+                        color: '#1890ff',
+                        fillColor: true,
+                        points: [
+                            {
+                                name: 'point',
+                                children: [],
+                                attrs: {
+                                    color: '#1890ff',
+                                    fillColor: false,
+                                    x: 559,
+                                    y: 180,
+                                },
+                            },
+                            {
+                                name: 'point',
+                                children: [],
+                                attrs: {
+                                    color: '#1890ff',
+                                    fillColor: false,
+                                    x: 696,
+                                    y: 139,
+                                },
+                            },
+                            {
+                                name: 'point',
+                                children: [],
+                                attrs: {
+                                    color: '#1890ff',
+                                    fillColor: false,
+                                    x: 721,
+                                    y: 315,
+                                },
+                            },
+                            {
+                                name: 'point',
+                                children: [],
+                                attrs: {
+                                    color: '#1890ff',
+                                    fillColor: false,
+                                    x: 606,
+                                    y: 330,
+                                },
+                            },
+                        ],
+                        x: 559,
+                        y: 180,
+                    },
+                    name: 'polygon',
+                    children: [
+                        {
+                            attrs: {
+                                color: '#000',
+                                fillColor: false,
+                                text: '2222',
+                                x: 646.1666666666666,
+                                y: 237.86111111111111,
+                                font: '20px sarif',
+                            },
+                            name: 'text',
+                            children: [],
+                        },
+                    ],
+                },
+            ]
 
             function drawGgImage() {
                 const image = new Image()
@@ -115,6 +236,9 @@
 
             exportGraphsButton.onclick = () => {
                 console.log(stage.export())
+            }
+            importGraphButton.onclick = () => {
+                stage.import(obj)
             }
 
             function switchActiveButton(evt) {
