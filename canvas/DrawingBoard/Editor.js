@@ -4,7 +4,7 @@ import {
     PolygonTransformer,
     RectTransformer,
     PictureTransformer,
-} from './Transformer.js'
+} from './Transformers/index.js'
 
 export const editorModes = {
     wait: Symbol('wait'), // 等在选择图形
