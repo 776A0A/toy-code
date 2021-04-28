@@ -35,3 +35,14 @@ export const getGraphCenter = (graph) => {
         return center
     }
 }
+
+export const merge = (o1, o2) => {
+    const obj = { ...o1 }
+    for (const key in o2) {
+        if (Object.hasOwnProperty.call(o2, key)) {
+            const value = o2[key]
+            if (value != null) obj[key] = value
+        }
+    }
+    return obj
+}

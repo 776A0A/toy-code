@@ -1,20 +1,24 @@
 import { EventEmitter } from './EventEmitter.js'
 import * as events from './events.js'
+import { merge } from './utils.js'
 
 export const DEFAULT_COLOR = '#1890ff'
 export const DEFAULT_FILL_COLOR = '#a0c5e84f'
+const defaultAttrs = { color: DEFAULT_COLOR, fillColor: false }
 
 // TODO 使用proxy重构，监听x，y的变化
 class Graph extends EventEmitter {
+    name = 'graph'
+    parent = null
+    children = []
+    withParentDiff = { x: 0, y: 0 }
+    parentListeners = []
     constructor(attrs = {}) {
         super()
-        this.name = 'graph'
-        this.attrs = attrs
-        this.children = []
-        this.parent = null
-        this.withParentDiff = { x: 0, y: 0 }
-        this.parentListeners = []
 
+        this.attrs = merge(defaultAttrs, attrs)
+
+        this.assignAttrs()
         this.init()
     }
     init() {
@@ -30,9 +34,12 @@ class Graph extends EventEmitter {
         this.parentListeners.push([type, cb])
     }
     attr(attrs = {}) {
+        this.attrs = merge(this.attrs, attrs)
         Object.entries(attrs).forEach(([k, v]) => (this[k] = v))
-        // TODO 需不需要做事件派发？通知属性改变
         return this
+    }
+    assignAttrs() {
+        Object.assign(this, this.attrs)
     }
     appendChild(...graphs) {
         if (this.name === 'point') throw Error(`点作为基础绘制图形不会有子图形`)
@@ -106,26 +113,16 @@ class Graph extends EventEmitter {
     }
 }
 export class Rect extends Graph {
-    constructor(attrs) {
-        super(attrs)
-        // TODO 将this.xx改为this.attrs.xx
-        const {
-            ctx,
-            x = 0,
-            y = 0,
-            width = 0,
-            height = 0,
-            lineWidth = 1,
-            color = DEFAULT_COLOR,
-        } = attrs
-        this.name = 'rect'
-        this.ctx = ctx
-        this.x = x
-        this.y = y
-        this.width = width
-        this.height = height
-        this.lineWidth = lineWidth
-        this.color = color
+    name = 'rect'
+    constructor({
+        x = 0,
+        y = 0,
+        width = 0,
+        height = 0,
+        lineWidth = 1,
+        ...rest
+    } = {}) {
+        super({ x, y, width, height, lineWidth, ...rest })
     }
     draw() {
         const { ctx, lineWidth, color } = this
@@ -147,15 +144,9 @@ export class Rect extends Graph {
     }
 }
 export class Circle extends Graph {
-    constructor(attrs) {
-        super(attrs)
-        const { ctx, x, y, r = 5, color = DEFAULT_COLOR } = attrs
-        this.name = 'circle'
-        this.ctx = ctx
-        this.x = x
-        this.y = y
-        this.r = r
-        this.color = color
+    name = 'circle'
+    constructor({ x = 0, y = 0, r = 5, ...rest } = {}) {
+        super({ x, y, r, ...rest })
     }
     draw() {
         const { ctx, color } = this
@@ -176,16 +167,16 @@ export class Circle extends Graph {
     }
 }
 export class Text extends Graph {
-    constructor(attrs) {
-        super(attrs)
-        const { ctx, text, x, y, font = '20px sarif', color = '#000' } = attrs
-        this.name = 'text'
-        this.ctx = ctx
-        this.text = text
-        this.x = x
-        this.y = y
-        this.font = font
-        this.color = color
+    name = 'text'
+    constructor({
+        text,
+        x = 0,
+        y = 0,
+        font = '20px sarif',
+        color = '#000',
+        ...rest
+    } = {}) {
+        super({ text, x, y, font, color, ...rest })
     }
     draw() {
         const { ctx, text, font, color } = this
@@ -202,13 +193,9 @@ export class Text extends Graph {
     }
 }
 export class Point extends Graph {
-    constructor(attrs) {
-        super(attrs)
-        const { ctx, x, y } = attrs
-        this.name = 'point'
-        this.ctx = ctx
-        this.x = x
-        this.y = y
+    name = 'point'
+    constructor({ x = 0, y = 0, ...rest }) {
+        super({ x, y, ...rest })
     }
     draw() {
         const { ctx } = this
@@ -224,14 +211,9 @@ export class Point extends Graph {
     }
 }
 export class Polygon extends Graph {
-    constructor(attrs) {
-        super(attrs)
-        const { ctx, points = [], color = DEFAULT_COLOR } = attrs
-        this.name = 'polygon'
-        this.ctx = ctx
-        this.points = points
-        this.color = color
-
+    name = 'polygon'
+    constructor({ points = [], ...rest } = {}) {
+        super({ points, ...rest })
         this.injectParentToPoints()
     }
     get x() {
@@ -292,22 +274,15 @@ export class Polygon extends Graph {
 
 export class Picture extends Graph {
     name = 'picture'
-    constructor(attrs) {
-        super(attrs)
-        const {
-            ctx,
-            image,
-            x = 0,
-            y = 0,
-            width = image.naturalWidth,
-            height = image.naturalHeight,
-        } = attrs
-        this.ctx = ctx
-        this.image = image
-        this.x = x
-        this.y = y
-        this.width = width
-        this.height = height
+    constructor({
+        image,
+        x = 0,
+        y = 0,
+        width = image.naturalWidth,
+        height = image.naturalHeight,
+        ...rest
+    } = {}) {
+        super({ image, x, y, width, height, ...rest })
     }
     draw() {
         const { ctx, image, width, height } = this
