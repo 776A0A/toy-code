@@ -4,11 +4,13 @@ import { GraphManager } from './GraphManager.js'
 import * as events from './events.js'
 import * as utils from './utils.js'
 
+// TODO 增加八个控制点
 // TODO 优化重复代码，例如很多方法中都要用到的那几行代码
+// TODO wheel 整个放大缩小
 // TODO 选择，框选
 // TODO cursor
 // TODO import功能
-// TODO resize问题
+// TODO 显示窗口resize问题
 // TODO 撤销和重做
 // TODO 旋转
 
@@ -104,20 +106,23 @@ export class Stage extends EventEmitter {
             .on(this.canvas, 'mouseleave', this.handlers.handleMouseLeave)
             .on(this.canvas, 'dblclick', this.handlers.handleDblClick)
             .on(this.canvas, 'contextmenu', this.handlers.handleContextMenu)
-            .on(events.ADD_GRAPH, (graph) => this.graphManager.add(graph))
+            .on(events.ADD_GRAPH, (graph, insertIndex) =>
+                this.graphManager.add(graph, insertIndex)
+            )
             .on(events.DELETE_GRAPH, (graph) => this.graphManager.delete(graph))
             .on(events.REFRESH_SCREEN, () =>
                 this._display.refresh(this.graphManager.graphs)
             )
     }
-    addGraph(graph) {
-        this.emit(events.ADD_GRAPH, graph)
+    addGraph(graph, insertIndex) {
+        this.emit(events.ADD_GRAPH, graph, insertIndex)
         return this
     }
     display() {
         this.emit(events.REFRESH_SCREEN)
     }
     import(graphs) {}
+    // TODO 导出数据中增加canvas的宽高
     export() {
         const graphs = this.graphManager.graphs
         const shakenGraphs = shake(graphs)

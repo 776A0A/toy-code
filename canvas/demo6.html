@@ -71,7 +71,7 @@
                 image.src = './图片4.png'
                 image.onload = () => {
                     const picture = new Picture({ ctx, image })
-                    stage.addGraph(picture).display()
+                    stage.addGraph(picture, 0).display()
                 }
             }
 

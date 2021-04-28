@@ -71,11 +71,6 @@ export class RectTransformer extends Transformer {
 
         this.graph.attr({ x, y }).updateChildrenDiff()
     }
-    resize({ x, y }) {
-        this.graph.attr({ width: x - this.graph.x, height: y - this.graph.y })
-        this.controller.updatePoints()
-        this.graph.emit(events.SIZE_CHANGED)
-    }
     drag({ x, y }) {
         const diff = this.getDiff({ x, y })
 
@@ -86,11 +81,27 @@ export class RectTransformer extends Transformer {
 
         this.dragPosition = { x, y }
     }
+    resize({ x, y }) {
+        this.graph.attr({ width: x - this.graph.x, height: y - this.graph.y })
+        this.controller.updatePoints()
+        this.graph.emit(events.SIZE_CHANGED)
+    }
 }
 
 export class PolygonTransformer extends Transformer {
     name = 'polygonTransformer'
     graphName = 'polygon'
+    drag({ x, y }) {
+        const diff = this.getDiff({ x, y })
+
+        // TODO 建立point的x，y和polygon的x，y之间的关系，使得不用更新每一个point的属性，也就是说point的坐标可以通过计算得出
+        this.graph.points.forEach((point) =>
+            point.attr({ x: point.x + diff.x, y: point.y + diff.y })
+        )
+        this.controller.updatePoints()
+
+        this.dragPosition = { x, y }
+    }
     resize(position, pickedIndex) {
         // TODO 只要更新了自身的坐标，就要运行updatePointsDiff和updateChildrenDiff
         if (this.controller.pickedIndex === 0) {
@@ -103,23 +114,22 @@ export class PolygonTransformer extends Transformer {
         this.controller.updatePoints(position)
         this.graph.emit(events.SIZE_CHANGED)
     }
-    // TODO 图形缩放
-    drag({ x, y }) {
-        const diff = this.getDiff({ x, y })
-
-        // TODO 建立point的x，y和polygon的x，y之间的关系，使得不用更新每一个point的属性，也就是说point的坐标可以通过计算得出
-        this.graph.points.forEach((point) =>
-            point.attr({ x: point.x + diff.x, y: point.y + diff.y })
-        )
-        this.controller.updatePoints()
-
-        this.dragPosition = { x, y }
-    }
 }
 
 export class PictureTransformer extends Transformer {
     name = 'pictureTransformer'
     graphName = 'picture'
+    start() {
+        if (this.controller.pickedIndex === -1) return
+
+        const { pickedIndex, points } = this.controller
+
+        const diagonalPoint = points[(pickedIndex + 2) % points.length]
+
+        const [x, y] = diagonalPoint.getTranslate()
+
+        this.graph.attr({ x, y }).updateChildrenDiff()
+    }
     drag({ x, y }) {
         const diff = this.getDiff({ x, y })
 
@@ -129,31 +139,23 @@ export class PictureTransformer extends Transformer {
 
         this.dragPosition = { x, y }
     }
+    resize({ x, y }, pickedIndex) {
+        this.graph.attr({ width: x - this.graph.x, height: y - this.graph.y })
+        this.controller.updatePoints()
+        this.graph.emit(events.SIZE_CHANGED)
+    }
 }
 
 class ControlPoint {
+    r = 10
+    points = []
+    pickedIndex = -1
     constructor(graph) {
         this.graph = graph
-        this.points = []
-        this.pickedIndex = -1
-        this.r = 10
         this.addPoints()
     }
     addPoints() {
-        if (this.graph.name === 'rect') {
-            const { x, y, width, height } = this.graph
-            this.points = this.createController([
-                [x, y],
-                [x + width, y],
-                [x + width, y + height],
-                [x, y + height],
-            ])
-        } else if (this.graph.name === 'polygon') {
-            const points = this.graph.points
-            this.points = this.createController(
-                points.map((point) => [point.x, point.y])
-            )
-        }
+        this.pointGenerators[this.graph.name]()
         this.graph.appendChild(...this.points)
     }
     clearPoints() {
@@ -169,17 +171,39 @@ class ControlPoint {
             this.addPoints()
         }
     }
-    pointFactory(x, y) {
-        return new Circle({
-            ctx: this.graph.ctx,
-            x,
-            y,
-            r: this.r,
-            fillColor: DEFAULT_COLOR,
-        })
-    }
     createController(points = []) {
-        return points.map(([x, y]) => this.pointFactory(x, y))
+        const factory = (x, y) => {
+            return new Circle({
+                ctx: this.graph.ctx,
+                x,
+                y,
+                r: this.r,
+                fillColor: DEFAULT_COLOR,
+            })
+        }
+        return points.map(([x, y]) => factory(x, y))
+    }
+    get pointGenerators() {
+        const rectPointGenerator = () => {
+            const { x, y, width, height } = this.graph
+            this.points = this.createController([
+                [x, y],
+                [x + width, y],
+                [x + width, y + height],
+                [x, y + height],
+            ])
+        }
+        const polyPointGenerator = () => {
+            const points = this.graph.points
+            this.points = this.createController(
+                points.map((point) => [point.x, point.y])
+            )
+        }
+        return {
+            rect: rectPointGenerator,
+            picture: rectPointGenerator,
+            polygon: polyPointGenerator,
+        }
     }
 }
 

@@ -111,8 +111,8 @@ export class Rect extends Graph {
         // TODO 将this.xx改为this.attrs.xx
         const {
             ctx,
-            x,
-            y,
+            x = 0,
+            y = 0,
             width = 0,
             height = 0,
             lineWidth = 1,
