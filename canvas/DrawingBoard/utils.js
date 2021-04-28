@@ -27,10 +27,12 @@ function calcArea(p0, p1, p2) {
 }
 
 export const getGraphCenter = (graph) => {
-    if (graph.name === 'rect') {
+    const name = graph.name
+
+    if (name === 'rect' || name === 'picture') {
         const { x, y, width, height } = graph.attrs
         return [x + width / 2, y + height / 2]
-    } else if (graph.name === 'polygon') {
+    } else if (name === 'polygon') {
         const center = calculateCenter(
             graph.attrs.points.map(({ attrs: { x, y } }) => [x, y])
         )
@@ -47,4 +49,8 @@ export const merge = (o1, o2) => {
         }
     }
     return obj
+}
+
+export function getDistance(p1, p2) {
+    return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2)
 }
