@@ -12,32 +12,27 @@
             .active {
                 color: darkcyan;
             }
-            #container {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-            }
             #buttonGroup {
                 margin-top: 10px;
                 user-select: none;
             }
             #canvas-wrapper {
-                position: relative;
+                border: 1px solid;
+                overflow: hidden;
+                width: 1000px;
                 height: 500px;
-                width: 500px;
             }
-            #canvas-wrapper > canvas {
-                position: absolute;
-                top: 0;
-                left: 0;
+            #canvas {
+                position: relative;
+                width: 1000px;
+                height: 500px;
             }
         </style>
     </head>
     <body>
         <div id="container">
             <div id="canvas-wrapper">
-                <!-- <canvas id="bgCanvas" style="border: 1px solid"></canvas> -->
-                <canvas id="canvas" style="border: 1px solid"></canvas>
+                <canvas id="canvas"></canvas>
             </div>
             <div id="buttonGroup">
                 <button id="drawRectButton" class="active">矩形</button>
@@ -58,11 +53,14 @@
                 adderModes,
                 getGraphCenter,
                 Picture,
+                Zoom,
             } from './DrawingBoard/index.js'
-            const size = 500
             const canvas = document.getElementById('canvas')
             const ctx = canvas.getContext('2d')
-            canvas.width = canvas.height = size
+            const width = 1000
+            const height = width / 2
+            canvas.width = width
+            canvas.height = height
 
             drawGgImage()
 
@@ -72,12 +70,14 @@
                 image.onload = () => {
                     const picture = new Picture({ ctx, image })
                     stage.addGraph(picture, 0).display()
+                    zoom.updateGraphs()
                 }
             }
 
             const stage = new Stage(canvas)
+            const zoom = new Zoom()
 
-            stage.use(adder).use(editor)
+            stage.use(adder).use(editor).use(zoom)
 
             drawRectButton.onclick = (evt) => {
                 stage.setMode('adder')

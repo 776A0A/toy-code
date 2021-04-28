@@ -97,6 +97,10 @@ export class Stage extends EventEmitter {
                 })
                 this.emit('contextmenu', params)
             },
+            handleWheel: (evt) => {
+                const params = generateParams.call(this, evt)
+                this.emit('wheel', params)
+            },
         }
     }
     addListener() {
@@ -106,20 +110,22 @@ export class Stage extends EventEmitter {
             .on(this.canvas, 'mouseleave', this.handlers.handleMouseLeave)
             .on(this.canvas, 'dblclick', this.handlers.handleDblClick)
             .on(this.canvas, 'contextmenu', this.handlers.handleContextMenu)
+            .on(this.canvas, 'wheel', this.handlers.handleWheel)
             .on(events.ADD_GRAPH, (graph, insertIndex) =>
-                this.graphManager.add(graph, insertIndex)
+                this.addGraph(graph, insertIndex)
             )
-            .on(events.DELETE_GRAPH, (graph) => this.graphManager.delete(graph))
-            .on(events.REFRESH_SCREEN, () =>
-                this._display.refresh(this.graphManager.graphs)
-            )
+            .on(events.DELETE_GRAPH, (graph) => this.deleteGraph(graph))
+            .on(events.REFRESH_SCREEN, () => this.display())
     }
     addGraph(graph, insertIndex) {
-        this.emit(events.ADD_GRAPH, graph, insertIndex)
+        this.graphManager.add(graph, insertIndex)
         return this
     }
+    deleteGraph(graph) {
+        this.graphManager.delete(graph)
+    }
     display() {
-        this.emit(events.REFRESH_SCREEN)
+        this._display.refresh(this.graphManager.graphs)
     }
     import(graphs) {}
     // TODO 导出数据中增加canvas的宽高
