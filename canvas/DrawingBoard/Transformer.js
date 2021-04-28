@@ -19,9 +19,6 @@ class Transformer extends Plugin {
         this.controller = new ControlPoint(graph)
         return this
     }
-    start() {}
-    resize() {}
-    drag() {}
     delete() {}
     handleContextmenu({ x, y }) {
         if (!this.isInPath({ x, y }) || this.menu) return
@@ -49,23 +46,60 @@ class Transformer extends Plugin {
             y: y - this.dragPosition.y,
         }
     }
-}
-
-export class RectTransformer extends Transformer {
-    name = 'rectTransformer'
-    graphName = 'rect'
-    start() {
+    _start() {
         if (this.controller.pickedIndex === -1) return
 
         const { pickedIndex, points } = this.controller
 
-        const diagonalPoint = points[(pickedIndex + 2) % points.length]
+        let targetPointIndex = 0
 
-        const [x, y] = diagonalPoint.getTranslate()
+        if (pickedIndex % 2 === 0) {
+            targetPointIndex = (pickedIndex + 4) % points.length
+        } else {
+            if (pickedIndex === 1) {
+                targetPointIndex = 6
+            } else if (pickedIndex === 3) {
+                targetPointIndex = 0
+            } else if (pickedIndex === 5) {
+                targetPointIndex = 0
+            } else if (pickedIndex === 7) {
+                targetPointIndex = 2
+            }
+        }
 
+        const [x, y] = points[targetPointIndex].getTranslate()
         this.graph.attr({ x, y }).updateChildrenDiff()
     }
-    drag({ x, y }) {
+    start() {
+        this._start()
+    }
+    _resize({ x, y }) {
+        const pickedIndex = this.controller.pickedIndex
+
+        let attrs = {}
+
+        if (pickedIndex % 2 === 0) {
+            attrs = {
+                width: x - this.graph.attrs.x,
+                height: y - this.graph.attrs.y,
+            }
+        } else {
+            if (pickedIndex === 1 || pickedIndex === 5) {
+                attrs = { height: y - this.graph.attrs.y }
+            } else {
+                attrs = { width: x - this.graph.attrs.x }
+            }
+        }
+
+        this.graph.attr(attrs)
+
+        this.controller.updatePoints()
+        this.graph.emit(events.SIZE_CHANGED)
+    }
+    resize({ x, y }) {
+        this._resize({ x, y })
+    }
+    _drag({ x, y }) {
         const diff = this.getDiff({ x, y })
 
         const graph = this.graph
@@ -78,19 +112,25 @@ export class RectTransformer extends Transformer {
 
         this.dragPosition = { x, y }
     }
-    resize({ x, y }) {
-        this.graph.attr({
-            width: x - this.graph.attrs.x,
-            height: y - this.graph.attrs.y,
-        })
-        this.controller.updatePoints()
-        this.graph.emit(events.SIZE_CHANGED)
+    drag({ x, y }) {
+        this._drag({ x, y })
     }
+}
+
+export class RectTransformer extends Transformer {
+    name = 'rectTransformer'
+    graphName = 'rect'
+}
+
+export class PictureTransformer extends Transformer {
+    name = 'pictureTransformer'
+    graphName = 'picture'
 }
 
 export class PolygonTransformer extends Transformer {
     name = 'polygonTransformer'
     graphName = 'polygon'
+    start() {}
     drag({ x, y }) {
         const diff = this.getDiff({ x, y })
 
@@ -105,58 +145,22 @@ export class PolygonTransformer extends Transformer {
 
         this.dragPosition = { x, y }
     }
-    resize(position) {
+    resize({ x, y }) {
         // TODO 只要更新了自身的坐标，就要运行updatePointsDiff和updateChildrenDiff
         if (this.controller.pickedIndex === 0) {
-            this.graph.attr(position).updatePointsDiff().updateChildrenDiff()
+            this.graph.attr({ x, y }).updatePointsDiff().updateChildrenDiff()
         } else {
             this.graph.attrs.points[this.controller.pickedIndex]
-                ?.attr(position)
+                ?.attr({ x, y })
                 .updateParentAndDiff()
         }
-        this.controller.updatePoints(position)
-        this.graph.emit(events.SIZE_CHANGED)
-    }
-}
-
-export class PictureTransformer extends Transformer {
-    name = 'pictureTransformer'
-    graphName = 'picture'
-    start() {
-        if (this.controller.pickedIndex === -1) return
-
-        const { pickedIndex, points } = this.controller
-
-        const diagonalPoint = points[(pickedIndex + 2) % points.length]
-
-        const [x, y] = diagonalPoint.getTranslate()
-
-        this.graph.attr({ x, y }).updateChildrenDiff()
-    }
-    drag({ x, y }) {
-        const diff = this.getDiff({ x, y })
-
-        this.graph.attr({
-            x: this.graph.attrs.x + diff.x,
-            y: this.graph.attrs.y + diff.y,
-        })
-
-        this.controller.updatePoints()
-
-        this.dragPosition = { x, y }
-    }
-    resize({ x, y }, pickedIndex) {
-        this.graph.attr({
-            width: x - this.graph.attrs.x,
-            height: y - this.graph.attrs.y,
-        })
-        this.controller.updatePoints()
+        this.controller.updatePoints({ x, y })
         this.graph.emit(events.SIZE_CHANGED)
     }
 }
 
 class ControlPoint {
-    r = 10
+    r = 5
     points = []
     pickedIndex = -1
     constructor(graph) {
@@ -197,9 +201,13 @@ class ControlPoint {
             const { x, y, width, height } = this.graph.attrs
             this.points = this.createController([
                 [x, y],
+                [x + width / 2, y],
                 [x + width, y],
+                [x + width, y + height / 2],
                 [x + width, y + height],
+                [x + width / 2, y + height],
                 [x, y + height],
+                [x, y + height / 2],
             ])
         }
         const polyPointGenerator = () => {
