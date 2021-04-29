@@ -273,6 +273,7 @@ export class Polygon extends Graph {
         }
         this.attrs.points.push(point)
     }
+    // 当x，y改变后，需要更新diff
     updatePointsDiff() {
         this.injectParentToPoints()
         return this

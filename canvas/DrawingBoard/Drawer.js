@@ -67,12 +67,12 @@ export class PolygonDrawer extends Drawer {
         const polygon = this.graph
         if (!polygon) return
 
-        polygon.attr({
-            points: polygon.attrs.points.filter(
-                (point) => !point.isPreviewPoint
-            ),
-        }) // 删除所有预览点})
+        const points = polygon.attrs.points.filter(
+            (point) => !point.isPreviewPoint
+        ) // 删除所有预览点
 
-        polygon.popPoint() // 因为dblclick也会触发mousedown事件，所有实际在mousedown时已经添加了两个点
+        points.pop() // 因为dblclick也会触发mousedown事件，所有实际在mousedown时已经添加了两个点
+
+        polygon.attr({ points }) // 替换整个points
     }
 }

@@ -156,14 +156,14 @@ export class Stage extends EventEmitter {
 
                 const graph = new constructor({ ctx, ...attrs })
 
-                // TODO 变形有问题
+                // BUG 导入后的文字不会跟随图形变化居中
                 if (children.length) generate(children, graph)
+
                 if (name === 'polygon') {
-                    graph.attr({
-                        points: attrs.points.map((point) => {
-                            return new Point({ ctx, ...point.attrs })
-                        }),
+                    const points = attrs.points.map((point) => {
+                        return new Point({ ctx, ...point.attrs })
                     })
+                    graph.attr({ points }).updatePointsDiff()
                 }
 
                 if (parent) parent.appendChild(graph)
