@@ -1,4 +1,4 @@
-import { Point } from './Graph.js'
+import { Point } from './Graphs/index.js'
 import * as events from './events.js'
 import { RectDrawer, PolygonDrawer } from './Drawer.js'
 import { Plugin } from './Plugin.js'

@@ -1,4 +1,4 @@
-import { Point, Polygon, Rect } from './Graph.js'
+import { Point, Polygon, Rect } from './Graphs/index.js'
 import { Plugin } from './Plugin.js'
 
 // 绘制器，用于添加图形

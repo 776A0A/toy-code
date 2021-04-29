@@ -1,4 +1,4 @@
-import { Circle, DEFAULT_COLOR } from '../Graph.js'
+import { Circle, DEFAULT_COLOR } from '../Graphs/index.js'
 
 export class ControlPoint {
     r = 5

@@ -2,7 +2,7 @@ import { Display } from './Display.js'
 import { EventEmitter } from './EventEmitter.js'
 import { GraphManager } from './GraphManager.js'
 import * as events from './events.js'
-import { Circle, Picture, Point, Polygon, Rect, Text } from './Graph.js'
+import { Circle, Picture, Point, Polygon, Rect, Text } from './Graphs/index.js'
 
 // TODO 增加八个控制点
 // TODO 有些属性只提供只读接口，然后用户可使用preserve属性向其中添加自定义属性
