@@ -3,6 +3,7 @@ import { EventEmitter } from './EventEmitter.js'
 import { GraphManager } from './GraphManager.js'
 import * as events from './events.js'
 import { Circle, Picture, Point, Polygon, Rect, Text } from './Graphs/index.js'
+import { Zoom } from './Zoom.js'
 
 // TODO 增加八个控制点
 // TODO 有些属性只提供只读接口，然后用户可使用preserve属性向其中添加自定义属性
@@ -32,12 +33,20 @@ export const stageModes = {
 export class Stage extends EventEmitter {
     mode = stageModes.adder
     plugins = new Set()
+    zoom = true
+    zoomer = new Zoom()
     constructor(canvas) {
         super()
 
         this.canvas = canvas
         this._display = new Display(canvas)
         this.graphManager = new GraphManager(this)
+
+        if (!this.zoom) {
+            this.zoomer = null
+        } else {
+            this.zoomer.install(this)
+        }
 
         this.init()
     }
@@ -126,7 +135,17 @@ export class Stage extends EventEmitter {
         this.graphManager.delete(graph)
     }
     display() {
-        this._display.refresh(this.graphManager.graphs)
+        if (this.zoom) {
+            const ctx = this.canvas.getContext('2d')
+            const { target, scaleTotal } = this.zoomer
+            ctx.save()
+            ctx.translate(target.x, target.y)
+            ctx.scale(scaleTotal, scaleTotal)
+            this._display.refresh(this.graphManager.graphs)
+            ctx.restore()
+        } else {
+            this._display.refresh(this.graphManager.graphs)
+        }
     }
     import(graphs) {
         const constructorMap = {

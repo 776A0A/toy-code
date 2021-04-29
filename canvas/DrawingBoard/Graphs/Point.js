@@ -14,7 +14,7 @@ export class Point extends Graph {
     }
     drawPath(x, y) {
         const { ctx } = this.attrs
-        ctx.translate(-x, -y)
+        ctx.translate(-x, -y) // 回退父级的偏移
         ctx.translate(...this.getTranslate())
         ctx.lineTo(0, 0)
     }

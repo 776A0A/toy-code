@@ -54,7 +54,6 @@
                 adderModes,
                 getGraphCenter,
                 Picture,
-                Zoom,
             } from './DrawingBoard/index.js'
             const canvas = document.getElementById('canvas')
             const ctx = canvas.getContext('2d')
@@ -191,14 +190,12 @@
                 image.onload = () => {
                     const picture = new Picture({ ctx, image })
                     stage.addGraph(picture, 0).display()
-                    zoom.updateGraphs()
                 }
             }
 
             const stage = new Stage(canvas)
-            const zoom = new Zoom()
 
-            stage.use(adder).use(editor).use(zoom)
+            stage.use(adder).use(editor)
 
             drawRectButton.onclick = (evt) => {
                 stage.setMode('adder')
