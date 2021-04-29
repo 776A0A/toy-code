@@ -24,10 +24,10 @@ export class Editor extends Plugin {
     }
     init() {
         this.on({
-            type: 'delete',
+            type: events.DELETE_GRAPH,
             handler: (graph) => {
                 this.stage.emit(events.DELETE_GRAPH, graph).emit(events.REFRESH_SCREEN)
-                this.delete()
+                this.deleteGraph()
             },
         })
     }
@@ -100,7 +100,7 @@ export class Editor extends Plugin {
         }
     }
     // 删除图形
-    delete() {
+    deleteGraph() {
         this.topGraphIndex = undefined
         this.transformer = null
         this.setMode(editorModes.wait)

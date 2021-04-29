@@ -1,3 +1,5 @@
+import { events } from '../shared.js'
+
 export class Menu {
     constructor(position, editor, transformer) {
         this.position = position
@@ -40,7 +42,7 @@ export class Menu {
     }
     handleClick(evt) {
         if (evt.target.id === 'deleteGraphButton') {
-            this.editor.emit('delete', this.transformer.graph)
+            this.editor.emit(events.DELETE_GRAPH, this.transformer.graph)
             this.remove()
         }
     }

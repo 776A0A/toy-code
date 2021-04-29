@@ -187,6 +187,7 @@ export class Stage extends EventEmitter {
     }
     deleteGraph(graph) {
         this.graphManager.delete(graph)
+
         return this
     }
     display() {

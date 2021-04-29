@@ -98,6 +98,7 @@
                                 x: 301.5,
                                 y: 301.5,
                                 font: '20px sarif',
+                                stickToParentCenter: true,
                             },
                             name: 'text',
                             children: [],
@@ -176,6 +177,7 @@
                                 x: 646.1666666666666,
                                 y: 237.86111111111111,
                                 font: '20px sarif',
+                                stickToParentCenter: true,
                             },
                             name: 'text',
                             children: [],
@@ -214,20 +216,19 @@
 
             addText.onclick = (evt) => {
                 const graph = stage.graphManager.graphs[editor.topGraphIndex]
-                if (graph.staging.text) graph.removeChild(graph.staging.text)
+                const child = graph.children.find((child) => child.attrs.stickToParentCenter)
+                if (child.name === 'text') {
+                    graph.removeChild(child)
+                }
 
-                const [x, y] = getGraphCenter(graph)
-                graph.staging.text = new Text({
+                const text = new Text({
                     ctx: graph.attrs.ctx,
                     text: boxName.value,
-                    x,
-                    y,
+                    stickToParentCenter: true,
                 })
-                graph.appendChild(graph.staging.text)
-                graph.staging.text.listenParent(events.SIZE_CHANGED, () => {
-                    const [x, y] = getGraphCenter(graph)
-                    graph.staging.text.attr({ x, y }).updateParentAndDiff()
-                })
+
+                graph.appendChild(text)
+
                 stage.emit(events.REFRESH_SCREEN)
             }
 
@@ -239,9 +240,7 @@
             }
 
             function switchActiveButton(evt) {
-                ;[...buttonGroup.children].forEach((b) =>
-                    b.classList.remove('active')
-                )
+                ;[...buttonGroup.children].forEach((b) => b.classList.remove('active'))
                 evt.target.classList.add('active')
             }
         </script>

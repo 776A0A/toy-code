@@ -1,9 +1,9 @@
 import { EventEmitter } from '../EventEmitter.js'
 import { events } from '../shared.js'
-import { merge } from '../utils.js'
+import { merge, getGraphCenter } from '../utils.js'
 export const DEFAULT_COLOR = '#1890ff'
 export const DEFAULT_FILL_COLOR = '#a0c5e84f'
-const defaultAttrs = { color: DEFAULT_COLOR, fillColor: false }
+const defaultAttrs = { color: DEFAULT_COLOR, fillColor: false, stickToParentCenter: false }
 
 export // TODO 使用proxy重构，监听x，y的变化
 class Graph extends EventEmitter {
@@ -27,24 +27,52 @@ class Graph extends EventEmitter {
         this.on({
             type: events.REMOVED_FROM_PARENT,
             handler: () => {
-                this.parentListeners.forEach(([type, cb]) => {
-                    this.parent.off({ type, handler: cb })
-                })
+                this.parentListeners.forEach(([type, handler]) => this.offParent({ type, handler }))
             },
         })
+
+        this.handleStickToCenter = this.handleStickToCenter.bind(this)
     }
-    listenParent(type, cb) {
+    onParent({ type, handler }) {
         if (!this.parent) return
-        this.parent.on({ type, handler: cb })
-        this.parentListeners.push([type, cb])
+        this.parent.on({ type, handler })
+        this.parentListeners.push([type, handler])
+    }
+    offParent({ type, handler }) {
+        if (!this.parent) return
+        this.parent.off({ type, handler })
+        this.parentListeners = this.parentListeners.filter((listener) => listener !== handler)
     }
     attr(attrs = {}) {
+        if (attrs.stickToParentCenter && !this.attrs.stickToParentCenter) {
+            this.onParent({ type: events.SIZE_CHANGED, handler: this.handleStickToCenter })
+            this.handleStickToCenter()
+        } else if (attrs.stickToParentCenter === false) {
+            this.offParent({ type: events.SIZE_CHANGED, handler: this.handleStickToCenter })
+        }
+
         Object.entries(attrs).forEach(([k, v]) => (this._attrs[k] = v))
+
         return this
+    }
+    handleStickToCenter() {
+        if (!this.parent) return
+
+        const [x, y] = getGraphCenter(this.parent)
+        this.attr({ x, y }).updateParentAndDiff()
     }
     appendChild(...graphs) {
         if (this.name === 'point') throw Error(`点作为基础绘制图形不会有子图形`)
-        graphs.forEach((graph) => this.setParentAndDiff(graph, this))
+
+        graphs.forEach((graph) => {
+            this.setParentAndDiff(graph, this)
+
+            if (graph.attrs.stickToParentCenter) {
+                graph.onParent({ type: events.SIZE_CHANGED, handler: graph.handleStickToCenter })
+                graph.handleStickToCenter()
+            }
+        })
+
         this.children.push(...graphs)
     }
     setParentAndDiff(graph, parent) {
