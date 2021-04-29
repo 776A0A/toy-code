@@ -1,10 +1,6 @@
 import * as events from './events.js'
 import { Plugin } from './Plugin.js'
-import {
-    PolygonTransformer,
-    RectTransformer,
-    PictureTransformer,
-} from './Transformers/index.js'
+import { PolygonTransformer, RectTransformer, PictureTransformer } from './Transformers/index.js'
 
 export const editorModes = {
     wait: Symbol('wait'), // 等在选择图形
@@ -30,9 +26,7 @@ export class Editor extends Plugin {
         this.on({
             type: 'delete',
             handler: (graph) => {
-                this.stage
-                    .emit(events.DELETE_GRAPH, graph)
-                    .emit(events.REFRESH_SCREEN)
+                this.stage.emit(events.DELETE_GRAPH, graph).emit(events.REFRESH_SCREEN)
                 this.delete()
             },
         })
@@ -88,9 +82,7 @@ export class Editor extends Plugin {
 
             if (top !== undefined) {
                 const graph = graphs[top]
-                this.transformer = this.transformers
-                    .get(graph.name)
-                    .generate(graph, { x, y })
+                this.transformer = this.transformers.get(graph.name).generate(graph, { x, y })
 
                 this.isEditing = true
                 this.topGraphIndex = top

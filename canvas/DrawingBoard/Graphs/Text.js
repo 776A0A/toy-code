@@ -2,14 +2,7 @@ import { Graph } from './Graph.js'
 
 export class Text extends Graph {
     name = 'text'
-    constructor({
-        text,
-        x = 0,
-        y = 0,
-        font = '20px sarif',
-        color = '#000',
-        ...rest
-    } = {}) {
+    constructor({ text, x = 0, y = 0, font = '20px sarif', color = '#000', ...rest } = {}) {
         super({ text, x, y, font, color, ...rest })
     }
     draw() {

@@ -3,7 +3,7 @@ import { EventEmitter } from './EventEmitter.js'
 import { GraphManager } from './GraphManager.js'
 import * as events from './events.js'
 import { Circle, Picture, Point, Polygon, Rect, Text } from './Graphs/index.js'
-import { Scaler } from './Scaler.js'
+import { VpController } from './VpController.js'
 
 // TODO 有些属性只提供只读接口，然后用户可使用preserve属性向其中添加自定义属性
 // TODO 选择，框选
@@ -29,8 +29,8 @@ export const stageModes = {
 export class Stage extends EventEmitter {
     mode = stageModes.adder
     plugins = new Set()
-    scale = true
-    scaler = new Scaler()
+    vpControl = true
+    vpController = new VpController()
     constructor(canvas) {
         super()
 
@@ -38,10 +38,10 @@ export class Stage extends EventEmitter {
         this._display = new Display(canvas)
         this.graphManager = new GraphManager(this)
 
-        if (!this.scale) {
-            this.scaler = null
+        if (!this.vpControl) {
+            this.vpController = null
         } else {
-            this.scaler.install(this)
+            this.vpController.install(this)
         }
 
         this.init()
@@ -72,17 +72,17 @@ export class Stage extends EventEmitter {
                 const params = generateParams.call(
                     this,
                     evt,
-                    this.scaler.getTranslatedPosition(evt.offsetX, evt.offsetY)
+                    this.vpController.getTransformedPosition(evt.offsetX, evt.offsetY)
                 )
 
-                if (this.scaler.isSpaceDown) this.scaler.handleMouseDown(params)
+                if (this.vpController.isSpaceDown) this.vpController.handleMouseDown(params)
                 else this.emit('mousedown', params)
             },
             handleMouseMove: (evt) => {
                 const params = generateParams.call(
                     this,
                     evt,
-                    this.scaler.getTranslatedPosition(evt.offsetX, evt.offsetY)
+                    this.vpController.getTransformedPosition(evt.offsetX, evt.offsetY)
                 )
 
                 this.emit('mousemove', params)
@@ -103,7 +103,7 @@ export class Stage extends EventEmitter {
                 const params = generateParams.call(
                     this,
                     evt,
-                    this.scaler.getTranslatedPosition(evt.clientX, evt.clientY)
+                    this.vpController.getTransformedPosition(evt.clientX, evt.clientY)
                 )
 
                 this.emit('contextmenu', params)
@@ -170,8 +170,7 @@ export class Stage extends EventEmitter {
             })
             .on({
                 type: events.ADD_GRAPH,
-                handler: (graph, insertIndex) =>
-                    this.addGraph(graph, insertIndex),
+                handler: (graph, insertIndex) => this.addGraph(graph, insertIndex),
             })
             .on({
                 type: events.DELETE_GRAPH,
@@ -187,8 +186,8 @@ export class Stage extends EventEmitter {
         this.graphManager.delete(graph)
     }
     display() {
-        if (this.scale) {
-            this.scaler.zoom(() => {
+        if (this.vpControl) {
+            this.vpController.scale(() => {
                 this._display.refresh(this.graphManager.graphs)
             })
         } else {

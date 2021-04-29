@@ -24,11 +24,7 @@ export class Transformer extends Plugin {
     delete() {}
     handleContextmenu({ x, y, nativeEvent }) {
         if (!this.isInPath({ x, y }) || this.menu) return
-        this.menu = new Menu(
-            { x: nativeEvent.clientX, y: nativeEvent.clientY },
-            this.editor,
-            this
-        )
+        this.menu = new Menu({ x: nativeEvent.clientX, y: nativeEvent.clientY }, this.editor, this)
         this.menu.append()
     }
     end() {
@@ -42,10 +38,7 @@ export class Transformer extends Plugin {
         }))
     }
     isInPath({ x, y }) {
-        const {
-            left,
-            top,
-        } = this.graph.attrs.ctx.canvas.getBoundingClientRect()
+        const { left, top } = this.graph.attrs.ctx.canvas.getBoundingClientRect()
 
         return this.graph.isInPath(x - left, y - top)
     }

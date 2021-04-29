@@ -1,16 +1,18 @@
 import { Plugin } from './Plugin.js'
 import * as events from './events.js'
 
-export class Scaler extends Plugin {
+// viewport controller
+export class VpController extends Plugin {
     stage = null
-    center = { x: 0, y: 0 }
+    vpCenter = { x: 0, y: 0 }
     pan = { x: 0, y: 0 }
     scaleFactor = 1 // 缩放因子
     isSpaceDown = false
     isMouseDown = false
     mouseDownPosition = { x: 0, y: 0 }
-    constructor({ maxScale = 2 } = {}) {
+    constructor({ minScale = 1, maxScale = 2 } = {}) {
         super()
+        this.minScale = minScale
         this.maxScale = maxScale
     }
     install(stage) {
@@ -33,25 +35,27 @@ export class Scaler extends Plugin {
             })
             .on({
                 type: 'wheel',
-                handler: ({ nativeEvent }) => this.setScale(nativeEvent.deltaY),
+                handler: ({ nativeEvent }) => {
+                    this.setScaleFactor(nativeEvent.deltaY)
+                },
             })
     }
-    setCenter(position) {
-        this.center = position
+    setVpCenter(position) {
+        this.vpCenter = position
     }
-    setScale(deltaY) {
+    setScaleFactor(deltaY) {
         let scale = this.scaleFactor
         scale += deltaY * -0.001
-        scale = Math.max(Math.min(this.maxScale, scale), 1)
+        scale = Math.max(Math.min(this.maxScale, scale), this.minScale)
 
         if (scale !== this.scaleFactor) {
             this.scaleFactor = scale
-            this.pan.x = -(this.center.x * this.scaleFactor - this.center.x)
-            this.pan.y = -(this.center.y * this.scaleFactor - this.center.y)
+            this.pan.x = -(this.vpCenter.x * this.scaleFactor - this.vpCenter.x)
+            this.pan.y = -(this.vpCenter.y * this.scaleFactor - this.vpCenter.y)
             this.stage.emit(events.REFRESH_SCREEN)
         }
     }
-    zoom(displayCb) {
+    scale(displayCb) {
         const ctx = this.stage.canvas.getContext('2d')
         const { pan, scaleFactor } = this
         this.correctPan()
@@ -61,7 +65,7 @@ export class Scaler extends Plugin {
         displayCb()
         ctx.restore()
     }
-    getTranslatedPosition(x, y) {
+    getTransformedPosition(x, y) {
         return {
             x: (x - this.pan.x) / this.scaleFactor,
             y: (y - this.pan.y) / this.scaleFactor,
@@ -95,7 +99,7 @@ export class Scaler extends Plugin {
             this.mouseDownPosition.y = y
         }
 
-        this.setCenter({ x, y })
+        this.setVpCenter({ x, y })
 
         this.stage.emit(events.REFRESH_SCREEN)
     }

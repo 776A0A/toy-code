@@ -7,9 +7,7 @@ export class Display {
         graphs.forEach((graph) => graph.draw())
     }
     clean() {
-        this.canvas
-            .getContext('2d')
-            .clearRect(0, 0, this.canvas.width, this.canvas.height)
+        this.canvas.getContext('2d').clearRect(0, 0, this.canvas.width, this.canvas.height)
     }
     refresh(graphs) {
         this.clean()

@@ -33,9 +33,7 @@ export const getGraphCenter = (graph) => {
         const { x, y, width, height } = graph.attrs
         return [x + width / 2, y + height / 2]
     } else if (name === 'polygon') {
-        const center = calculateCenter(
-            graph.attrs.points.map(({ attrs: { x, y } }) => [x, y])
-        )
+        const center = calculateCenter(graph.attrs.points.map(({ attrs: { x, y } }) => [x, y]))
         return center
     }
 }

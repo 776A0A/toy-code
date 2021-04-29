@@ -6,8 +6,7 @@ export class EventEmitter {
         if (elem instanceof Node) {
             elem.addEventListener(type, handler, capture)
         } else {
-            const handlers =
-                this._handlers[type] ?? (this._handlers[type] = new Set())
+            const handlers = this._handlers[type] ?? (this._handlers[type] = new Set())
 
             handlers.add(handler)
         }
