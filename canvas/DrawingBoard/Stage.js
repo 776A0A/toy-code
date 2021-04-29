@@ -232,9 +232,7 @@ export class Stage extends EventEmitter {
                 if (children.length) generate(children, graph)
 
                 if (name === 'polygon') {
-                    const points = attrs.points.map((point) => {
-                        return new Point({ ctx, ...point.attrs })
-                    })
+                    const points = attrs.points.map((point) => new Point({ ctx, ...point.attrs }))
                     graph.attr({ points }).updatePointsDiff()
                 }
 

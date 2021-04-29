@@ -23,6 +23,8 @@ export class Picture extends Graph {
     drawPath() {
         const { ctx, width, height } = this.attrs
         ctx.translate(...this.getTranslate())
+        ctx.beginPath()
         ctx.rect(0, 0, width, height)
+        ctx.closePath()
     }
 }

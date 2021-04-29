@@ -121,8 +121,6 @@ export class Editor extends Plugin {
         if (!graphs.length) return
 
         let top
-        const ctx = this.stage.canvas.getContext('2d')
-
         ;[...graphs].forEach((graph, idx) => {
             if (graph.isInPath(x, y)) top = idx
         })
