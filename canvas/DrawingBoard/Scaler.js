@@ -24,6 +24,10 @@ export class Scaler extends Plugin {
             .on({ type: 'keyup', handler: () => (this.isSpaceDown = false) })
             .on({ type: 'mouseup', handler: () => (this.isMouseDown = false) })
             .on({
+                type: 'mouseleave',
+                handler: () => (this.isMouseDown = false),
+            })
+            .on({
                 type: 'mousemove',
                 handler: (evt) => this.handleMouseMove(evt),
             })
