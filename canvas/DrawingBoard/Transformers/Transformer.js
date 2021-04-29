@@ -22,9 +22,13 @@ export class Transformer extends Plugin {
         return this
     }
     delete() {}
-    handleContextmenu({ x, y }) {
+    handleContextmenu({ x, y, nativeEvent }) {
         if (!this.isInPath({ x, y }) || this.menu) return
-        this.menu = new Menu({ x, y }, this.editor, this)
+        this.menu = new Menu(
+            { x: nativeEvent.clientX, y: nativeEvent.clientY },
+            this.editor,
+            this
+        )
         this.menu.append()
     }
     end() {

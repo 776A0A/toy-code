@@ -5,14 +5,10 @@ import * as events from './events.js'
 import { Circle, Picture, Point, Polygon, Rect, Text } from './Graphs/index.js'
 import { Scaler } from './Scaler.js'
 
-// TODO 增加八个控制点
 // TODO 有些属性只提供只读接口，然后用户可使用preserve属性向其中添加自定义属性
-// TODO 优化重复代码，例如很多方法中都要用到的那几行代码
-// TODO wheel 整个放大缩小
 // TODO 选择，框选
 // TODO 优化使用插件的类的共有代码
 // TODO cursor
-// TODO import功能
 // TODO 显示窗口resize问题
 // TODO 撤销和重做
 // TODO 旋转
@@ -104,10 +100,12 @@ export class Stage extends EventEmitter {
                 this.emit('dblclick', params)
             },
             handleContextMenu: (evt) => {
-                const params = generateParams.call(this, evt, {
-                    x: evt.clientX,
-                    y: evt.clientY,
-                })
+                const params = generateParams.call(
+                    this,
+                    evt,
+                    this.scaler.getTranslatedPosition(evt.clientX, evt.clientY)
+                )
+
                 this.emit('contextmenu', params)
             },
             handleWheel: (evt) => {
