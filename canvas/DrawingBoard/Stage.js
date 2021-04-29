@@ -3,7 +3,7 @@ import { EventEmitter } from './EventEmitter.js'
 import { GraphManager } from './GraphManager.js'
 import * as events from './events.js'
 import { Circle, Picture, Point, Polygon, Rect, Text } from './Graphs/index.js'
-import { Zoom } from './Zoom.js'
+import { Scaler } from './Scaler.js'
 
 // TODO 增加八个控制点
 // TODO 有些属性只提供只读接口，然后用户可使用preserve属性向其中添加自定义属性
@@ -33,8 +33,8 @@ export const stageModes = {
 export class Stage extends EventEmitter {
     mode = stageModes.adder
     plugins = new Set()
-    zoom = true
-    zoomer = new Zoom()
+    scale = true
+    scaler = new Scaler()
     constructor(canvas) {
         super()
 
@@ -42,10 +42,10 @@ export class Stage extends EventEmitter {
         this._display = new Display(canvas)
         this.graphManager = new GraphManager(this)
 
-        if (!this.zoom) {
-            this.zoomer = null
+        if (!this.scale) {
+            this.scaler = null
         } else {
-            this.zoomer.install(this)
+            this.scaler.install(this)
         }
 
         this.init()
@@ -73,18 +73,20 @@ export class Stage extends EventEmitter {
             handleMouseDown: (evt) => {
                 if (evt.button !== LEFT_MOUSE_DOWN) return
 
-                const params = generateParams.call(this, evt, {
-                    x: evt.offsetX,
-                    y: evt.offsetY,
-                })
+                const params = generateParams.call(
+                    this,
+                    evt,
+                    this.scaler.getTranslatedPosition(evt.offsetX, evt.offsetY)
+                )
 
                 this.emit('mousedown', params)
             },
             handleMouseMove: (evt) => {
-                const params = generateParams.call(this, evt, {
-                    x: evt.offsetX,
-                    y: evt.offsetY,
-                })
+                const params = generateParams.call(
+                    this,
+                    evt,
+                    this.scaler.getTranslatedPosition(evt.offsetX, evt.offsetY)
+                )
 
                 this.emit('mousemove', params)
             },
@@ -135,12 +137,12 @@ export class Stage extends EventEmitter {
         this.graphManager.delete(graph)
     }
     display() {
-        if (this.zoom) {
+        if (this.scale) {
             const ctx = this.canvas.getContext('2d')
-            const { target, scaleTotal } = this.zoomer
+            const { pan, scaleFactor } = this.scaler
             ctx.save()
-            ctx.translate(target.x, target.y)
-            ctx.scale(scaleTotal, scaleTotal)
+            ctx.translate(pan.x, pan.y)
+            ctx.scale(scaleFactor, scaleFactor)
             this._display.refresh(this.graphManager.graphs)
             ctx.restore()
         } else {
