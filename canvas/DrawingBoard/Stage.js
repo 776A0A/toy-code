@@ -1,14 +1,13 @@
 import { Display } from './Display.js'
 import { EventEmitter } from './EventEmitter.js'
 import { GraphManager } from './GraphManager.js'
-import * as events from './events.js'
+import { events, cursors } from './shared.js'
 import { Circle, Picture, Point, Polygon, Rect, Text } from './Graphs/index.js'
 import { VpController } from './VpController.js'
 
 // TODO 有些属性只提供只读接口，然后用户可使用preserve属性向其中添加自定义属性
 // TODO 选择，框选
 // TODO 优化使用插件的类的共有代码
-// TODO cursor
 // TODO 显示窗口resize问题
 // TODO 撤销和重做
 // TODO 旋转
@@ -31,6 +30,7 @@ export class Stage extends EventEmitter {
     plugins = new Set()
     vpControl = true
     vpController = new VpController()
+    cursor = cursors.crosshair
     constructor(canvas) {
         super()
 
@@ -48,13 +48,15 @@ export class Stage extends EventEmitter {
     }
     init() {
         this.addListener()
+        this.setCursor(cursors.crosshair)
     }
     setMode(mode) {
         this.mode = mode
 
         if (mode === stageModes.adder) {
             this.emit(events.END_EDIT)
-        }
+            this.setCursor(cursors.crosshair)
+        } else this.setCursor(cursors.grab)
 
         return this
     }
@@ -177,6 +179,7 @@ export class Stage extends EventEmitter {
                 handler: (graph) => this.deleteGraph(graph),
             })
             .on({ type: events.REFRESH_SCREEN, handler: () => this.display() })
+            .on({ type: events.CHANGE_CURSOR, handler: (cursor) => this.setCursor(cursor) })
     }
     addGraph(graph, insertIndex) {
         this.graphManager.add(graph, insertIndex)
@@ -184,6 +187,7 @@ export class Stage extends EventEmitter {
     }
     deleteGraph(graph) {
         this.graphManager.delete(graph)
+        return this
     }
     display() {
         if (this.vpControl) {
@@ -193,6 +197,7 @@ export class Stage extends EventEmitter {
         } else {
             this._display.refresh(this.graphManager.graphs)
         }
+        return this
     }
     import(graphs) {
         const constructorMap = {
@@ -274,6 +279,15 @@ export class Stage extends EventEmitter {
                 return obj
             })
         }
+    }
+    setCursor(cursor) {
+        if (!cursors) throw Error('请传入合法的 cursor 值！')
+
+        if (cursor === cursors.crosshair) {
+            if (this.mode === 'editor') cursor = cursors.grab
+        }
+
+        this.canvas.style.cursor = cursor
     }
 }
 

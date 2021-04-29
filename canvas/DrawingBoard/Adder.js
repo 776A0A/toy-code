@@ -1,5 +1,5 @@
 import { Point } from './Graphs/index.js'
-import * as events from './events.js'
+import { events } from './shared.js'
 import { RectDrawer, PolygonDrawer } from './Drawer.js'
 import { Plugin } from './Plugin.js'
 

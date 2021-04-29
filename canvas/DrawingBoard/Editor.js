@@ -1,4 +1,4 @@
-import * as events from './events.js'
+import { events, cursors } from './shared.js'
 import { Plugin } from './Plugin.js'
 import { PolygonTransformer, RectTransformer, PictureTransformer } from './Transformers/index.js'
 
@@ -51,6 +51,7 @@ export class Editor extends Plugin {
             this.isDragging = true
         } else if (mode === editorModes.wait) {
             this.isResizing = this.isDragging = false
+            this.stage.emit(events.CHANGE_CURSOR, cursors.grab)
         }
     }
     edit({ x, y }) {
@@ -72,6 +73,7 @@ export class Editor extends Plugin {
 
         if (this.transformer && this.transformer.isPicked({ x, y }) !== -1) {
             this.setMode(editorModes.resize)
+            this.stage.emit(events.CHANGE_CURSOR, cursors.grabbing)
         } else {
             const top = this.findTop({ x, y })
 
@@ -87,9 +89,11 @@ export class Editor extends Plugin {
                 this.isEditing = true
                 this.topGraphIndex = top
                 this.setMode(editorModes.drag)
+                this.stage.emit(events.CHANGE_CURSOR, cursors.grabbing)
             } else {
                 this.isEditing = false
                 this.topGraphIndex = undefined
+                this.stage.emit(events.CHANGE_CURSOR, cursors.grab)
             }
 
             this.stage.emit(events.REFRESH_SCREEN)

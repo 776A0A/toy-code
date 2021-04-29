@@ -1,5 +1,5 @@
 import { Transformer } from './Transformer.js'
-import * as events from '../events.js'
+import { events } from '../shared.js'
 
 export class PolygonTransformer extends Transformer {
     name = 'polygonTransformer'

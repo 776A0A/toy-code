@@ -1,5 +1,5 @@
 import { EventEmitter } from '../EventEmitter.js'
-import * as events from '../events.js'
+import { events } from '../shared.js'
 import { merge } from '../utils.js'
 export const DEFAULT_COLOR = '#1890ff'
 export const DEFAULT_FILL_COLOR = '#a0c5e84f'

@@ -1,5 +1,5 @@
 import { Plugin } from './Plugin.js'
-import * as events from './events.js'
+import { cursors, events } from './shared.js'
 
 // viewport controller
 export class VpController extends Plugin {
@@ -23,8 +23,8 @@ export class VpController extends Plugin {
                 type: 'keydown',
                 handler: (evt) => this.handleKeyDown(evt),
             })
-            .on({ type: 'keyup', handler: () => (this.isSpaceDown = false) })
-            .on({ type: 'mouseup', handler: () => (this.isMouseDown = false) })
+            .on({ type: 'keyup', handler: () => this.handleKeyUp() })
+            .on({ type: 'mouseup', handler: () => this.handleMouseUp() })
             .on({
                 type: 'mouseleave',
                 handler: () => (this.isMouseDown = false),
@@ -74,7 +74,15 @@ export class VpController extends Plugin {
     handleKeyDown({ nativeEvent }) {
         if (nativeEvent.code.toLowerCase() === 'space') {
             this.isSpaceDown = true
+            this.stage.emit(events.CHANGE_CURSOR, cursors.move)
         }
+    }
+    handleKeyUp() {
+        this.isSpaceDown = false
+        this.stage.emit(events.CHANGE_CURSOR, cursors.crosshair)
+    }
+    handleMouseUp() {
+        this.isMouseDown = false
     }
     handleMouseDown({ nativeEvent, x, y }) {
         if (this.isSpaceDown) {

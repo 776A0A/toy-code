@@ -1,4 +1,4 @@
-import * as events from '../events.js'
+import { events } from '../shared.js'
 
 export function quadrangleStart() {
     if (this.controller.pickedIndex === -1) return
