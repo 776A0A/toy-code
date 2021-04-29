@@ -79,7 +79,8 @@ export class Stage extends EventEmitter {
                     this.scaler.getTranslatedPosition(evt.offsetX, evt.offsetY)
                 )
 
-                this.emit('mousedown', params)
+                if (this.scaler.isSpaceDown) this.scaler.handleMouseDown(params)
+                else this.emit('mousedown', params)
             },
             handleMouseMove: (evt) => {
                 const params = generateParams.call(
@@ -113,21 +114,72 @@ export class Stage extends EventEmitter {
                 const params = generateParams.call(this, evt)
                 this.emit('wheel', params)
             },
+            handleKeyDown: (evt) => {
+                const params = generateParams.call(this, evt)
+                this.emit('keydown', params)
+            },
+            handleKeyUp: (evt) => {
+                const params = generateParams.call(this, evt)
+                this.emit('keyup', params)
+            },
         }
     }
     addListener() {
-        this.on(this.canvas, 'mousedown', this.handlers.handleMouseDown)
-            .on(this.canvas, 'mousemove', this.handlers.handleMouseMove)
-            .on(this.canvas, 'mouseup', this.handlers.handleMouseUp)
-            .on(this.canvas, 'mouseleave', this.handlers.handleMouseLeave)
-            .on(this.canvas, 'dblclick', this.handlers.handleDblClick)
-            .on(this.canvas, 'contextmenu', this.handlers.handleContextMenu)
-            .on(this.canvas, 'wheel', this.handlers.handleWheel)
-            .on(events.ADD_GRAPH, (graph, insertIndex) =>
-                this.addGraph(graph, insertIndex)
-            )
-            .on(events.DELETE_GRAPH, (graph) => this.deleteGraph(graph))
-            .on(events.REFRESH_SCREEN, () => this.display())
+        this.on({
+            elem: this.canvas,
+            type: 'mousedown',
+            handler: this.handlers.handleMouseDown,
+        })
+            .on({
+                elem: this.canvas,
+                type: 'mousemove',
+                handler: this.handlers.handleMouseMove,
+            })
+            .on({
+                elem: this.canvas,
+                type: 'mouseup',
+                handler: this.handlers.handleMouseUp,
+            })
+            .on({
+                elem: this.canvas,
+                type: 'mouseleave',
+                handler: this.handlers.handleMouseLeave,
+            })
+            .on({
+                elem: this.canvas,
+                type: 'dblclick',
+                handler: this.handlers.handleDblClick,
+            })
+            .on({
+                elem: this.canvas,
+                type: 'contextmenu',
+                handler: this.handlers.handleContextMenu,
+            })
+            .on({
+                elem: this.canvas,
+                type: 'wheel',
+                handler: this.handlers.handleWheel,
+            })
+            .on({
+                elem: document,
+                type: 'keydown',
+                handler: this.handlers.handleKeyDown,
+            })
+            .on({
+                elem: document,
+                type: 'keyup',
+                handler: this.handlers.handleKeyUp,
+            })
+            .on({
+                type: events.ADD_GRAPH,
+                handler: (graph, insertIndex) =>
+                    this.addGraph(graph, insertIndex),
+            })
+            .on({
+                type: events.DELETE_GRAPH,
+                handler: (graph) => this.deleteGraph(graph),
+            })
+            .on({ type: events.REFRESH_SCREEN, handler: () => this.display() })
     }
     addGraph(graph, insertIndex) {
         this.graphManager.add(graph, insertIndex)
@@ -138,13 +190,9 @@ export class Stage extends EventEmitter {
     }
     display() {
         if (this.scale) {
-            const ctx = this.canvas.getContext('2d')
-            const { pan, scaleFactor } = this.scaler
-            ctx.save()
-            ctx.translate(pan.x, pan.y)
-            ctx.scale(scaleFactor, scaleFactor)
-            this._display.refresh(this.graphManager.graphs)
-            ctx.restore()
+            this.scaler.zoom(() => {
+                this._display.refresh(this.graphManager.graphs)
+            })
         } else {
             this._display.refresh(this.graphManager.graphs)
         }

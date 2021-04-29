@@ -24,15 +24,18 @@ class Graph extends EventEmitter {
         return this._attrs
     }
     init() {
-        this.on(events.REMOVED_FROM_PARENT, () => {
-            this.parentListeners.forEach(([type, cb]) => {
-                this.parent.off(type, cb)
-            })
+        this.on({
+            type: events.REMOVED_FROM_PARENT,
+            handler: () => {
+                this.parentListeners.forEach(([type, cb]) => {
+                    this.parent.off({ type, handler: cb })
+                })
+            },
         })
     }
     listenParent(type, cb) {
         if (!this.parent) return
-        this.parent.on(type, cb)
+        this.parent.on({ type, handler: cb })
         this.parentListeners.push([type, cb])
     }
     attr(attrs = {}) {

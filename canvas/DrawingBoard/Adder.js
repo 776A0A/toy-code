@@ -77,11 +77,20 @@ export class Adder extends Plugin {
         this.stage = stage
 
         stage
-            .on('mousedown', ({ x, y }) => check() && this.add({ x, y }))
-            .on('mousemove', ({ x, y }) => check() && this.update({ x, y }))
-            .on('mouseup', () => check() && this.commit())
-            .on('mouseleave', () => check() && this.commit())
-            .on('dblclick', ({ type }) => check() && this.commit(type))
+            .on({
+                type: 'mousedown',
+                handler: ({ x, y }) => check() && this.add({ x, y }),
+            })
+            .on({
+                type: 'mousemove',
+                handler: ({ x, y }) => check() && this.update({ x, y }),
+            })
+            .on({ type: 'mouseup', handler: () => check() && this.commit() })
+            .on({ type: 'mouseleave', handler: () => check() && this.commit() })
+            .on({
+                type: 'dblclick',
+                handler: ({ type }) => check() && this.commit(type),
+            })
 
         function check() {
             return stage.mode === 'adder'

@@ -27,11 +27,14 @@ export class Editor extends Plugin {
         this.init()
     }
     init() {
-        this.on('delete', (graph) => {
-            this.stage
-                .emit(events.DELETE_GRAPH, graph)
-                .emit(events.REFRESH_SCREEN)
-            this.delete()
+        this.on({
+            type: 'delete',
+            handler: (graph) => {
+                this.stage
+                    .emit(events.DELETE_GRAPH, graph)
+                    .emit(events.REFRESH_SCREEN)
+                this.delete()
+            },
         })
     }
     use(plugin) {
@@ -147,15 +150,27 @@ export class Editor extends Plugin {
         this.stage = stage
 
         stage
-            .on('mousedown', (event) => check() && this.pick(event))
-            .on('mousemove', (event) => check() && this.edit(event))
-            .on('mouseup', () => check() && this.setMode(editorModes.wait))
-            .on('mouseleave', () => check() && this.setMode(editorModes.wait))
-            .on(
-                'contextmenu',
-                (event) => check() && this.handleContextmenu(event)
-            )
-            .on(events.END_EDIT, () => this.end())
+            .on({
+                type: 'mousedown',
+                handler: (event) => check() && this.pick(event),
+            })
+            .on({
+                type: 'mousemove',
+                handler: (event) => check() && this.edit(event),
+            })
+            .on({
+                type: 'mouseup',
+                handler: () => check() && this.setMode(editorModes.wait),
+            })
+            .on({
+                type: 'mouseleave',
+                handler: () => check() && this.setMode(editorModes.wait),
+            })
+            .on({
+                type: 'contextmenu',
+                handler: (event) => check() && this.handleContextmenu(event),
+            })
+            .on({ type: events.END_EDIT, handler: () => this.end() })
 
         function check() {
             return stage.mode === 'editor'

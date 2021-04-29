@@ -2,13 +2,10 @@ export class EventEmitter {
     constructor() {
         this._handlers = {}
     }
-    on(elem, type, handler) {
-        if (elem instanceof Element) {
-            elem.addEventListener(type, handler)
+    on({ elem, type, handler, capture = false } = {}) {
+        if (elem instanceof Node) {
+            elem.addEventListener(type, handler, capture)
         } else {
-            handler = type
-            type = elem
-
             const handlers =
                 this._handlers[type] ?? (this._handlers[type] = new Set())
 
@@ -17,13 +14,10 @@ export class EventEmitter {
 
         return this
     }
-    off(elem, type, handler) {
-        if (elem instanceof Element) {
-            elem.removeEventListener(type, handler)
+    off({ elem, type, handler, capture = false } = {}) {
+        if (elem instanceof Node) {
+            elem.removeEventListener(type, handler, capture)
         } else {
-            handler = type
-            type = elem
-
             const handlers = this._handlers[type]
 
             if (!handlers || handlers.size === 0) return this
