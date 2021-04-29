@@ -47,13 +47,14 @@ export class Scaler extends Plugin {
             this.stage.emit(events.REFRESH_SCREEN)
         }
     }
-    zoom(cb) {
+    zoom(displayCb) {
         const ctx = this.stage.canvas.getContext('2d')
         const { pan, scaleFactor } = this
+        this.correctPan()
         ctx.save()
         ctx.translate(pan.x, pan.y)
         ctx.scale(scaleFactor, scaleFactor)
-        cb()
+        displayCb()
         ctx.restore()
     }
     getTranslatedPosition(x, y) {
@@ -84,6 +85,8 @@ export class Scaler extends Plugin {
             this.pan.x += diff.x
             this.pan.y += diff.y
 
+            this.correctPan()
+
             this.mouseDownPosition.x = x
             this.mouseDownPosition.y = y
         }
@@ -91,5 +94,26 @@ export class Scaler extends Plugin {
         this.setCenter({ x, y })
 
         this.stage.emit(events.REFRESH_SCREEN)
+    }
+    correctPan() {
+        // 缩放因子为1，则不能位移
+        if (this.scaleFactor === 1) this.pan = { x: 0, y: 0 }
+        else {
+            // 不能向右拉过头
+            if (this.pan.x > 0 || this.pan.y > 0) {
+                if (this.pan.x > 0) this.pan.x = 0
+                if (this.pan.y > 0) this.pan.y = 0
+            } else {
+                const { width, height } = this.stage.canvas
+
+                const diff = {
+                    x: -(width * this.scaleFactor - width),
+                    y: -(height * this.scaleFactor - height),
+                }
+                // 不能向左拉过头
+                if (this.pan.x < diff.x) this.pan.x = diff.x
+                if (this.pan.y < diff.y) this.pan.y = diff.y
+            }
+        }
     }
 }
