@@ -48,6 +48,19 @@ export class Stage extends EventEmitter {
         this.addListener()
         this.setCursor(cursors.crosshair)
     }
+    // TODO 处理retina问题
+    initRetina() {
+        const dpi = window.devicePixelRatio
+        const canvas = this.canvas
+
+        canvas.style.width = `${canvas.width}px`
+        canvas.style.height = `${canvas.height}px`
+
+        canvas.width = canvas.width * dpi
+        canvas.height = canvas.height * dpi
+
+        canvas.getContext('2d').scale(dpi, dpi)
+    }
     setMode(mode) {
         this.mode = mode
 
