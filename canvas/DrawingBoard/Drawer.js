@@ -15,6 +15,9 @@ class Drawer extends Plugin {
     update() {}
     // 提交图形，即完成绘制
     commit() {}
+    cancel() {
+        this.graph.destroy()
+    }
 }
 
 export class RectDrawer extends Drawer {

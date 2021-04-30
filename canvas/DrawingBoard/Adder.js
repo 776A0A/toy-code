@@ -67,10 +67,26 @@ export class Adder extends PluginHost {
         this.isDrawing = false
         this.drawer = null
     }
+    cancel(evt) {
+        if (
+            evt.code.toLowerCase() === 'escape' &&
+            this.isDrawing &&
+            this.mode === adderModes.polygon
+        ) {
+            this.stage.emit(events.DELETE_GRAPH, this.drawer.graph).display()
+            this.drawer.cancel()
+            this.isDrawing = false
+            this.drawer = null
+        }
+    }
     install(stage) {
         this.stage = stage
 
         stage
+            .on({
+                type: 'keyup',
+                handler: ({ nativeEvent }) => check() && this.cancel(nativeEvent),
+            })
             .on({
                 type: 'mousedown',
                 handler: ({ x, y }) => check() && this.add({ x, y }),
