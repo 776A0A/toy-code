@@ -1,25 +1,19 @@
 import { Point } from './Graphs/index.js'
 import { events } from './shared.js'
 import { RectDrawer, PolygonDrawer } from './Drawer.js'
-import { Plugin } from './Plugin.js'
+import { PluginHost } from './PluginHost.js'
 
 export const adderModes = {
     rect: Symbol('rect'),
     polygon: Symbol('polygon'),
 }
-export class Adder extends Plugin {
+export class Adder extends PluginHost {
     stage = null
     mode = adderModes.rect
     drawers = new Map()
     drawer = null
     isDrawing = false
     plugins = new Set()
-    use(plugin) {
-        if (this.plugins.has(plugin)) return
-        this.plugins.add(plugin)
-        plugin.install(this)
-        return this
-    }
     injectDrawer(name, drawer) {
         if (this.drawers.has(drawer)) return
         this.drawers.set(name, drawer)

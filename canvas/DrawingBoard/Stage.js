@@ -5,9 +5,7 @@ import { events, cursors } from './shared.js'
 import { Circle, Picture, Point, Polygon, Rect, Text } from './Graphs/index.js'
 import { VpController } from './VpController.js'
 
-// TODO 有些属性只提供只读接口，然后用户可使用preserve属性向其中添加自定义属性
 // TODO 选择，框选
-// TODO 优化使用插件的类的共有代码
 // TODO 显示窗口resize问题
 // TODO 撤销和重做
 // TODO 旋转

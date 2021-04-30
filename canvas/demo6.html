@@ -20,12 +20,9 @@
                 border: 1px solid;
                 overflow: hidden;
                 width: 1000px;
-                height: 500px;
             }
             #canvas {
-                position: relative;
-                width: 1000px;
-                height: 500px;
+                width: 100%;
             }
         </style>
     </head>
@@ -194,6 +191,15 @@
                     stage.addGraph(picture, 0).display()
                 }
             }
+
+            // window.onresize = handleResize
+
+            function handleResize() {
+                const { width } = canvas.getBoundingClientRect()
+                canvas.style.height = `${width / 2}px`
+            }
+
+            handleResize()
 
             const stage = new Stage(canvas)
 

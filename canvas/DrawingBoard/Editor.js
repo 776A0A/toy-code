@@ -1,6 +1,6 @@
 import { events, cursors } from './shared.js'
-import { Plugin } from './Plugin.js'
 import { PolygonTransformer, RectTransformer, PictureTransformer } from './Transformers/index.js'
+import { PluginHost } from './PluginHost.js'
 
 export const editorModes = {
     wait: Symbol('wait'), // 等在选择图形
@@ -8,7 +8,7 @@ export const editorModes = {
     drag: Symbol('drag'),
 }
 
-export class Editor extends Plugin {
+export class Editor extends PluginHost {
     stage = null
     topGraphIndex = undefined
     isEditing = false // 点选到了某一个图形即为true
@@ -30,12 +30,6 @@ export class Editor extends Plugin {
                 this.deleteGraph()
             },
         })
-    }
-    use(plugin) {
-        if (this.plugins.has(plugin)) return
-        this.plugins.add(plugin)
-        plugin.install(this)
-        return this
     }
     injectTransformer(name, transformer) {
         if (this.transformers.has(name)) return
