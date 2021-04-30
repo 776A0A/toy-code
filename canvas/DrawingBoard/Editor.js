@@ -1,6 +1,7 @@
 import { events, cursors } from './shared.js'
 import { PolygonTransformer, RectTransformer, PictureTransformer } from './Transformers/index.js'
 import { PluginHost } from './PluginHost.js'
+import { stageModes } from './Stage.js'
 
 export const editorModes = {
     wait: Symbol('wait'), // 等在选择图形
@@ -161,7 +162,7 @@ export class Editor extends PluginHost {
             .on({ type: events.END_EDIT, handler: () => this.end() })
 
         function check() {
-            return stage.mode === 'editor'
+            return stage.mode === stageModes.editor
         }
     }
 }

@@ -2,6 +2,7 @@ import { Point } from './Graphs/index.js'
 import { events } from './shared.js'
 import { RectDrawer, PolygonDrawer } from './Drawer.js'
 import { PluginHost } from './PluginHost.js'
+import { stageModes } from './Stage.js'
 
 export const adderModes = {
     rect: Symbol('rect'),
@@ -103,7 +104,7 @@ export class Adder extends PluginHost {
             })
 
         function check() {
-            return stage.mode === 'adder'
+            return stage.mode === stageModes.adder
         }
     }
 }

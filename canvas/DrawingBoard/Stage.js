@@ -10,17 +10,11 @@ import { VpController } from './VpController.js'
 // TODO 撤销和重做
 // TODO 旋转
 
-const canvasDefaultConfig = {
-    backgroundColor: '#fff',
-    strokeColor: '#1890ff',
-    fillColor: '#a0c5e8',
-}
-
 const LEFT_MOUSE_DOWN = 0
 
 export const stageModes = {
-    adder: 'adder',
-    editor: 'editor',
+    adder: Symbol('adder'),
+    editor: Symbol('editor'),
 }
 
 export class Stage extends EventEmitter {
@@ -294,7 +288,7 @@ export class Stage extends EventEmitter {
         if (!cursors) throw Error('请传入合法的 cursor 值！')
 
         if (cursor === cursors.crosshair) {
-            if (this.mode === 'editor') cursor = cursors.grab
+            if (this.mode === stageModes.editor) cursor = cursors.grab
         }
 
         this.canvas.style.cursor = cursor
