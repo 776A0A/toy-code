@@ -1,10 +1,9 @@
 import { events } from '../shared.js'
 
 export class Menu {
-    constructor(position, editor, transformer) {
+    constructor(position, handleDelete) {
         this.position = position
-        this.editor = editor
-        this.transformer = transformer
+        this.handleDelete = handleDelete
         this.menu = document.createElement('div')
         this.menu.id = 'canvas-editor-menu'
 
@@ -42,7 +41,7 @@ export class Menu {
     }
     handleClick(evt) {
         if (evt.target.id === 'deleteGraphButton') {
-            this.editor.emit(events.DELETE_GRAPH, this.transformer.graph)
+            this.handleDelete()
             this.remove()
         }
     }
@@ -52,6 +51,6 @@ export class Menu {
     remove() {
         this.menu?.removeEventListener('click', this.handleClick)
         this.menu?.remove()
-        this.editor.menu = this.menu = null
+        this.menu = null
     }
 }

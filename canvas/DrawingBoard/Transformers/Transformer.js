@@ -3,6 +3,7 @@ import { ControlPoint } from './ControlPoint.js'
 import { getDistance } from '../utils.js'
 import * as quadrangleHandlers from './quadrangleHandlers.js'
 import { Menu } from './Menu.js'
+import { events } from '../shared.js'
 
 export class Transformer extends Plugin {
     name = 'transformer'
@@ -21,10 +22,17 @@ export class Transformer extends Plugin {
         this.controller = new ControlPoint(graph)
         return this
     }
-    delete() {}
+    delete() {
+        this.editor.emit(events.DELETE_GRAPH, this.graph)
+        this.menu = null
+        this.graph = null
+        this.controller = null
+    }
     handleContextmenu({ x, y, nativeEvent }) {
         if (!this.isInPath({ x, y }) || this.menu) return
-        this.menu = new Menu({ x: nativeEvent.clientX, y: nativeEvent.clientY }, this.editor, this)
+        this.menu = new Menu({ x: nativeEvent.clientX, y: nativeEvent.clientY }, () =>
+            this.delete()
+        )
         this.menu.append()
     }
     end() {

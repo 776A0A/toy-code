@@ -26,7 +26,7 @@ export class Editor extends PluginHost {
         this.on({
             type: events.DELETE_GRAPH,
             handler: (graph) => {
-                this.stage.emit(events.DELETE_GRAPH, graph).emit(events.REFRESH_SCREEN)
+                this.stage.emit(events.DELETE_GRAPH, graph).display()
                 this.deleteGraph()
             },
         })
