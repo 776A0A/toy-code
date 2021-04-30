@@ -45,6 +45,10 @@ export class VpController extends Plugin {
     }
     setScaleFactor(deltaY) {
         let scale = this.scaleFactor
+        // 在firefox中deltaY的值为-3/3
+        if (window.navigator.userAgent.toLowerCase().includes('firefox')) {
+            deltaY = (deltaY / 3) * 100
+        }
         scale += deltaY * -0.001
         scale = Math.max(Math.min(this.maxScale, scale), this.minScale)
 
