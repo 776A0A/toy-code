@@ -233,7 +233,6 @@ export class Stage extends EventEmitter {
 
                 const graph = new constructor({ ctx, ...attrs })
 
-                // BUG 导入后的文字不会跟随图形变化居中
                 if (children.length) generate(children, graph)
 
                 if (name === 'polygon') {

@@ -36,6 +36,7 @@ export class VpController extends Plugin {
             .on({
                 type: 'wheel',
                 handler: ({ nativeEvent }) => {
+                    nativeEvent.preventDefault()
                     this.setScaleFactor(nativeEvent.deltaY)
                 },
             })
