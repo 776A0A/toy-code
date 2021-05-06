@@ -205,6 +205,9 @@ export class Stage extends EventEmitter {
         }
         return this
     }
+    refresh() {
+        this.display()
+    }
     import(graphs) {
         const constructorMap = {
             rect: Rect,
