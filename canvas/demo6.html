@@ -1,269 +1,271 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Document</title>
-        <style>
-            button {
-                padding: 5px 10px;
-            }
-            .active {
-                color: darkcyan;
-            }
-            #buttonGroup {
-                margin-top: 10px;
-                user-select: none;
-            }
-            #canvas-wrapper {
-                border: 1px solid;
-                overflow: hidden;
-                width: 1000px;
-            }
-            #canvas {
-                width: 100%;
-            }
-        </style>
-    </head>
-    <body>
-        <div id="container">
-            <div id="canvas-wrapper">
-                <canvas id="canvas"></canvas>
-            </div>
-            <div id="buttonGroup">
-                <button id="drawRectButton" class="active">矩形</button>
-                <button id="drawPointButton">描点</button>
-                <button id="editButton">编辑</button>
-                <input type="text" id="boxName" />
-                <button id="addText">添加盒子名称</button>
-                <button id="exportGraphsButton">导出</button>
-                <button id="importGraphButton">导入</button>
-            </div>
-        </div>
-        <script type="module">
-            import {
-                Stage,
-                Text,
-                events,
-                adder,
-                editor,
-                adderModes,
-                getGraphCenter,
-                Picture,
-                stageModes,
-            } from './DrawingBoard/index.js'
-            const canvas = document.getElementById('canvas')
-            const ctx = canvas.getContext('2d')
-            const width = 1000
-            const height = width * 0.665
-            canvas.width = width
-            canvas.height = height
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      button {
+        padding: 5px 10px;
+      }
+      .active {
+        color: darkcyan;
+      }
+      #buttonGroup {
+        margin-top: 10px;
+        user-select: none;
+      }
+      #canvas-wrapper {
+        border: 1px solid;
+        overflow: hidden;
+        width: 1000px;
+      }
+      #canvas {
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <div id="canvas-wrapper">
+        <canvas id="canvas"></canvas>
+      </div>
+      <div id="buttonGroup">
+        <button id="drawRectButton" class="active">矩形</button>
+        <button id="drawPointButton">描点</button>
+        <button id="editButton">编辑</button>
+        <input type="text" id="boxName" />
+        <button id="addText">添加盒子名称</button>
+        <button id="exportGraphsButton">导出</button>
+        <button id="importGraphButton">导入</button>
+      </div>
+    </div>
+    <script type="module">
+      import {
+        Stage,
+        Text,
+        events,
+        adder,
+        editor,
+        adderModes,
+        getGraphCenter,
+        Picture,
+        stageModes,
+      } from './DrawingBoard/index.js'
+      const canvas = document.getElementById('canvas')
+      const ctx = canvas.getContext('2d')
+      const width = 1000
+      const height = width * 0.665
+      canvas.width = width
+      canvas.height = height
 
-            // drawGgImage()
+      // drawGgImage()
 
-            const obj = [
-                {
-                    attrs: {
-                        color: '#1890ff',
-                        fillColor: false,
-                        image: 'http://127.0.0.1:5500/%E5%9B%BE%E7%89%874.png',
-                        x: 0,
-                        y: 0,
-                        width: 519,
-                        height: 424,
-                    },
-                    name: 'picture',
-                    children: [
-                        {
-                            attrs: {
-                                color: '#1890ff',
-                                fillColor: true,
-                                x: 50,
-                                y: 50,
-                                width: 100,
-                                height: 100,
-                                lineWidth: 1,
-                            },
-                            name: 'rect',
-                            children: [],
-                        },
-                    ],
+      const obj = [
+        {
+          attrs: {
+            color: '#1890ff',
+            fillColor: false,
+            image: './图片4.png',
+            x: 0,
+            y: 0,
+            width: 519,
+            height: 424,
+          },
+          name: 'picture',
+          children: [
+            {
+              attrs: {
+                color: '#1890ff',
+                fillColor: true,
+                x: 50,
+                y: 50,
+                width: 100,
+                height: 100,
+                lineWidth: 1,
+              },
+              name: 'rect',
+              children: [],
+            },
+          ],
+        },
+        {
+          attrs: {
+            color: '#1890ff',
+            fillColor: true,
+            x: 181,
+            y: 216,
+            width: 241,
+            height: 171,
+            lineWidth: 1,
+          },
+          name: 'rect',
+          children: [
+            {
+              attrs: {
+                color: '#000',
+                fillColor: false,
+                text: '111',
+                x: 301.5,
+                y: 301.5,
+                font: '20px sarif',
+                stickToParentCenter: true,
+              },
+              name: 'text',
+              children: [],
+            },
+          ],
+        },
+        {
+          attrs: {
+            color: '#1890ff',
+            fillColor: true,
+            x: 287,
+            y: 364,
+            width: 0,
+            height: 0,
+            lineWidth: 1,
+          },
+          name: 'rect',
+          children: [],
+        },
+        {
+          attrs: {
+            color: '#1890ff',
+            fillColor: true,
+            points: [
+              {
+                name: 'point',
+                children: [],
+                attrs: {
+                  color: '#1890ff',
+                  fillColor: false,
+                  x: 559,
+                  y: 180,
                 },
-                {
-                    attrs: {
-                        color: '#1890ff',
-                        fillColor: true,
-                        x: 181,
-                        y: 216,
-                        width: 241,
-                        height: 171,
-                        lineWidth: 1,
-                    },
-                    name: 'rect',
-                    children: [
-                        {
-                            attrs: {
-                                color: '#000',
-                                fillColor: false,
-                                text: '111',
-                                x: 301.5,
-                                y: 301.5,
-                                font: '20px sarif',
-                                stickToParentCenter: true,
-                            },
-                            name: 'text',
-                            children: [],
-                        },
-                    ],
+              },
+              {
+                name: 'point',
+                children: [],
+                attrs: {
+                  color: '#1890ff',
+                  fillColor: false,
+                  x: 696,
+                  y: 139,
                 },
-                {
-                    attrs: {
-                        color: '#1890ff',
-                        fillColor: true,
-                        x: 287,
-                        y: 364,
-                        width: 0,
-                        height: 0,
-                        lineWidth: 1,
-                    },
-                    name: 'rect',
-                    children: [],
+              },
+              {
+                name: 'point',
+                children: [],
+                attrs: {
+                  color: '#1890ff',
+                  fillColor: false,
+                  x: 721,
+                  y: 315,
                 },
-                {
-                    attrs: {
-                        color: '#1890ff',
-                        fillColor: true,
-                        points: [
-                            {
-                                name: 'point',
-                                children: [],
-                                attrs: {
-                                    color: '#1890ff',
-                                    fillColor: false,
-                                    x: 559,
-                                    y: 180,
-                                },
-                            },
-                            {
-                                name: 'point',
-                                children: [],
-                                attrs: {
-                                    color: '#1890ff',
-                                    fillColor: false,
-                                    x: 696,
-                                    y: 139,
-                                },
-                            },
-                            {
-                                name: 'point',
-                                children: [],
-                                attrs: {
-                                    color: '#1890ff',
-                                    fillColor: false,
-                                    x: 721,
-                                    y: 315,
-                                },
-                            },
-                            {
-                                name: 'point',
-                                children: [],
-                                attrs: {
-                                    color: '#1890ff',
-                                    fillColor: false,
-                                    x: 606,
-                                    y: 330,
-                                },
-                            },
-                        ],
-                        x: 559,
-                        y: 180,
-                    },
-                    name: 'polygon',
-                    children: [
-                        {
-                            attrs: {
-                                color: '#000',
-                                fillColor: false,
-                                text: '2222',
-                                x: 646.1666666666666,
-                                y: 237.86111111111111,
-                                font: '20px sarif',
-                                stickToParentCenter: true,
-                            },
-                            name: 'text',
-                            children: [],
-                        },
-                    ],
+              },
+              {
+                name: 'point',
+                children: [],
+                attrs: {
+                  color: '#1890ff',
+                  fillColor: false,
+                  x: 606,
+                  y: 330,
                 },
-            ]
+              },
+            ],
+            x: 559,
+            y: 180,
+          },
+          name: 'polygon',
+          children: [
+            {
+              attrs: {
+                color: '#000',
+                fillColor: false,
+                text: '2222',
+                x: 646.1666666666666,
+                y: 237.86111111111111,
+                font: '20px sarif',
+                stickToParentCenter: true,
+              },
+              name: 'text',
+              children: [],
+            },
+          ],
+        },
+      ]
 
-            function drawGgImage() {
-                const image = new Image()
-                image.src = './图片4.png'
-                image.onload = () => {
-                    const picture = new Picture({ ctx, image })
-                    stage.addGraph(picture, 0).display()
-                }
-            }
+      function drawGgImage() {
+        const image = new Image()
+        image.src = './图片4.png'
+        image.onload = () => {
+          const picture = new Picture({ ctx, image })
+          stage.addGraph(picture, 0).display()
+        }
+      }
 
-            // window.onresize = handleResize
+      // window.onresize = handleResize
 
-            function handleResize() {
-                const { width } = canvas.getBoundingClientRect()
-                canvas.style.height = `${width / 2}px`
-            }
+      function handleResize() {
+        const { width } = canvas.getBoundingClientRect()
+        canvas.style.height = `${width * 0.665}px`
+      }
 
-            handleResize()
+      handleResize()
 
-            const stage = new Stage(canvas)
+      const stage = new Stage(canvas)
 
-            stage.use(adder).use(editor)
+      stage.use(adder).use(editor)
 
-            drawRectButton.onclick = (evt) => {
-                stage.setMode(stageModes.adder)
-                adder.setMode(adderModes.rect)
-                switchActiveButton(evt)
-            }
-            drawPointButton.onclick = (evt) => {
-                stage.setMode(stageModes.adder)
-                adder.setMode(adderModes.polygon)
-                switchActiveButton(evt)
-            }
-            editButton.onclick = (evt) => {
-                stage.setMode(stageModes.editor)
-                switchActiveButton(evt)
-            }
+      drawRectButton.onclick = (evt) => {
+        stage.setMode(stageModes.adder)
+        adder.setMode(adderModes.rect)
+        switchActiveButton(evt)
+      }
+      drawPointButton.onclick = (evt) => {
+        stage.setMode(stageModes.adder)
+        adder.setMode(adderModes.polygon)
+        switchActiveButton(evt)
+      }
+      editButton.onclick = (evt) => {
+        stage.setMode(stageModes.editor)
+        switchActiveButton(evt)
+      }
 
-            addText.onclick = (evt) => {
-                const graph = stage.graphManager.graphs[editor.topGraphIndex]
-                const child = graph.children.find((child) => child.attrs.stickToParentCenter)
-                if (child?.name === 'text') {
-                    graph.removeChild(child)
-                }
+      addText.onclick = (evt) => {
+        const graph = stage.graphManager.graphs[editor.topGraphIndex]
+        const child = graph.children.find(
+          (child) => child.attrs.stickToParentCenter
+        )
+        if (child?.name === 'text') {
+          graph.removeChild(child)
+        }
 
-                const text = new Text({
-                    ctx: graph.attrs.ctx,
-                    text: boxName.value,
-                    stickToParentCenter: true,
-                })
+        const text = new Text({
+          ctx: graph.attrs.ctx,
+          text: boxName.value,
+          stickToParentCenter: true,
+        })
 
-                graph.appendChild(text)
+        graph.appendChild(text)
 
-                stage.emit(events.REFRESH_SCREEN)
-            }
+        stage.emit(events.REFRESH_SCREEN)
+      }
 
-            exportGraphsButton.onclick = () => {
-                console.log(stage.export())
-            }
-            importGraphButton.onclick = () => {
-                stage.import(obj)
-            }
+      exportGraphsButton.onclick = () => {
+        console.log(stage.export())
+      }
+      importGraphButton.onclick = () => {
+        stage.import(obj)
+      }
 
-            function switchActiveButton(evt) {
-                ;[...buttonGroup.children].forEach((b) => b.classList.remove('active'))
-                evt.target.classList.add('active')
-            }
-        </script>
-    </body>
+      function switchActiveButton(evt) {
+        ;[...buttonGroup.children].forEach((b) => b.classList.remove('active'))
+        evt.target.classList.add('active')
+      }
+    </script>
+  </body>
 </html>
