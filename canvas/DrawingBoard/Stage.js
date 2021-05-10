@@ -215,7 +215,7 @@ export class Stage extends EventEmitter {
   }
   import(graphs) {
     this.emit(events.IMPORT)
-    
+
     const constructorMap = {
       rect: Rect,
       polygon: Polygon,
@@ -297,7 +297,7 @@ export class Stage extends EventEmitter {
     }
   }
   setCursor(cursor) {
-    if (!cursors) throw Error('请传入合法的 cursor 值！')
+    if (!cursors[cursor]) throw Error('请传入合法的 cursor 值！')
 
     if (cursor === cursors.crosshair) {
       if (this.mode === stageModes.editor) cursor = cursors.grab
