@@ -78,9 +78,11 @@ export class Stage extends EventEmitter {
     return this
   }
   use(plugin) {
-    if (this.plugins.has(plugin)) return
+    if (this.plugins.has(plugin)) return this
+
     this.plugins.add(plugin)
     plugin.install(this)
+
     return this
   }
   get handlers() {
