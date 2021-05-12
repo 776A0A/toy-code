@@ -195,6 +195,8 @@ export class Stage extends EventEmitter {
     return this
   }
   deleteGraph(graph) {
+    if (!graph) return
+
     this.graphManager.delete(graph)
 
     return this
