@@ -1,6 +1,7 @@
 export class EventEmitter {
   constructor() {
     this._handlers = {}
+    this.beHandlers = new Set()
   }
   on({ elem, type, handler, capture = false } = {}) {
     if (elem instanceof Node) {
@@ -29,6 +30,15 @@ export class EventEmitter {
     return this
   }
   emit(type, ...args) {
+    let canRun = true
+
+    if (this.beHandlers.size) {
+      canRun = validateCanRun([...this.beHandlers])
+      const handlers = [...this.beHandlers]
+    }
+
+    if (!canRun) return this
+
     const handlers = this._handlers[type]
 
     if (handlers && handlers.size) {
@@ -37,4 +47,24 @@ export class EventEmitter {
 
     return this
   }
+
+  beforeEach(cb) {
+    this.beHandlers.add(cb)
+    return this
+  }
+}
+
+function validateCanRun(fns) {
+  let canRun = true
+
+  for (let idx = 0; idx < fns.length; idx++) {
+    const fn = fns[idx]
+    const res = fn()
+    if (res === false) {
+      canRun = false
+      break
+    }
+  }
+
+  return canRun
 }
