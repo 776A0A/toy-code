@@ -40,6 +40,7 @@
         <button id="exportGraphsButton">导出</button>
         <button id="importGraphButton">导入</button>
         <button id="clearButton">清空画布</button>
+        <button id="lockButton">锁定画布</button>
       </div>
     </div>
     <script type="module">
@@ -264,6 +265,10 @@
       }
       clearButton.onclick = () => {
         stage.clear()
+      }
+      lockButton.onclick = (evt) => {
+        stage.lock()
+        switchActiveButton(evt)
       }
 
       function switchActiveButton(evt) {

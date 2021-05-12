@@ -15,6 +15,7 @@ const LEFT_MOUSE_DOWN = 0
 export const stageModes = {
   adder: Symbol('adder'),
   editor: Symbol('editor'),
+  lock: Symbol('lock'),
 }
 
 export class Stage extends EventEmitter {
@@ -56,12 +57,23 @@ export class Stage extends EventEmitter {
     canvas.getContext('2d').scale(dpi, dpi)
   }
   setMode(mode) {
-    this.mode = mode
+    switch (mode) {
+      case stageModes.adder:
+        this.emit(events.END_EDIT)
+        this.setCursor(cursors.crosshair)
+        break
+      case stageModes.editor:
+        this.setCursor(cursors.grab)
+        break
+      case stageModes.lock:
+        this.emit(events.END_EDIT)
+        this.setCursor(cursors.default)
+        break
+      default:
+        throw Error(`不正确的 stageMode：${String(mode)}`)
+    }
 
-    if (mode === stageModes.adder) {
-      this.emit(events.END_EDIT)
-      this.setCursor(cursors.crosshair)
-    } else this.setCursor(cursors.grab)
+    this.mode = mode
 
     return this
   }
@@ -131,11 +143,12 @@ export class Stage extends EventEmitter {
     }
   }
   addListener() {
-    this.on({
-      elem: this.canvas,
-      type: 'mousedown',
-      handler: this.handlers.handleMouseDown,
-    })
+    this.beforeEach(() => this.mode !== stageModes.lock)
+      .on({
+        elem: this.canvas,
+        type: 'mousedown',
+        handler: this.handlers.handleMouseDown,
+      })
       .on({
         elem: this.canvas,
         type: 'mousemove',
@@ -314,6 +327,10 @@ export class Stage extends EventEmitter {
     }
 
     this.canvas.style.cursor = cursor
+  }
+  lock() {
+    this.setMode(stageModes.lock)
+    return this
   }
 }
 
