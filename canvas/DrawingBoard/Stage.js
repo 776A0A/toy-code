@@ -199,6 +199,11 @@ export class Stage extends EventEmitter {
 
     return this
   }
+  clear() {
+    this.graphManager.graphs.forEach((graph) => this.deleteGraph(graph))
+    this.refresh()
+    return this
+  }
   display() {
     if (this.vpControl) {
       this.vpController.scale(() => {
@@ -213,6 +218,7 @@ export class Stage extends EventEmitter {
     this.display()
     return this
   }
+  // TODO 深拷贝graphs
   import(graphs) {
     this.emit(events.IMPORT)
 
@@ -225,20 +231,22 @@ export class Stage extends EventEmitter {
       picture: Picture,
     }
     const ctx = this.canvas.getContext('2d')
-    let a = 0,
-      b = 0
+
+    let imageNumber = 0,
+      loadedImageNumber = 0
 
     const generate = (graphs, parent) => {
       graphs.forEach(({ attrs, name, children }) => {
         const constructor = constructorMap[name]
 
         if (name === 'picture') {
-          a++
+          imageNumber++
           const image = new Image()
-          image.src = attrs.image
+          image.src =
+            attrs.image instanceof Image ? attrs.image.src : attrs.image
           image.crossOrigin = 'anonymous'
           attrs.image = image
-          image.onload = () => b++
+          image.onload = () => loadedImageNumber++
         }
 
         const graph = new constructor({ ctx, ...attrs })
@@ -259,12 +267,12 @@ export class Stage extends EventEmitter {
 
     generate(graphs)
 
-    const d = () => {
-      if (a === b) this.display()
-      else setTimeout(d, 50)
+    const waitToDraw = () => {
+      if (imageNumber === loadedImageNumber) this.display()
+      else setTimeout(waitToDraw, 50)
     }
 
-    setTimeout(d, 50)
+    setTimeout(waitToDraw, 50)
   }
   // TODO 导出数据中增加canvas的宽高
   export() {

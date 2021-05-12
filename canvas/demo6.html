@@ -39,6 +39,7 @@
         <button id="addText">添加盒子名称</button>
         <button id="exportGraphsButton">导出</button>
         <button id="importGraphButton">导入</button>
+        <button id="clearButton">清空画布</button>
       </div>
     </div>
     <script type="module">
@@ -260,6 +261,9 @@
       }
       importGraphButton.onclick = () => {
         stage.import(obj)
+      }
+      clearButton.onclick = () => {
+        stage.clear()
       }
 
       function switchActiveButton(evt) {
