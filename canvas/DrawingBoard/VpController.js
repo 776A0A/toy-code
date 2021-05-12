@@ -110,11 +110,11 @@ export class VpController extends Plugin {
 
       this.mouseDownPosition.x = x
       this.mouseDownPosition.y = y
+
+      this.stage.emit(events.REFRESH_SCREEN)
     }
 
     this.setVpCenter({ x, y })
-
-    this.stage.emit(events.REFRESH_SCREEN)
   }
   correctPan() {
     // 缩放因子为1，则不能位移
