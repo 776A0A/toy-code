@@ -78,6 +78,7 @@ export class VpController extends Plugin {
   }
   handleKeyDown({ nativeEvent }) {
     if (nativeEvent.code.toLowerCase() === 'space') {
+      nativeEvent.preventDefault()
       this.isSpaceDown = true
       this.stage.emit(events.CHANGE_CURSOR, cursors.move)
     }
