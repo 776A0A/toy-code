@@ -324,10 +324,6 @@ export class Stage extends EventEmitter {
   setCursor(cursor) {
     if (!cursors[cursor]) throw Error('请传入合法的 cursor 值！')
 
-    if (cursor === cursors.crosshair) {
-      if (this.mode === stageModes.editor) cursor = cursors.grab
-    }
-
     this.canvas.style.cursor = cursor
   }
   lock() {

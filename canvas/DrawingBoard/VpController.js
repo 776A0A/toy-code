@@ -1,5 +1,6 @@
 import { Plugin } from './Plugin.js'
 import { cursors, events } from './shared.js'
+import { stageModes } from './Stage.js'
 
 // viewport controller
 export class VpController extends Plugin {
@@ -85,7 +86,10 @@ export class VpController extends Plugin {
   }
   handleKeyUp() {
     this.isSpaceDown = false
-    this.stage.emit(events.CHANGE_CURSOR, cursors.crosshair)
+    this.stage.emit(
+      events.CHANGE_CURSOR,
+      this.stage.mode === stageModes.adder ? cursors.crosshair : cursors.grab
+    )
   }
   handleMouseUp() {
     this.isMouseDown = false
