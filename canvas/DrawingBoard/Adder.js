@@ -74,7 +74,7 @@ export class Adder extends PluginHost {
       this.isDrawing &&
       this.mode === adderModes.polygon
     ) {
-      this.stage.emit(events.DELETE_GRAPH, this.drawer.graph).display()
+      this.stage.emit(events.DELETE_GRAPH, this.drawer.graph).refresh()
       this.drawer.cancel()
       this.isDrawing = false
       this.drawer = null

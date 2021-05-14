@@ -1,4 +1,4 @@
-import { Display } from './Display.js'
+import { Screen } from './Screen.js'
 import { EventEmitter } from './EventEmitter.js'
 import { GraphManager } from './GraphManager.js'
 import { events, cursors } from './shared.js'
@@ -28,7 +28,7 @@ export class Stage extends EventEmitter {
     super()
 
     this.canvas = canvas
-    this.screen = new Display(canvas)
+    this.screen = new Screen(canvas)
     this.graphManager = new GraphManager(this)
 
     if (!this.vpControl) {
