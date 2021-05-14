@@ -61,6 +61,10 @@ export class VpController extends Plugin {
       this.stage.emit(events.REFRESH_SCREEN)
     }
   }
+  restore() {
+    this.scaleFactor = 1
+    this.stage.emit(events.REFRESH_SCREEN)
+  }
   scale(displayCb) {
     const ctx = this.stage.canvas.getContext('2d')
     const { pan, scaleFactor } = this

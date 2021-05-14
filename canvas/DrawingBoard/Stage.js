@@ -28,7 +28,7 @@ export class Stage extends EventEmitter {
     super()
 
     this.canvas = canvas
-    this._display = new Display(canvas)
+    this.screen = new Display(canvas)
     this.graphManager = new GraphManager(this)
 
     if (!this.vpControl) {
@@ -79,10 +79,8 @@ export class Stage extends EventEmitter {
   }
   use(plugin) {
     if (this.plugins.has(plugin)) return this
-
     this.plugins.add(plugin)
     plugin.install(this)
-
     return this
   }
   get handlers() {
@@ -199,7 +197,7 @@ export class Stage extends EventEmitter {
         type: events.DELETE_GRAPH,
         handler: (graph) => this.deleteGraph(graph),
       })
-      .on({ type: events.REFRESH_SCREEN, handler: () => this.display() })
+      .on({ type: events.REFRESH_SCREEN, handler: () => this.refresh() })
       .on({
         type: events.CHANGE_CURSOR,
         handler: (cursor) => this.setCursor(cursor),
@@ -224,10 +222,10 @@ export class Stage extends EventEmitter {
   display() {
     if (this.vpControl) {
       this.vpController.scale(() => {
-        this._display.refresh(this.graphManager.graphs)
+        this.screen.refresh(this.graphManager.graphs)
       })
     } else {
-      this._display.refresh(this.graphManager.graphs)
+      this.screen.refresh(this.graphManager.graphs)
     }
     return this
   }
@@ -285,7 +283,7 @@ export class Stage extends EventEmitter {
     generate(graphs)
 
     const waitToDraw = () => {
-      if (imageNumber === loadedImageNumber) this.display()
+      if (imageNumber === loadedImageNumber) this.refresh()
       else setTimeout(waitToDraw, 50)
     }
 
@@ -327,6 +325,7 @@ export class Stage extends EventEmitter {
     this.canvas.style.cursor = cursor
   }
   lock() {
+    this.vpController.restore()
     this.setMode(stageModes.lock)
     return this
   }
